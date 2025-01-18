@@ -1,0 +1,59 @@
+# 介绍
+字节寒假青训营开发项目
+
+# 目录结构
+写的差不多了再改成树的形式
+```
+github:   github action的文件
+common:   公共可复用代码
+deploy:   部署相关代码
+rpc:      rpc相关文件
+rpc/idl:  protobuf定义文件
+rpc/kitex_gen: 使用kitex+protoc生成的go代码，包括编解码,server,client的实现
+scripts:  被github action调用的测试逻辑
+services: 各个服务的代码
+services/.../biz: 业务(biz)代码
+services/.../biz/bll: 业务逻辑(为了和service区分开，用的bll和dal这种C#里的概念)
+services/.../biz/dal: 数据访问层,就是db/redis等存储中间件
+services/.../biz/model: 模型定义层，采用的是贫血模型，不过部分数据库操作也和模型写一起了。看后面需不需要把PO的定义放在common里
+services/.../biz/conf: 包含了开发和上线的yaml配置文件，以及根据当前环境读取对应文件的代码。看需不需要一个test配置
+services/.../docs: 基于hertz提供的swag工具生成的swagger文档
+services/.../handler.go: 本来是让kitex生成的，但没啥必要，直接从user中粘贴即可
+services/.../main.go: 服务的启动代码，启动对应的服务就进对应的文件夹，然后 `go run .`
+```
+
+
+# 环境搭建
+## go依赖
+`go mod tidy`
+
+## protobuf 
+- 不同os:
+    - Ubuntu可以: `apt install protobuf-compiler`
+    - Windows: `https://github.com/protocolbuffers/protobuf/releases`
+- 验证: `protoc --version`
+
+kitex: `go install github.com/cloudwego/kitex/tool/cmd/kitex@latest`
+```shell
+cd rpc
+# -I和后面的文件相对路径一样的，因为protobuf在识别相对路径方面的局限性
+kitex -module=rpc -I=./ ./idl/user.proto
+```
+业务只需要写handler即可
+照着user里的写就行
+
+
+## swagger
+
+1. `go install github.com/swaggo/swag/cmd/swag@latest`
+2. 在某个hertz服务的根目录下运行`swag init`，生成 `docs` 文件夹和 `docs/doc.go `
+3. 参考`services/gateway/main.go`和`handler.go`的写法，为路由函数添加swagger参数
+4. 启动hertz, 访问`http://127.0.0.1:8888/swagger/index.html`
+
+# 热重载
+air: TODO
+
+
+
+# go.work
+允许跨模块调用,但不要在服务间调用，而是服务调 `common` 和 `rpc`

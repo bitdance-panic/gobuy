@@ -1,0 +1,6 @@
+go.sum
+go.work.sum
+.env
+
+**/develop/conf.y*ml
+.vscode
