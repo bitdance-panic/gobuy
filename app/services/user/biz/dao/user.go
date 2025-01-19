@@ -18,12 +18,12 @@ type User = models.User
 func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, password string) (*User, error) {
 	userPO := &User{}
 	err := db.WithContext(ctx).Model(&User{}).Where(&User{Email: email, PasswordHashed: password}).First(userPO).Error
-	newUser := &User{
-		Email:          email,
-		Username:       "qwer",
-		PasswordHashed: password,
-	}
-	db.WithContext(ctx).Create(newUser)
+	// newUser := &User{
+	// 	Email:          email,
+	// 	Username:       "qwer",
+	// 	PasswordHashed: password,
+	// }
+	// db.WithContext(ctx).Create(newUser)
 	return userPO, err
 }
 
