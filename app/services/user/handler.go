@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 	"github.com/bitdance-panic/gobuy/app/services/user/biz/bll"
@@ -25,7 +24,6 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *rpc_user.RegisterRe
 
 // Login implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Login(ctx context.Context, req *rpc_user.LoginReq) (resp *rpc_user.LoginResp, err error) {
-	fmt.Printf("Login called, req: %+v\n", *req)
 	// 做validate...
 	resp, err = ub.Login(ctx, req)
 	return

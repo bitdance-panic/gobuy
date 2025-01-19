@@ -18,6 +18,7 @@ require (
 	github.com/hertz-contrib/swagger v0.1.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/swag v1.16.4
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -48,6 +49,8 @@ require (
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
