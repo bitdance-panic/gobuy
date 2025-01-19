@@ -1,3 +1,8 @@
+---
+name: bug_report
+about: bug_report 的模板
+---
+
 # 问题描述
 简要描述你遇到的问题。例如：
 - 问题的具体表现是什么？
