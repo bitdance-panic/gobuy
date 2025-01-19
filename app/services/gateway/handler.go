@@ -16,9 +16,9 @@ func handlePong(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, utils.H{"message": "pong"})
 }
 
-// handleLogin 测试 handler
-// @Summary 测试 Summary
-// @Description 测试 Description
+// handleLogin 这是一个handler
+// @Summary 这是一段Summary
+// @Description 这是一段Description
 // @Accept application/json
 // @Produce application/json
 // @Router /login [get]

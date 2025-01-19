@@ -19,9 +19,9 @@ var (
 	cli userservice.Client
 )
 
-// @title HertzTest
+// @title userservice
 // @version 1.0
-// @description This is a demo using Hertz.
+// @description API Doc for user service.
 
 // @contact.name hertz-contrib
 // @contact.url https://github.com/hertz-contrib

@@ -50,8 +50,9 @@ kitex -module=github.com/bitdance-panic/gobuy/app/rpc -I=./ ./idl/user.proto
 ## swagger
 
 1. `go install github.com/swaggo/swag/cmd/swag@latest`
-2. 在某个hertz服务的根目录下运行`swag init`，生成 `docs` 文件夹和 `docs/doc.go `
-3. 参考`services/gateway/main.go`和`handler.go`的写法，为路由函数添加swagger参数
+2. 进入某个使用了hertz的服务
+2. 参考`services/gateway/main.go`和`handler.go`的写法，为路由函数添加swagger参数
+3. 在该服务的根目录运行`swag init`，生成 `docs` 文件夹和 `docs/doc.go `
 4. 启动hertz, 访问`http://<ip>:<port>/swagger/index.html`
 
 # 热重载
@@ -65,4 +66,4 @@ air: TODO
 
 
 # 中间件版本
-postgresql: V15
+postgresql: ...
