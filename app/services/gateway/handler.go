@@ -14,6 +14,7 @@ import (
 
 func handlePong(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, utils.H{"message": "pong"})
+
 }
 
 // handleLogin 这是一个handler
