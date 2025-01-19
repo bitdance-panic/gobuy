@@ -1,3 +1,8 @@
+---
+name: feature_request
+about: feature_request 的模板
+---
+
 # 问题描述
 简要描述当前的问题或需求。例如：
 
