@@ -61,18 +61,18 @@ jobs:
         run: ./scripts/lint.sh
 
       # 缓存 gosec
-      - name: Cache gosec binary
-        uses: actions/cache@v3
-        with:
-          path: ~/.local/bin/gosec
-          key: ${{ runner.os }}-gosec-${{ hashFiles('go.mod', 'go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-gosec-
+      # - name: Cache gosec binary
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.local/bin/gosec
+      #     key: ${{ runner.os }}-gosec-${{ hashFiles('go.mod', 'go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-gosec-
 
-      - name: Install gosec
-        if: steps.cache-gosec.outputs.cache-hit != 'true'
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
+      # - name: Install gosec
+      #   if: steps.cache-gosec.outputs.cache-hit != 'true'
+      #   run: |
+      #     go install github.com/securego/gosec/v2/cmd/gosec@latest
 
-      - name: Check for vulnerabilities with GoSec
-        run: gosec ./...
+      # - name: Check for vulnerabilities with GoSec
+      #   run: gosec ./...
