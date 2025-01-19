@@ -4,3 +4,5 @@ go.work.sum
 
 **/develop/conf.y*ml
 .vscode
+
+*.pem

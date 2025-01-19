@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -20,12 +19,12 @@ var (
 type Config struct {
 	Env      string
 	Kitex    Kitex    `yaml:"kitex"`
-	MySQL    MySQL    `yaml:"mysql"`
+	Postgres Postgres `yaml:"postgres"`
 	Redis    Redis    `yaml:"redis"`
 	Registry Registry `yaml:"registry"`
 }
 
-type MySQL struct {
+type Postgres struct {
 	DSN      string `yaml:"dsn"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
@@ -68,7 +67,6 @@ func GetConf() *Config {
 func initConf() {
 	prefix := "conf"
 	confFileRelPath := filepath.Join(prefix, filepath.Join(GetEnv(), "conf.yml"))
-	log.Printf("读取 %s", confFileRelPath)
 	content, err := os.ReadFile(confFileRelPath)
 	if err != nil {
 		panic(err)

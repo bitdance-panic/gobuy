@@ -1,9 +1,9 @@
 package dal
 
 import (
-	"user/biz/dal/mysql"
+	"user/biz/dal/postgres"
 )
 
 func Init() {
-	mysql.Init()
+	postgres.Init()
 }

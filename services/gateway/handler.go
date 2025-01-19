@@ -22,6 +22,7 @@ func handlePong(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /login [get]
 func handleLogin(ctx context.Context, c *app.RequestContext) {
+	// 通过 /login?email=1234&pass=1234 测试
 	email := c.Query("email")
 	password := c.Query("pass")
 	req := rpc_user.LoginReq{

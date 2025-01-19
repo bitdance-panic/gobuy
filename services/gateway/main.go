@@ -41,6 +41,7 @@ func main() {
 		ExposeHeaders:    []string{"*"}, // 暴露所有头信息
 		AllowCredentials: true,          // 允许携带凭证（如 cookies）
 	}))
+	// middleware.RegsterAuth(h)
 	c, err := userservice.NewClient("user", client.WithHostPorts("0.0.0.0:9999"))
 	if err != nil {
 		log.Fatal(err)
