@@ -4,14 +4,16 @@
 # 目录结构
 写的差不多了再改成树的形式
 ```
-.github:   github action的文件
-deploy:   部署相关代码
-scripts:  被github action调用的测试逻辑
+.github:        github action的文件
+deploy:         部署相关代码
+scripts:        被github action调用的测试逻辑
+src:            后端代码
+utils:         工具集
+model:          各个PO的定义
+rpc:            rpc相关文件
 
-common:   公共可复用代码
-rpc:      rpc相关文件
-rpc/idl:  protobuf定义文件
-rpc/kitex_gen: 使用kitex+protoc生成的go代码，包括编解码,server,client的实现
+rpc/idl:        protobuf定义文件
+rpc/kitex_gen:  使用kitex+protoc生成的go代码，包括编解码,server,client的实现
 
 services: 各个服务的代码
 services/.../biz: 业务(biz)代码
@@ -39,7 +41,7 @@ kitex: `go install github.com/cloudwego/kitex/tool/cmd/kitex@latest`
 ```shell
 cd rpc
 # -I和后面的文件相对路径一样的，因为protobuf在识别相对路径方面的局限性
-kitex -module=rpc -I=./ ./idl/user.proto
+kitex -module=github.com/bitdance-panic/gobuy/app/rpc -I=./ ./idl/user.proto
 ```
 业务只需要写handler即可
 照着user里的写就行
@@ -59,6 +61,7 @@ air: TODO
 
 # go.work
 允许跨模块调用,但不要在服务间调用，而是服务调 `common` 和 `rpc`
+需要在各個go.mod中添加replace，可參考`gateway/go.mod`
 
 
 # 中间件版本
