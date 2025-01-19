@@ -15,9 +15,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-var (
-	cli userservice.Client
-)
+var cli userservice.Client
 
 // @title userservice
 // @version 1.0

@@ -12,15 +12,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.21
+          go-version: 1.22
 
-      # - uses: actions/cache@v3
-      #   with:
-      #     path: ~/go/pkg/mod
-      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-go-
+      - uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Unit Test
-        # run: make test
-        run: echo "hello world"
+        run: ./scripts/test.sh

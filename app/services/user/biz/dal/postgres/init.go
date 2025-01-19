@@ -36,7 +36,7 @@ func Init() {
 	// }
 	if os.Getenv("GO_ENV") != "production" {
 		//nolint:errcheck
-		// log.Println("进行user表的migrate")
+		log.Println("进行user表的migrate")
 		// DB.AutoMigrate(
 		// 	&models.User{},
 		// 	&models.Role{},

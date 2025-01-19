@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/bitdance-panic/gobuy/app/services/agent/tools"
+
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/prompt"
 	"github.com/cloudwego/eino/components/tool"
@@ -15,21 +17,23 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var agent compose.Runnable[map[string]any, []*schema.Message]
-var ctx context.Context
-var variables map[string]any
+var (
+	agent     compose.Runnable[map[string]any, []*schema.Message]
+	ctx       context.Context
+	variables map[string]any
+)
 
 func setup() {
 	ctx = context.Background()
 
 	// 初始化 tools
 	tools := []tool.BaseTool{
-		searchProductsTool, // 使用 InferTool 方式
+		tools.NewSearchProductsTool(), // 使用 InferTool 方式
 	}
 
 	// 创建并配置 ChatModel
 	temp := float32(0.7)
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -116,9 +120,13 @@ func main() {
 	// 输出结果
 	for _, msg := range resp {
 		var respString string
-		json.Unmarshal([]byte(msg.Content), &respString)
-		var respData SearchProductsResponse
-		err := json.Unmarshal([]byte(respString), &respData)
+		err := json.Unmarshal([]byte(msg.Content), &respString)
+		if err != nil {
+			fmt.Println("Error unmarshalling JSON:", err)
+			return
+		}
+		var respData tools.SearchProductsResponse
+		err = json.Unmarshal([]byte(respString), &respData)
 		if err != nil {
 			fmt.Println("Error unmarshalling JSON:", err)
 			return

@@ -65,5 +65,12 @@ air: TODO
 需要在各個go.mod中添加replace，可參考`gateway/go.mod`
 
 
+# golangci-lint
+https://golangci-lint.run/welcome/install/#install-from-sources
+
+
+# gofumpt
+`go install mvdan.cc/gofumpt@latest`
+
 # 中间件版本
 postgresql: ...

@@ -13,11 +13,11 @@ type SearchProductsParams struct {
 	SQL string `json:"sql" jsonschema:"description=SQL for searching products."`
 }
 
-// type SearchProductsResponse struct {
-// 	Success  bool             `json:"success"`
-// 	Message  string           `json:"message"`
-// 	Products []map[string]any `json:"products"`
-// }
+type SearchProductsResponse struct {
+	Success  bool             `json:"success"`
+	Message  string           `json:"message"`
+	Products []map[string]any `json:"products"`
+}
 
 func NewSearchProductsTool() tool.BaseTool {
 	searchProductsTool, err := utils.InferTool("search_products", "Search for products based on user requirements.", searchProductsFunc)
@@ -40,6 +40,11 @@ func searchProductsFunc(ctx context.Context, params *SearchProductsParams) (stri
 		Message:  "查询成功",
 		Products: products,
 	}
+	// resp := map[string]any{
+	// 	"Success":  true,
+	// 	"Message":  "查询成功",
+	// 	"Products": products,
+	// }
 	respString, _ := json.Marshal(resp)
 	return string(respString), nil
 }
