@@ -39,5 +39,6 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, utils.H{"userID": resp.UserId})
 	} else {
 		c.JSON(consts.StatusOK, utils.H{"message": "登录失败"})
+
 	}
 }
