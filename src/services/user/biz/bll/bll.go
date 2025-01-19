@@ -16,7 +16,7 @@ func NewUserBLL() *UserBLL {
 }
 
 func (s *UserBLL) Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.LoginResp, error) {
-	userPO, err := dao.GetByEmailAndPass(postgres.DB, ctx, req.Email, req.Password)
+	userPO, err := dao.GetUserByEmailAndPass(postgres.DB, ctx, req.Email, req.Password)
 	resp := rpc_user.LoginResp{}
 	// 没查到
 	if err != nil {

@@ -4,13 +4,15 @@
 # 目录结构
 写的差不多了再改成树的形式
 ```
-github:   github action的文件
-common:   公共可复用代码
+.github:   github action的文件
 deploy:   部署相关代码
+scripts:  被github action调用的测试逻辑
+
+common:   公共可复用代码
 rpc:      rpc相关文件
 rpc/idl:  protobuf定义文件
 rpc/kitex_gen: 使用kitex+protoc生成的go代码，包括编解码,server,client的实现
-scripts:  被github action调用的测试逻辑
+
 services: 各个服务的代码
 services/.../biz: 业务(biz)代码
 services/.../biz/bll: 业务逻辑(为了和service区分开，用的bll和dal这种C#里的概念)
