@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/bitdance-panic/gobuy/app/models"
-
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
 
 	// "gorm.io/driver/mysql"
@@ -38,9 +36,18 @@ func Init() {
 	// }
 	if os.Getenv("GO_ENV") != "production" {
 		//nolint:errcheck
-		log.Println("进行user表的migrate")
-		DB.AutoMigrate(
-			&models.User{},
-		)
+		// log.Println("进行user表的migrate")
+		// DB.AutoMigrate(
+		// 	&models.User{},
+		// 	&models.Role{},
+		// 	&models.Permission{},
+		// 	&models.UserRole{},
+		// 	&models.RolePermission{},
+		// 	&models.Cart{},
+		// 	&models.CartItem{},
+		// 	&models.Order{},
+		// 	&models.OrderItem{},
+		// 	&models.Product{},
+		// )
 	}
 }
