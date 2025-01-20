@@ -29,6 +29,12 @@ jobs:
       - name: Run Go Tests
         run: ./scripts/test.sh
 
+      # 安装 gofumpt
+      - name: Install gofumpt
+        run: |
+          mkdir -p ~/.local/bin
+          go install mvdan.cc/gofumpt@latest
+
       # 缓存 gofumpt
       - name: Cache gofumpt binary
         uses: actions/cache@v3
@@ -38,10 +44,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gofumpt-
 
-      - name: Install gofumpt
-        if: steps.cache-gofumpt.outputs.cache-hit != 'true'
+      # 安装 golangci-lint
+      - name: Install golangci-lint
         run: |
-          go install mvdan.cc/gofumpt@latest
+          mkdir -p ~/.local/bin
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
 
       # 缓存 golangci-lint
       - name: Cache golangci-lint binary
@@ -52,13 +59,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-golangci-lint-
 
-      - name: Install golangci-lint
-        if: steps.cache-golangci-lint.outputs.cache-hit != 'true'
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
-
       - name: Run Go Lint
         run: ./scripts/lint.sh
+
+
+      # - name: Install gosec
+      #   if: steps.cache-gosec.outputs.cache-hit != 'true'
+      #   run: |
+      #     go install github.com/securego/gosec/v2/cmd/gosec@latest
 
       # 缓存 gosec
       # - name: Cache gosec binary
@@ -69,10 +77,7 @@ jobs:
       #     restore-keys: |
       #       ${{ runner.os }}-gosec-
 
-      # - name: Install gosec
-      #   if: steps.cache-gosec.outputs.cache-hit != 'true'
-      #   run: |
-      #     go install github.com/securego/gosec/v2/cmd/gosec@latest
+      
 
       # - name: Check for vulnerabilities with GoSec
       #   run: gosec ./...
