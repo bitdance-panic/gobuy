@@ -24,14 +24,14 @@ const docTemplate = `{
     "paths": {
         "/login": {
             "get": {
-                "description": "测试 Description",
+                "description": "这是一段Description",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "测试 Summary",
+                "summary": "这是一段Summary",
                 "responses": {}
             }
         }
@@ -44,8 +44,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8888",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "HertzTest",
-	Description:      "This is a demo using Hertz.",
+	Title:            "userservice",
+	Description:      "API Doc for user service.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
