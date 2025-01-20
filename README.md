@@ -1,5 +1,5 @@
 # 介绍
-字节寒假青训营开发项目
+
 
 # 目录结构
 写的差不多了再改成树的形式
@@ -74,3 +74,11 @@ https://golangci-lint.run/welcome/install/#install-from-sources
 
 # 中间件版本
 postgresql: ...
+
+
+# 本地测试方式
+> 务必在提交之前进行本地测试!!!!
+```
+# 当前在项目根目录,与.github同级
+make
+```

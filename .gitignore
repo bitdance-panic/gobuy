@@ -2,7 +2,7 @@ go.sum
 go.work.sum
 .env
 
-# **/develop/conf.y*ml
+conf.y*ml
 .vscode
 
 *.pem
