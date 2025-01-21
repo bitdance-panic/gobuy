@@ -1,12 +1,10 @@
 package main
 
 import (
-	"log"
-
-	"github.com/cloudwego/hertz/pkg/app/server"
 	"app/services/cart/biz/bll"
 	"app/services/cart/biz/dal"
 	"app/services/user/biz/dal/postgres"
+	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
 func main() {

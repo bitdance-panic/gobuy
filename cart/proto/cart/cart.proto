@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package cart;
+
+option go_package = "app/services/cart/proto/cart";
+
+// 定义购物车项结构
+message CartItem {
+    string product_id = 1;
+    int32 quantity = 2;
+    double price = 3;
+}
+
+// 定义购物车结构
+message Cart {
+    repeated CartItem items = 1;
+    double total_price = 2;
+}
+
+// 定义获取购物车请求
+message GetCartRequest {
+    string user_id = 1;
+}
+
+// 定义获取购物车响应
+message GetCartResponse {
+    Cart cart = 1;
+}
+
+// 定义添加购物车项请求
+message AddCartItemRequest {
+    string user_id = 1;
+    CartItem item = 2;
+}
+
+// 定义添加购物车项响应
+message AddCartItemResponse {
+    bool success = 1;
+}
+
+// 定义购物车服务
+service CartService {
+    rpc GetCart(GetCartRequest) returns (GetCartResponse);
+    rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse);
+}
