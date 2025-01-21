@@ -4,11 +4,14 @@ go 1.22.1
 
 require (
 	github.com/cloudwego/fastpb v0.0.5
+	github.com/cloudwego/gopkg v0.1.3
 	github.com/cloudwego/kitex v0.12.1
+	github.com/cloudwego/kitex/pkg/protocol/bthrift v0.0.0-20250120071802-1de9e03154ac
 	google.golang.org/protobuf v1.36.3
 )
 
 require (
+	github.com/apache/thrift v0.13.0 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.5 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
@@ -16,7 +19,6 @@ require (
 	github.com/cloudwego/configmanager v0.2.2 // indirect
 	github.com/cloudwego/dynamicgo v0.4.7-0.20241220085612-55704ea4ca8f // indirect
 	github.com/cloudwego/frugal v0.2.3 // indirect
-	github.com/cloudwego/gopkg v0.1.3 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cloudwego/localsession v0.1.1 // indirect
 	github.com/cloudwego/netpoll v0.6.5 // indirect
