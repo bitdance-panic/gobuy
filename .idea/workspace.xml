@@ -4,27 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b6142ba-e094-442b-80f0-965435143e32" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/services/cart/cartservice/cartservice.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/conf/conf.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/etc/cart.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/additemlogic.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/emptycartlogic.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/getcartlogic.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/internal/server/cartserver.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/proto/cart/cart.pb.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/proto/cart/cart.proto" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/cart/proto/cart/cart_grpc.pb.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/95046aa3-0846-4fd0-a3b5-8a9d48893180.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/95046aa3-0846-4fd0-a3b5-8a9d48893180.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/go.work" beforeDir="false" afterPath="$PROJECT_DIR$/app/go.work" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/model.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/biz/ball/cart_bll.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/biz/ball/cart_bll.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/biz/dal/cart_dal.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/biz/dal/cart_dal.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/user/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/user/go.mod" afterDir="false" />
-    </list>
+    <list default="true" id="7b6142ba-e094-442b-80f0-965435143e32" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
