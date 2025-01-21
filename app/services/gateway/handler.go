@@ -30,7 +30,7 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 		Email:    email,
 		Password: password,
 	}
-	resp, err := cli.Login(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := userservice.Login(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		c.JSON(consts.StatusInternalServerError, utils.H{"message": err.Error()})
 		return

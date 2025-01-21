@@ -18,6 +18,7 @@ var (
 	err error
 )
 
+// 弃用
 func Init() {
 	conf_ := conf.GetConf()
 	dsn := fmt.Sprintf(conf_.Postgres.DSN, conf_.Postgres.User, conf_.Postgres.Password, conf_.Postgres.Host)
