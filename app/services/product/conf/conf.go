@@ -1,10 +1,11 @@
 package conf
 
 import (
-	"github.com/bytedance/go-tagexpr/v2/validator"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/bytedance/go-tagexpr/v2/validator"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	// "github.com/kr/pretty"

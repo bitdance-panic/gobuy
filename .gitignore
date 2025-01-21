@@ -6,3 +6,5 @@ conf.y*ml
 .vscode
 
 *.pem
+
+.idea

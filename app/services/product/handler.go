@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/bll"
 )
@@ -12,8 +13,7 @@ func init() {
 	ub = bll.NewProductBLL()
 }
 
-type ProductServiceImpl struct {
-}
+type ProductServiceImpl struct{}
 
 func (s *ProductServiceImpl) CreateProduct(ctx context.Context, req *product.CreateProductRequest) (*product.CreateProductResponse, error) {
 	return ub.CreateProduct(ctx, req)

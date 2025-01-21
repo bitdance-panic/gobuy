@@ -1,6 +1,12 @@
 package models
 
-import "time"
+import (
+	"log"
+	"os"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Base struct {
 	ID        int `gorm:"primarykey"`
@@ -17,26 +23,21 @@ type User struct {
 	Username       string
 	RefreshToken   string
 
-	Roles  []Role `gorm:"many2many:user_roles;"` // 用户和角色的多对多关系
+	Roles  []Role `gorm:"many2many:user_role;"` // 用户和角色的多对多关系
 	Cart   Cart
 	Orders []Order
-}
-
-// 设置这个po对应的表名
-func (u User) TableName() string {
-	return "user"
 }
 
 type Role struct {
 	Base
 	Name        string       `gorm:"unique;not null"`
-	Permissions []Permission `gorm:"many2many:role_permissions;"` // 角色和权限的多对多关系
+	Permissions []Permission `gorm:"many2many:role_permission;"` // 角色和权限的多对多关系
 }
 
 type Permission struct {
 	Base
-	Name  string `gorm:"unique;not null"`             // 权限名称，例如 "create_user", "delete_user"
-	Roles []Role `gorm:"many2many:role_permissions;"` // 权限和角色的多对多关系
+	Name  string `gorm:"unique;not null"`            // 权限名称，例如 "create_user", "delete_user"
+	Roles []Role `gorm:"many2many:role_permission;"` // 权限和角色的多对多关系
 }
 
 type UserRole struct {
@@ -91,4 +92,64 @@ type OrderItem struct {
 	Price       float64 `gorm:"not null"`             // 商品单价
 	Product     Product `gorm:"foreignKey:ProductID"` // 关联商品
 	ProductName string
+}
+
+func (User) TableName() string {
+	return "user"
+}
+
+func (Role) TableName() string {
+	return "role"
+}
+
+func (Permission) TableName() string {
+	return "permission"
+}
+
+func (UserRole) TableName() string {
+	return "user_role"
+}
+
+func (RolePermission) TableName() string {
+	return "role_permission"
+}
+
+func (Cart) TableName() string {
+	return "cart"
+}
+
+func (CartItem) TableName() string {
+	return "cart_item"
+}
+
+func (Order) TableName() string {
+	return "order"
+}
+
+func (OrderItem) TableName() string {
+	return "order_item"
+}
+
+func (Product) TableName() string {
+	return "product"
+}
+
+// 调用这个来自动调整表结构
+func AutoMigrate(db *gorm.DB) {
+	if os.Getenv("GO_ENV") != "production" {
+		log.Println("进行数据表的Migrate")
+		//nolint:errcheck
+		db.AutoMigrate(
+			&User{},
+			&Role{},
+			&Permission{},
+			&UserRole{},
+			&RolePermission{},
+			&Cart{},
+			&CartItem{},
+			&Order{},
+			&OrderItem{},
+			&Product{},
+		)
+	}
 }

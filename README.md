@@ -12,8 +12,8 @@ utils:         工具集
 model:          各个PO的定义
 rpc:            rpc相关文件
 
-rpc/idl:        protobuf定义文件
-rpc/kitex_gen:  使用kitex+protoc生成的go代码，包括编解码,server,client的实现
+rpc/idl:        thrift 定义文件
+rpc/kitex_gen:  使用 kitex + thrift 生成的go代码，包括编解码,server,client的实现
 
 services: 各个服务的代码
 services/.../biz: 业务(biz)代码
@@ -31,7 +31,7 @@ services/.../main.go: 服务的启动代码，启动对应的服务就进对应�
 ## go依赖
 `go mod tidy`
 
-## protobuf 
+## ~~protobuf~~ 已改为使用thrift
 - 不同os:
     - Ubuntu可以: `apt install protobuf-compiler`
     - Windows: `https://github.com/protocolbuffers/protobuf/releases`
@@ -40,8 +40,8 @@ services/.../main.go: 服务的启动代码，启动对应的服务就进对应�
 kitex: `go install github.com/cloudwego/kitex/tool/cmd/kitex@latest`
 ```shell
 cd rpc
-# -I和后面的文件相对路径一样的，因为protobuf在识别相对路径方面的局限性
-kitex -module=github.com/bitdance-panic/gobuy/app/rpc -I=./ ./idl/user.proto
+
+kitex -module=github.com/bitdance-panic/gobuy/app/rpc idl/user.thrift
 ```
 业务只需要写handler即可
 照着user里的写就行
@@ -74,7 +74,7 @@ https://golangci-lint.run/welcome/install/#install-from-sources
 
 
 # 中间件版本
-postgresql: ...
+tidb: ...
 
 
 # 本地测试方式
@@ -82,4 +82,15 @@ postgresql: ...
 ```
 # 当前在项目根目录,与.github同级
 make
+# 如果不会用make，就依次执行makefile里的命令
+```
+
+# 测试服务跑起来没
+```
+cd services/gateway
+go run .
+# 再开一个终端
+cd services/user
+go run .
+# 访问`http://localhost:8888/login?email=1234@password=1234`,请求会发到gateway，然后rpc到user，然后操作数据库
 ```

@@ -18,11 +18,14 @@ require (
 	github.com/hertz-contrib/swagger v0.1.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/swag v1.16.4
+	gopkg.in/validator.v2 v2.0.1
+	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/gorm v1.25.12
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/apache/thrift v0.13.0 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.5 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
@@ -33,6 +36,7 @@ require (
 	github.com/cloudwego/frugal v0.2.3 // indirect
 	github.com/cloudwego/gopkg v0.1.3 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
+	github.com/cloudwego/kitex/pkg/protocol/bthrift v0.0.0-20250120071802-1de9e03154ac // indirect
 	github.com/cloudwego/localsession v0.1.1 // indirect
 	github.com/cloudwego/netpoll v0.6.5 // indirect
 	github.com/cloudwego/runtimex v0.1.0 // indirect
