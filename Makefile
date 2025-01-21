@@ -3,13 +3,13 @@
 all: gen tidy test lint
 
 gen:
-	./scripts/gen.sh
+	sh ./scripts/gen.sh
 
 tidy:
-	./scripts/tidy.sh
+	sh ./scripts/tidy.sh
 
 test:
-	./scripts/test.sh
+	sh ./scripts/test.sh
 
 lint:
-	./scripts/lint.sh
+	sh ./scripts/lint.sh

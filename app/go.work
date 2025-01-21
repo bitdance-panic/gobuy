@@ -1,14 +1,14 @@
 go 1.22.1
 
 use (
-	./consts
-	./models
-	./rpc
-	./services/gateway
-	./services/user
-	./services/order
-	./services/agent
-	./utils
+	consts
+	models
+	rpc
+	services/gateway
+	services/user
+	services/order
+	services/agent
+	utils
 	services/product
 )
 

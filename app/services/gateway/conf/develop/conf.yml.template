@@ -1,5 +1,19 @@
-postgres: 
-    dsn: "postgres://%s:%s@%s/gobuy?timezone=Asia/Shanghai"
+hertz:
+  address: ":8080"
+  metrics_port: 8090
+  enable_pprof: true
+  enable_gzip: true
+  enable_access_log: true
+  log_level: info
+  log_file_name: "log/hertz.log"
+  log_max_size: 10
+  log_max_age: 3
+  log_max_backups: 50
+  registry_addr: "localhost:8500"
+
+tidb: 
+    dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
     user: <user>
     password: <password>
     host: <host>
+    port: 4000

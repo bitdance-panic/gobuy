@@ -2,12 +2,12 @@ module github.com/bitdance-panic/gobuy/app/rpc
 
 go 1.22.1
 
+replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
+
 require (
-	github.com/cloudwego/fastpb v0.0.5
 	github.com/cloudwego/gopkg v0.1.3
 	github.com/cloudwego/kitex v0.12.1
 	github.com/cloudwego/kitex/pkg/protocol/bthrift v0.0.0-20250120071802-1de9e03154ac
-	google.golang.org/protobuf v1.36.3
 )
 
 require (
@@ -18,6 +18,7 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/configmanager v0.2.2 // indirect
 	github.com/cloudwego/dynamicgo v0.4.7-0.20241220085612-55704ea4ca8f // indirect
+	github.com/cloudwego/fastpb v0.0.5 // indirect
 	github.com/cloudwego/frugal v0.2.3 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cloudwego/localsession v0.1.1 // indirect
@@ -47,5 +48,6 @@ require (
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto v0.0.0-20210513213006-bf773b8c8384 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

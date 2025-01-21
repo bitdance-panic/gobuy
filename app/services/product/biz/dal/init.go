@@ -1,9 +1,9 @@
 package dal
 
 import (
-	"github.com/bitdance-panic/gobuy/app/services/product/biz/dal/postgres"
+	"github.com/bitdance-panic/gobuy/app/services/product/biz/dal/tidb"
 )
 
 func Init() {
-	postgres.Init()
+	tidb.Init()
 }

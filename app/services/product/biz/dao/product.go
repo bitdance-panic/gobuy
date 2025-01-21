@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/dal/postgres"
 )
