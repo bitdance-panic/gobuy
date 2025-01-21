@@ -92,5 +92,5 @@ go run .
 # 再开一个终端
 cd services/user
 go run .
-# 访问`http://localhost:8888/login?email=1234@password=1234`,请求会发到gateway，然后rpc到user，然后操作数据库
+# 访问`http://localhost:8080/login?email=1234@password=1234`,请求会发到gateway，然后rpc到user，然后操作数据库
 ```
