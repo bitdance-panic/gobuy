@@ -1,13 +1,13 @@
 package conf
 
 import (
-	"github.com/bytedance/go-tagexpr/v2/validator"
 	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	// "github.com/kr/pretty"
+	"gopkg.in/validator.v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,9 +19,18 @@ var (
 type Config struct {
 	Env      string
 	Kitex    Kitex    `yaml:"kitex"`
+	Tidb     Tidb     `yaml:"tidb"`
 	Postgres Postgres `yaml:"postgres"`
 	Redis    Redis    `yaml:"redis"`
 	Registry Registry `yaml:"registry"`
+}
+
+type Tidb struct {
+	DSN      string `yaml:"dsn"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
 }
 
 type Postgres struct {
@@ -36,6 +45,20 @@ type Redis struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
+}
+
+type Hertz struct {
+	Address         string `yaml:"address"`
+	MetricsPort     int    `yaml:"metrics_port"`
+	EnablePprof     bool   `yaml:"enable_pprof"`
+	EnableGzip      bool   `yaml:"enable_gzip"`
+	EnableAccessLog bool   `yaml:"enable_access_log"`
+	LogLevel        string `yaml:"log_level"`
+	LogFileName     string `yaml:"log_file_name"`
+	LogMaxSize      int    `yaml:"log_max_size"`
+	LogMaxBackups   int    `yaml:"log_max_backups"`
+	LogMaxAge       int    `yaml:"log_max_age"`
+	RegistryAddr    string `yaml:"registry_addr"`
 }
 
 type Kitex struct {
