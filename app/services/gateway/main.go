@@ -52,4 +52,7 @@ func main() {
 	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
 	h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))
 	h.Spin()
+
+	h.GET("/cart", cart.GetCartHandler)
+	h.POST("/cart/add", cart.AddItemToCartHandler)
 }

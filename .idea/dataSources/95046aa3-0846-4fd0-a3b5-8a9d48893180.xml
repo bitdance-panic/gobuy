@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="@gateway01.ap-southeast-1.prod.aws.tidbcloud.com">
+  <database-model serializer="dbm" dbms="TIDB" family-id="TIDB" format-version="4.53">
+    <root id="1">
+      <Dbms>TIDB</Dbms>
+      <DefaultCasing>mixed/mixed</DefaultCasing>
+      <DefaultEngine>InnoDB</DefaultEngine>
+      <DefaultTmpEngine>InnoDB</DefaultTmpEngine>
+      <ServerVersion>7.1.3</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="INFORMATION_SCHEMA">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="3" parent="1" name="PERFORMANCE_SCHEMA">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="4" parent="1" name="gobuy">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="5" parent="1" name="mysql">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="6" parent="1" name="test">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+  </database-model>
+</dataSource>
