@@ -2,29 +2,29 @@
 
 root_path=${PWD}
 
-# 1. 生成proto
-echo "------ start generate proto ------"
+# 1. 生成 thrift
+echo "------ start generate thrift ------"
 idl_dir="$root_path/app/rpc/idl"
 # 固定不变
 MODULE="github.com/bitdance-panic/gobuy/app/rpc"
 
 cd "$idl_dir/.."
 
-# 遍历 IDL 文件夹中的所有 .proto 文件
-for proto_file in "$idl_dir"/*.proto; do
+# 遍历 IDL 文件夹中的所有 .thrift 文件
+for thrift_file in "$idl_dir"/*.thrift; do
     # 获取文件名（不带路径和后缀）
-    name=$(basename "$proto_file" .proto)
+    name=$(basename "$thrift_file" .thrift)
 
-    kitex -module="$MODULE" -I=./ ./idl/"$name".proto
+    kitex -module="$MODULE" idl/"$name".thrift
 
     # 检查 kitex 是否执行成功
     if [ $? -eq 0 ]; then
-        echo "Successfully generated code for $name.proto"
+        echo "Successfully generated code for $name.thrift"
     else
-        echo "Failed to generate code for $name.proto"
+        echo "Failed to generate code for $name.thrift"
     fi
 done
-echo "------ end generate proto ------"
+echo "------ end generate thrift ------"
 
 
 echo "------ start generate swagger ------"

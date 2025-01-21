@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
+	userservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 
+	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -15,7 +16,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-var cli userservice.Client
+var userservice userservice_.Client
 
 // @title userservice
 // @version 1.0
@@ -31,7 +32,8 @@ var cli userservice.Client
 // @BasePath /
 // @schemes http
 func main() {
-	s := "0.0.0.0:8888"
+	address := conf.GetConf().Hertz.Address
+	s := fmt.Sprintf("localhost%s", address)
 	h := server.New(server.WithHostPorts(s))
 	h.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"}, // 允许所有来源
@@ -41,11 +43,11 @@ func main() {
 		AllowCredentials: true,          // 允许携带凭证（如 cookies）
 	}))
 	// middleware.RegsterAuth(h)
-	c, err := userservice.NewClient("user", client.WithHostPorts("0.0.0.0:9999"))
+	c, err := userservice_.NewClient("user", client.WithHostPorts("0.0.0.0:8881"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	cli = c
+	userservice = c
 	h.GET("/ping", handlePong)
 	h.GET("/login", handleLogin)
 	// The url pointing to swagger API definition

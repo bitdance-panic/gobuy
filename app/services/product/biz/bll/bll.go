@@ -2,6 +2,7 @@ package bll
 
 import (
 	"context"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/dao"
@@ -12,6 +13,7 @@ type ProductBLL struct{}
 func NewProductBLL() *ProductBLL {
 	return &ProductBLL{}
 }
+
 func (s *ProductBLL) CreateProduct(ctx context.Context, req *product.CreateProductRequest) (*product.CreateProductResponse, error) {
 	p := models.Product{
 		Name:        req.Name,
