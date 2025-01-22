@@ -10,11 +10,11 @@ import (
 
 var cartBLL *bll.CartBLL
 
-// GetCartHandler 获取购物车信息的Handler
+// 获取购物车信息的Handler
 func GetCartHandler(ctx context.Context, c *app.RequestContext) {
 	userID := c.QueryInt("user_id")
 	if userID == 0 {
-		c.JSON(consts.StatusBadRequest, utils.H{"message": "user_id is required"})
+		c.JSON(consts.StatusBadRequest, utils.H{"message": "需要提供user_id(用户标识)"})
 		return
 	}
 
@@ -27,23 +27,23 @@ func GetCartHandler(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, cart)
 }
 
-// AddItemToCartHandler 向购物车中添加商品的Handler
+//向购物车中添加商品的Handler
 func AddItemToCartHandler(ctx context.Context, c *app.RequestContext) {
 	userID := c.QueryInt("user_id")
 	if userID == 0 {
-		c.JSON(consts.StatusBadRequest, utils.H{"message": "user_id is required"})
+		c.JSON(consts.StatusBadRequest, utils.H{"message": "需要提供user_id(用户标识)"})
 		return
 	}
 
 	productID := c.QueryInt("product_id")
 	if productID == 0 {
-		c.JSON(consts.StatusBadRequest, utils.H{"message": "product_id is required"})
+		c.JSON(consts.StatusBadRequest, utils.H{"message": "需要提供product_id(产品编号)"})
 		return
 	}
 
 	quantity := c.QueryInt("quantity")
 	if quantity == 0 {
-		c.JSON(consts.StatusBadRequest, utils.H{"message": "quantity is required"})
+		c.JSON(consts.StatusBadRequest, utils.H{"message": "需要数量"})
 		return
 	}
 
@@ -53,5 +53,5 @@ func AddItemToCartHandler(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	c.JSON(consts.StatusOK, utils.H{"message": "Item added to cart successfully"})
+	c.JSON(consts.StatusOK, utils.H{"message": "商品已成功添加到购物车"})
 }

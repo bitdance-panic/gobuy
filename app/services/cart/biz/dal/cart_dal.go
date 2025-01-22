@@ -7,19 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// CartDAL 定义购物车数据访问层结构体
 type CartDAL struct {
 	db *gorm.DB
 }
 
-// NewCartDAL 创建新的购物车数据访问层实例
 func NewCartDAL(db *gorm.DB) *CartDAL {
 	return &CartDAL{
 		db: db,
 	}
 }
 
-// GetCartByUserID 根据用户ID获取购物车信息
 func (dal *CartDAL) GetCartByUserID(userID uint) (*models.Cart, error) {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除
@@ -30,7 +27,7 @@ func (dal *CartDAL) GetCartByUserID(userID uint) (*models.Cart, error) {
 	return &cart, nil
 }
 
-// AddItemToCart 向购物车中添加商品
+// 向购物车中添加商品
 func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除
@@ -58,7 +55,7 @@ func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 	return dal.db.Create(&newItem).Error
 }
 
-// RemoveItemFromCart 从购物车中移除商品
+//从购物车中移除商品
 func (dal *CartDAL) RemoveItemFromCart(userID, productID uint) error {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除
@@ -77,7 +74,7 @@ func (dal *CartDAL) RemoveItemFromCart(userID, productID uint) error {
 	return nil
 }
 
-// ClearCart 清空购物车
+//清空购物车
 func (dal *CartDAL) ClearCart(userID uint) error {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除

@@ -27,25 +27,23 @@ func NewEmptyCartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EmptyCa
 func (l *EmptyCartLogic) EmptyCart(in *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
 	db := l.svcCtx.DB
 	log := l.svcCtx.Log
-	c := model.Cart{UserID: uint(in.UserId)}
-
-	if err := db.Preload("Products").Where("user_id = ?", c.UserID).Take(&c).Error; err != nil {
-		log.Error("get cart with products:" + err.Error())
-		return nil, err
-	}
-
-	ProductID := make([]uint, len(c.Products))
-	for i, v := range c.Products {
-		ProductID[i] = v.ID
-	}
-	//log.Debug("empty cart_id:" + strconv.Itoa(int(c.ID)))
-
-	err := db.Where("cart_id = ?", c.ID).Where("product_id in ?", ProductID).Delete(&model.CartProducts{}).Error
+	
+	var cart model.Cart
+	err := db.Preload("Products").Where("user_id = ?", in.UserId).Take(&cart).Error
 	if err != nil {
-		log.Error("empty cart:" + err.Error())
-		return nil, err
+		log.Errorw("获取购物车失败", "error", err, "user_id", in.UserId)
+		return nil, fmt.Errorf("获取购物车失败: %v", err)
 	}
-	return &cart.EmptyCartResp{}, nil
 
+	// 直接删除与该用户相关的所有购物车项
+	err = db.Where("cart_id = ?", cart.ID).Delete(&model.CartProducts{}).Error
+	if err != nil {
+		log.Errorw("清空购物车失败", "error", err, "cart_id", cart.ID)
+		return nil, fmt.Errorf("清空购物车失败: %v", err)
+	}
+
+	log.Infow("购物车已成功清空", "user_id", in.UserId, "cart_id", cart.ID)
+
+	return &cart.EmptyCartResp{}, nil
 }
 

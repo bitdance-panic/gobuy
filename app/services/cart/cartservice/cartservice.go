@@ -6,8 +6,7 @@ import (
     "github.com/cloudwego/kitex/pkg/klog"
     "github.com/cloudwego/kitex/pkg/rpcinfo"
     "github.com/kitex-contrib/obs-opentelemetry/tracing"
-    "github.com/kitex-contrib/registry-nacos/nacos
-	"context"
+	"github.com/kitex-contrib/registry-nacos/nacos/resolver"
 	"mall/service/cart/proto/cart"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

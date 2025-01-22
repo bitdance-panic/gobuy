@@ -23,30 +23,26 @@ func NewGetCartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCartLo
 	}
 }
 
-func (l *GetCartLogic) GetCart(in *cart.GetCartReq) (*cart.GetCartResp, error) {
+func (l *EmptyCartLogic) EmptyCart(in *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
 	db := l.svcCtx.DB
-	u := model.User{}
 	log := l.svcCtx.Log
 
-	err := db.Preload("Cart").First(&u, in.UserId).Error
+	// 查询用户的购物车
+	var cart model.Cart
+	err := db.Preload("Products").Where("user_id = ?", in.UserId).Take(&cart).Error
 	if err != nil {
-		log.Error("get user with cart:" + err.Error())
-		return nil, err
+		log.Errorw("获取购物车失败", "error", err, "user_id", in.UserId)
+		return nil, fmt.Errorf("获取购物车失败: %v", err)
 	}
 
-	c := make([]model.CartProducts, 0)
-	err = db.Model(&model.CartProducts{}).Where("cart_id = ?", u.Cart.ID).Find(&c).Error
+	// 直接删除与该用户相关的所有购物车项
+	err = db.Where("cart_id = ?", cart.ID).Delete(&model.CartProducts{}).Error
 	if err != nil {
-		log.Error("get cart:" + err.Error())
-		return nil, err
+		log.Errorw("清空购物车失败", "error", err, "cart_id", cart.ID)
+		return nil, fmt.Errorf("清空购物车失败: %v", err)
 	}
 
-	res := cart.GetCartResp{Items: make([]*cart.CartItem, len(c))}
-	for i, v := range c {
-		res.Items[i] = new(cart.CartItem)
-		res.Items[i].ProductId = uint32(v.ProductID)
-		res.Items[i].Quantity = uint32(v.Quantity)
-	}
-	return &res, nil
+	log.Infow("购物车已成功清空", "user_id", in.UserId, "cart_id", cart.ID)
 
+	return &cart.EmptyCartResp{}, nil
 }

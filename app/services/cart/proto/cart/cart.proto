@@ -38,8 +38,31 @@ message AddCartItemResponse {
   bool success = 1;
 }
 
+// 定义添加商品请求
+message AddItemReq {
+  string user_id = 1;
+  CartItem item = 2;
+}
+
+// 定义添加商品响应
+message AddItemResp {
+  bool success = 1;
+}
+
 // 定义购物车服务
 service CartService {
-  rpc GetCart(GetCartRequest) returns (GetCartResponse);
-  rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse);
+  rpc GetCart (GetCartRequest) returns (GetCartResponse);
+  rpc AddCartItem (AddCartItemRequest) returns (AddCartItemResponse);
+  rpc RemoveCartItem (RemoveCartItemRequest) returns (RemoveCartItemResponse);
+}
+
+message RemoveCartItemRequest {
+  // 定义 RemoveCartItemRequest 的字段
+  string cart_id = 1;
+  string item_id = 2;
+}
+
+message RemoveCartItemResponse {
+  // 定义 RemoveCartItemResponse 的字段
+  bool success = 1;
 }
