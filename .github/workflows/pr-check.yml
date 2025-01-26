@@ -15,11 +15,15 @@ jobs:
         with:
           go-version: '1.22'
 
+      - name: Set environment variable
+        run: |
+          echo "BIN=/usr/local/bin" >> $GITHUB_ENV
+
       # 读取 gofumpt 二进制文件缓存
-      - name: Read gofumpt binary Cache
+      - name: Cache gofumpt binary
         uses: actions/cache@v3
         with:
-          path: ~/.local/bin/gofumpt
+          path: ${{ env.BIN }}/gofumpt
           key: ${{ runner.os }}-gofumpt
           restore-keys: |
             ${{ runner.os }}-gofumpt
@@ -28,14 +32,14 @@ jobs:
       - name: Install gofumpt
         if: steps.cache-gofumpt.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ~/.local/bin
-          go install mvdan.cc/gofumpt@latest
+          mkdir -p ${{ env.BIN }}
+          GOBIN=${{ env.BIN }} go install mvdan.cc/gofumpt@latest
 
       # 读取 golangci-lint 缓存
-      - name: Read golangci-lint binary Cache
+      - name: Cache golangci-lint binary
         uses: actions/cache@v3
         with:
-          path: ~/.local/bin/golangci-lint
+          path: ${{ env.BIN }}/golangci-lint
           key: ${{ runner.os }}-golangci-lint
           restore-keys: |
             ${{ runner.os }}-golangci-lint
@@ -44,8 +48,8 @@ jobs:
       - name: Install golangci-lint
         if: steps.cache-golangci-lint.outputs.cache-hit != 'true'
         run: |
-          mkdir -p ~/.local/bin
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
+          mkdir -p ${{ env.BIN }}
+          GOBIN=${{ env.BIN }} go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
 
       - name: Go Mod Tidy
         run: ./scripts/tidy.sh
@@ -60,7 +64,7 @@ jobs:
       # - name: Cache gosec binary
       #   uses: actions/cache@v3
       #   with:
-      #     path: ~/.local/bin/gosec
+      #     path: ${{ env.BIN }}/gosec
       #     key: ${{ runner.os }}-gosec-${{ hashFiles('go.mod', 'go.sum') }}
       #     restore-keys: |
       #       ${{ runner.os }}-gosec-
@@ -68,7 +72,7 @@ jobs:
       # - name: Install gosec
       #   if: steps.cache-gosec.outputs.cache-hit != 'true'
       #   run: |
-      #     go install github.com/securego/gosec/v2/cmd/gosec@latest
+      #     GOBIN=${{ env.BIN }} go install github.com/securego/gosec/v2/cmd/gosec@latest
 
 
       # - name: Check for vulnerabilities with GoSec
