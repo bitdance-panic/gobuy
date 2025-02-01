@@ -20,6 +20,48 @@ paths:
       - application/json
       responses: {}
       summary: 这是一段Summary
+  /product:
+    delete:
+      consumes:
+      - application/json
+      description: 这是一段Description
+      produces:
+      - application/json
+      responses: {}
+      summary: 这是一段Summary
+    get:
+      consumes:
+      - application/json
+      description: 这是一段Description
+      produces:
+      - application/json
+      responses: {}
+      summary: 这是一段Summary
+    post:
+      consumes:
+      - application/json
+      description: 这是一段Description
+      produces:
+      - application/json
+      responses: {}
+      summary: 这是一段Summary
+    put:
+      consumes:
+      - application/json
+      description: 这是一段Description
+      produces:
+      - application/json
+      responses: {}
+      summary: 这是一段Summary
+  /product/search:
+    get:
+      consumes:
+      - application/json
+      description: 这是一段Description
+      produces:
+      - application/json
+      responses: {}
+      summary: 这是一段Summary
 schemes:
 - http
 swagger: "2.0"
