@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	productservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
 	userservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
@@ -16,7 +17,10 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-var userservice userservice_.Client
+var (
+	userservice    userservice_.Client
+	productservice productservice_.Client
+)
 
 // @title userservice
 // @version 1.0
@@ -48,8 +52,22 @@ func main() {
 		log.Fatal(err)
 	}
 	userservice = c
+	cp, errp := productservice_.NewClient("product", client.WithHostPorts("0.0.0.0:8882"))
+	if errp != nil {
+		log.Fatal(err)
+	}
+	productservice = cp
+
 	h.GET("/ping", handlePong)
 	h.GET("/login", handleLogin)
+	product := h.Group("/product")
+	{
+		product.GET("/search", handleProductSearch)
+		product.GET("/:id", handleProductGet)
+		product.DELETE("/:id", handleProductDELETE)
+		product.PUT("/:id", handleProductPut)
+		product.POST("", handleProductPost)
+	}
 	// The url pointing to swagger API definition
 	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
 	h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))

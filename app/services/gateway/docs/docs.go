@@ -34,6 +34,65 @@ const docTemplate = `{
                 "summary": "这是一段Summary",
                 "responses": {}
             }
+        },
+        "/product": {
+            "get": {
+                "description": "这是一段Description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "这是一段Summary",
+                "responses": {}
+            },
+            "put": {
+                "description": "这是一段Description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "这是一段Summary",
+                "responses": {}
+            },
+            "post": {
+                "description": "这是一段Description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "这是一段Summary",
+                "responses": {}
+            },
+            "delete": {
+                "description": "这是一段Description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "这是一段Summary",
+                "responses": {}
+            }
+        },
+        "/product/search": {
+            "get": {
+                "description": "这是一段Description",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "这是一段Summary",
+                "responses": {}
+            }
         }
     }
 }`
