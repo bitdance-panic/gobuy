@@ -56,7 +56,8 @@ struct CreateOrderResponse{
 }
 //更新订单请求
 struct UpdateOrderRequest{
-    1: OrderStatus status;//更新的订单状态
+    1: i32 order_id;
+    2: OrderStatus status;//更新的订单状态
 }
 struct UpdateOrderResponse{
     1: Order order;

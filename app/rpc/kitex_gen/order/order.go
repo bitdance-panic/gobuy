@@ -1611,7 +1611,8 @@ func (p *CreateOrderResponse) Field1DeepEqual(src *Order) bool {
 }
 
 type UpdateOrderRequest struct {
-	Status OrderStatus `thrift:"status,1" frugal:"1,default,OrderStatus" json:"status"`
+	OrderId int32       `thrift:"order_id,1" frugal:"1,default,i32" json:"order_id"`
+	Status  OrderStatus `thrift:"status,2" frugal:"2,default,OrderStatus" json:"status"`
 }
 
 func NewUpdateOrderRequest() *UpdateOrderRequest {
@@ -1621,15 +1622,23 @@ func NewUpdateOrderRequest() *UpdateOrderRequest {
 func (p *UpdateOrderRequest) InitDefault() {
 }
 
+func (p *UpdateOrderRequest) GetOrderId() (v int32) {
+	return p.OrderId
+}
+
 func (p *UpdateOrderRequest) GetStatus() (v OrderStatus) {
 	return p.Status
+}
+func (p *UpdateOrderRequest) SetOrderId(val int32) {
+	p.OrderId = val
 }
 func (p *UpdateOrderRequest) SetStatus(val OrderStatus) {
 	p.Status = val
 }
 
 var fieldIDToName_UpdateOrderRequest = map[int16]string{
-	1: "status",
+	1: "order_id",
+	2: "status",
 }
 
 func (p *UpdateOrderRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -1654,6 +1663,14 @@ func (p *UpdateOrderRequest) Read(iprot thrift.TProtocol) (err error) {
 		case 1:
 			if fieldTypeId == thrift.I32 {
 				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.I32 {
+				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -1690,6 +1707,17 @@ ReadStructEndError:
 
 func (p *UpdateOrderRequest) ReadField1(iprot thrift.TProtocol) error {
 
+	var _field int32
+	if v, err := iprot.ReadI32(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.OrderId = _field
+	return nil
+}
+func (p *UpdateOrderRequest) ReadField2(iprot thrift.TProtocol) error {
+
 	var _field OrderStatus
 	if v, err := iprot.ReadI32(); err != nil {
 		return err
@@ -1711,6 +1739,10 @@ func (p *UpdateOrderRequest) Write(oprot thrift.TProtocol) (err error) {
 			fieldId = 1
 			goto WriteFieldError
 		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
 	}
 	if err = oprot.WriteFieldStop(); err != nil {
 		goto WriteFieldStopError
@@ -1730,10 +1762,10 @@ WriteStructEndError:
 }
 
 func (p *UpdateOrderRequest) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("status", thrift.I32, 1); err != nil {
+	if err = oprot.WriteFieldBegin("order_id", thrift.I32, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(int32(p.Status)); err != nil {
+	if err := oprot.WriteI32(p.OrderId); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1744,6 +1776,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *UpdateOrderRequest) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("status", thrift.I32, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI32(int32(p.Status)); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
 func (p *UpdateOrderRequest) String() string {
@@ -1760,13 +1809,23 @@ func (p *UpdateOrderRequest) DeepEqual(ano *UpdateOrderRequest) bool {
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.Status) {
+	if !p.Field1DeepEqual(ano.OrderId) {
+		return false
+	}
+	if !p.Field2DeepEqual(ano.Status) {
 		return false
 	}
 	return true
 }
 
-func (p *UpdateOrderRequest) Field1DeepEqual(src OrderStatus) bool {
+func (p *UpdateOrderRequest) Field1DeepEqual(src int32) bool {
+
+	if p.OrderId != src {
+		return false
+	}
+	return true
+}
+func (p *UpdateOrderRequest) Field2DeepEqual(src OrderStatus) bool {
 
 	if p.Status != src {
 		return false
