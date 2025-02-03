@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
@@ -23,10 +24,22 @@ func (s *OrderServiceImpl) CreateOrder(ctx context.Context, req *rpc_order.Creat
 	if err != nil {
 		return nil, err
 	}
+	// todo 把items弄进来
+	rpcOrder := &rpc_order.Order{
+		Id:          int32(orderInfo.ID),
+		UserId:      int32(orderInfo.UserID),
+		OrderNumber: orderInfo.OrderNumber,
+		TotalAmount: orderInfo.TotalAmount,
+		Status:      rpc_order.OrderStatus(orderInfo.Status),
+		Items:       []*rpc_order.OrderItem{},
+		IsDeleted:   orderInfo.IsDeleted,
+	}
 	//返回创建的订单信息
-	return
+	return &rpc_order.CreateOrderResponse{
+		Order: rpcOrder,
+	}, nil
 }
-func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, req *rpc_order.CreateOrderRequest) (*rpc_order.CreateOrderResponse, error) {
+func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, req *rpc_order.GetUserOrdersRequest) (*rpc_order.GetUserOrdersResponse, error) {
 	//调用业务逻辑层获取订单
 	orders, err := orderBll.GetOrdersByUserID(req.UserId)
 	if err != nil {
@@ -37,6 +50,9 @@ func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, req *rpc_order.Cre
 		fmt.Printf("Order ID: %s, User ID: %s, Items: %v, Amount: %.2f, Status: %s\n",
 			order.ID, order.UserID, order.Items, order.TotalAmount, order.Status)
 	}
+	return &rpc_order.GetUserOrdersResponse{
+		Orders: []*rpc_order.Order{},
+	}, nil
 
 	//orderInfo, err := orderBll.GetOrder(r
 	//if err != nil {
@@ -57,14 +73,23 @@ func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, req *rpc_order.Cre
 }
 func (s *OrderServiceImpl) UpdateOrder(ctx context.Context, req *rpc_order.UpdateOrderRequest) (*rpc_order.UpdateOrderResponse, error) {
 	//调用业务逻辑层更新订单
-
-	order := orderBll.UpdateOrder(123, int32(req.Status))
-	//if err != nil {
-	//	return nil, err
-	//}
+	order, err := orderBll.UpdateOrder(123, int32(req.Status))
+	if err != nil {
+		return nil, err
+	}
+	// todo 把items弄进来
+	rpcOrder := &rpc_order.Order{
+		Id:          int32(order.ID),
+		UserId:      int32(order.UserID),
+		OrderNumber: order.OrderNumber,
+		TotalAmount: order.TotalAmount,
+		Status:      rpc_order.OrderStatus(order.Status),
+		Items:       []*rpc_order.OrderItem{},
+		IsDeleted:   order.IsDeleted,
+	}
 	//返回更新结果
 	return &rpc_order.UpdateOrderResponse{
-		Order: order,
+		Order: rpcOrder,
 	}, nil
 }
 func ConvertOrderItems(items []*rpc_order.OrderItem) []models.OrderItem {
