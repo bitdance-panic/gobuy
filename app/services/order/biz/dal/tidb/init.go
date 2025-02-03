@@ -3,7 +3,7 @@ package tidb
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/bitdance-panic/gobuy/app/services/user/conf"
+	"github.com/bitdance-panic/gobuy/app/services/order/conf"
 	driver "github.com/go-sql-driver/mysql"
 
 	"gorm.io/driver/mysql"
