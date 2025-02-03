@@ -1,17 +1,12 @@
 package cartservice
 
 import (
-    "context"
-    "github.com/cloudwego/kitex/client"
-    "github.com/cloudwego/kitex/pkg/klog"
-    "github.com/cloudwego/kitex/pkg/rpcinfo"
-    "github.com/kitex-contrib/obs-opentelemetry/tracing"
-	"github.com/kitex-contrib/registry-nacos/nacos/resolver"
-	"mall/service/cart/proto/cart"
+	"context"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
+	//"github.com/kitex-contrib/registry-nacos/nacos/resolver"
+	"mall/service/cart/proto/cart"
 )
-
 
 type (
 	AddItemReq    = cart.AddItemReq
