@@ -11,6 +11,7 @@ replace (
 require (
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-00010101000000-000000000000
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-00010101000000-000000000000
+	github.com/bitdance-panic/gobuy/app/utils v0.0.0-00010101000000-000000000000
 	github.com/cloudwego/hertz v0.9.5
 	github.com/cloudwego/kitex v0.12.1
 	github.com/hertz-contrib/cors v0.1.0

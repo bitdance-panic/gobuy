@@ -2,6 +2,7 @@ package bll
 
 import (
 	"errors"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/order/biz/dal"
 )
@@ -37,10 +38,10 @@ func (bll *OrderBLL) GetOrder(orderID int32) (*models.Order, error) {
 	}
 	return order, nil
 }
-func (bll *OrderBLL) UpdateOrder(orderId int32, newStatus int32) error {
+func (bll *OrderBLL) UpdateOrder(orderId int32, newStatus int32) (*models.Order, error) {
 	order, err := dal.UpdateOrderStatus(orderId, int(newStatus))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return order, nil
 }
