@@ -3,9 +3,8 @@ package svc
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	mlog "mall/log"
-	"mall/service/cart/internal/config"
-	"mall/service/cart/internal/repo/cart"
+	"app/services/cart/conf"
+	"mall/service/cart/internal"
 	"time"
 )
 

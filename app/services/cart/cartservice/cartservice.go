@@ -5,7 +5,7 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	//"github.com/kitex-contrib/registry-nacos/nacos/resolver"
-	"mall/service/cart/proto/cart"
+	"app/services/cart/proto/cart"
 )
 
 type (

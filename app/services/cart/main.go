@@ -3,9 +3,13 @@ package main
 import (
 	"app/services/cart/biz/bll"
 	"app/services/cart/biz/dal"
-	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/bitdance-panic/gobuy/hertz/pkg/app/server"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+
+	"github.com/bitdance-panic/gobuy/app/services/user/conf"
+
+	"github.com/cloudwego/kitex/server"
 )
 
 // 初始化 TiDB 连接

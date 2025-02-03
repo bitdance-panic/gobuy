@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"mall/service/cart/internal/logic"
-	"mall/service/cart/internal/svc"
-	"mall/service/cart/proto/cart"
+	"app/services/cart/internal/logic"
+	"app/services/cart/internal/svc"
+	"app/services/cart/proto/cart"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 

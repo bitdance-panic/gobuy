@@ -3,11 +3,11 @@ package logic
 package logic
 
 import (
-"context"
-"github.com/zeromicro/go-zero/core/logx"
-"mall/model"
-"mall/service/cart/internal/svc"
-"mall/service/cart/proto/cart"
+        "context"
+        "github.com/zeromicro/go-zero/core/logx"
+        "app/models"
+        "app/services/cart/internal/svc"
+        "app/services/cart/proto/cart"
 )
 
 type EmptyCartLogic struct {

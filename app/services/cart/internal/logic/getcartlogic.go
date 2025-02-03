@@ -2,9 +2,9 @@ package logic
 
 import (
 "context"
-"mall/model"
-"mall/service/cart/internal/svc"
-"mall/service/cart/proto/cart"
+"app/models"
+"app/services/cart/internal/svc"
+"app/services/cart/proto/cart"
 
 "github.com/zeromicro/go-zero/core/logx"
 )

@@ -5,11 +5,11 @@ import (
 	"context"
 	"errors"
 	"gorm.io/gorm"
-	"mall/model"
+	"app/models"
 	"strconv"
 
-	"mall/service/cart/internal/svc"
-	"mall/service/cart/proto/cart"
+	"app/services/cart/internal/svc"
+	"app/services/cart/proto/cart"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
