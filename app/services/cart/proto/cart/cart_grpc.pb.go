@@ -2,8 +2,6 @@ package cart
 
 import (
 	"context"
-	"io"
-
 	"google.golang.org/grpc"
 )
 

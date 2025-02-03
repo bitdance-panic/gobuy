@@ -19,13 +19,13 @@ func NewCartServiceServer(svcCtx *svc.ServiceContext) *CartServiceServer {
 	}
 }
 
-//封装逻辑处理对象的创建和调用
-func (s *CartServiceServer) handleRequest[T any, R any](ctx context.Context, req T, logicFunc func(context.Context, *svc.ServiceContext) interface{}) (*R, error) {
+// 封装逻辑处理对象的创建和调用
+func (s *CartServiceServer) handleRequest(ctx context.Context, req interface{}, logicFunc func(context.Context, *svc.ServiceContext, interface{}) (interface{}, error)) (interface{}, error) {
 	log := logx.WithContext(ctx)
 	log.Infow("Handling request", "request", req)
 
 	// 获取逻辑处理对象并调用其方法
-	resp, err := logicFunc(ctx, s.svcCtx).(func(T) (*R, error))(req)
+	resp, err := logicFunc(ctx, s.svcCtx, req)
 	if err != nil {
 		log.Errorw("错误处理请求", "error", err, "request", req)
 		return nil, err
@@ -36,28 +36,22 @@ func (s *CartServiceServer) handleRequest[T any, R any](ctx context.Context, req
 }
 
 func (s *CartServiceServer) AddItem(ctx context.Context, in *cart.AddItemReq) (*cart.AddItemResp, error) {
-	return s.handleRequest[cart.AddItemReq, cart.AddItemResp](ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext) interface{} {
-		return func(req *cart.AddItemReq) (*cart.AddItemResp, error) {
-			l := logic.NewAddItemLogic(ctx, svcCtx)
-			return l.AddItem(req)
-		}
-	})
+	return s.handleRequest(ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext, req interface{}) (interface{}, error) {
+		l := logic.NewAddItemLogic(ctx, svcCtx)
+		return l.AddItem(req.(*cart.AddItemReq))
+	}).(*cart.AddItemResp), nil
 }
 
 func (s *CartServiceServer) GetCart(ctx context.Context, in *cart.GetCartReq) (*cart.GetCartResp, error) {
-	return s.handleRequest[cart.GetCartReq, cart.GetCartResp](ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext) interface{} {
-		return func(req *cart.GetCartReq) (*cart.GetCartResp, error) {
-			l := logic.NewGetCartLogic(ctx, svcCtx)
-			return l.GetCart(req)
-		}
-	})
+	return s.handleRequest(ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext, req interface{}) (interface{}, error) {
+		l := logic.NewGetCartLogic(ctx, svcCtx)
+		return l.GetCart(req.(*cart.GetCartReq))
+	}).(*cart.GetCartResp), nil
 }
 
 func (s *CartServiceServer) EmptyCart(ctx context.Context, in *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
-	return s.handleRequest[cart.EmptyCartReq, cart.EmptyCartResp](ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext) interface{} {
-		return func(req *cart.EmptyCartReq) (*cart.EmptyCartResp, error) {
-			l := logic.NewEmptyCartLogic(ctx, svcCtx)
-			return l.EmptyCart(req)
-		}
-	})
+	return s.handleRequest(ctx, in, func(ctx context.Context, svcCtx *svc.ServiceContext, req interface{}) (interface{}, error) {
+		l := logic.NewEmptyCartLogic(ctx, svcCtx)
+		return l.EmptyCart(req.(*cart.EmptyCartReq))
+	}).(*cart.EmptyCartResp), nil
 }
