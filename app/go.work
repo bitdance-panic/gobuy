@@ -1,16 +1,16 @@
 go 1.22.1
 
 use (
-	./consts
-	./models
-	./rpc
-	./services/gateway
-	./services/user
-	./services/order
-	./services/agent
-	./services/cart
-	./utils
-	.
+	consts
+	models
+	rpc
+	services/gateway
+	services/user
+	services/order
+	services/agent
+	utils
+	services/product
+	services/cart
 )
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0

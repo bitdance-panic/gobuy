@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7b6142ba-e094-442b-80f0-965435143e32" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/95046aa3-0846-4fd0-a3b5-8a9d48893180.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/95046aa3-0846-4fd0-a3b5-8a9d48893180.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/cartservice/cartservice.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/cartservice/cartservice.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/go.work" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/cart/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/go.mod" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,11 +35,11 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="cart" />
-                    <option name="lastUsedInstant" value="1738592506" />
+                    <option name="lastUsedInstant" value="1738593661" />
                   </RecentBranch>
                   <RecentBranch>
                     <option name="branchName" value="main" />
-                    <option name="lastUsedInstant" value="1738592505" />
+                    <option name="lastUsedInstant" value="1738593652" />
                   </RecentBranch>
                 </list>
               </option>
