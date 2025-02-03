@@ -42,7 +42,7 @@ func GetOrderById(orderId int32) (*models.Order, error) {
 	}
 	return &order, nil
 }
-func UpdateOrderStatus(orderId int32, newStatus int) error {
+func UpdateOrderStatus(orderId int32, newStatus int) (*models.Order, error) {
 	var order *models.Order
 	result := db.Model(&order).Where("id = ?", orderId).Update("status", newStatus)
 	if result.Error != nil {
@@ -51,5 +51,5 @@ func UpdateOrderStatus(orderId int32, newStatus int) error {
 	if result.RowsAffected == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}
-	return &order, nil
+	return order, nil
 }
