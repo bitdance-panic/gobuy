@@ -60,6 +60,7 @@ type Hertz struct {
 	LogMaxBackups   int    `yaml:"log_max_backups"`
 	LogMaxAge       int    `yaml:"log_max_age"`
 	RegistryAddr    string `yaml:"registry_addr"`
+	JWTSecret       string `mapstructure:"JWTSecret"`
 }
 
 type Kitex struct {

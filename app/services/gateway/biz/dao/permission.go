@@ -6,6 +6,7 @@ import (
 )
 
 type User = models.User
+type Product = models.Product
 
 func HasPermission(db *gorm.DB, userID uint, permissionName string) bool {
 	var count int64
