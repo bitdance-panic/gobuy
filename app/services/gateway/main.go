@@ -32,7 +32,7 @@ var (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8888
+// @host localhost:8080
 // @BasePath /
 // @schemes http
 func main() {
@@ -64,7 +64,7 @@ func main() {
 	{
 		product.GET("/search", handleProductSearch)
 		product.GET("/:id", handleProductGet)
-		product.DELETE("/:id", handleProductDELETE)
+		product.DELETE("/:id", handleProductDelete)
 		product.PUT("/:id", handleProductPut)
 		product.POST("", handleProductPost)
 	}
