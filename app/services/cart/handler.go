@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/bitdance-panic/gobuy/app/services/cart/biz/bll"
+	"github.com/bitdance-panic/gobuy/app/services/cart/proto/cart"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -27,7 +28,7 @@ func GetCartHandler(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, cart)
 }
 
-//向购物车中添加商品的Handler
+// 向购物车中添加商品的Handler
 func AddItemToCartHandler(ctx context.Context, c *app.RequestContext) {
 	userID := c.QueryInt("user_id")
 	if userID == 0 {
@@ -54,4 +55,17 @@ func AddItemToCartHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	c.JSON(consts.StatusOK, utils.H{"message": "商品已成功添加到购物车"})
+}
+
+func (l *CartHandler) RemoveCartItem(ctx context.Context, req *cart.RemoveCartItemRequest) (*cart.RemoveCartItemResponse, error) {
+	// 实现 RemoveCartItem 方法的具体逻辑
+	// 根据 req.CartId 和 req.ItemId 从购物车中移除相应的商品项
+
+	// 方法 l.svcCtx.CartRepo.RemoveItem 用于移除购物车项
+	err := l.svcCtx.CartRepo.RemoveItem(ctx, req.CartId, req.ItemId)
+	if err != nil {
+		return &cart.RemoveCartItemResponse{Success: false}, err
+	}
+
+	return &cart.RemoveCartItemResponse{Success: true}, nil
 }

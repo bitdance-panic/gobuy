@@ -27,7 +27,7 @@ func (l *EmptyCartLogic) EmptyCart(in *cart.EmptyCartReq) (*cart.EmptyCartResp, 
 		return nil, err
 	}
 
-	ProductID := make([]uint, len(c.Products))
+	ProductID := make([]uint, len(c.ID))
 	for i, v := range c.Products {
 		ProductID[i] = v.ID
 	}

@@ -6,10 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="7b6142ba-e094-442b-80f0-965435143e32" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/biz/dal/cart_dal.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/biz/dal/cart_dal.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/cart/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/cart/internal/logic/additemlogic.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/additemlogic.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/internal/logic/emptycartlogic.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/emptycartlogic.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/cart/internal/logic/getcartlogic.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/internal/logic/getcartlogic.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/cart/proto/cart/cart.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/proto/cart/cart.pb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/cart/proto/cart/cart_grpc.pb.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/cart/proto/cart/cart_grpc.pb.go" afterDir="false" />
     </list>

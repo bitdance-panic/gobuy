@@ -5,7 +5,6 @@ import (
 	"github.com/bitdance-panic/gobuy/app/services/cart/internal/logic"
 	"github.com/bitdance-panic/gobuy/app/services/cart/internal/svc"
 	"github.com/bitdance-panic/gobuy/app/services/cart/proto/cart"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type CartServiceServer struct {
@@ -21,17 +20,13 @@ func NewCartServiceServer(svcCtx *svc.ServiceContext) *CartServiceServer {
 
 // 封装逻辑处理对象的创建和调用
 func (s *CartServiceServer) handleRequest(ctx context.Context, req interface{}, logicFunc func(context.Context, *svc.ServiceContext, interface{}) (interface{}, error)) (interface{}, error) {
-	log := logx.WithContext(ctx)
-	log.Infow("Handling request", "request", req)
 
 	// 获取逻辑处理对象并调用其方法
 	resp, err := logicFunc(ctx, s.svcCtx, req)
 	if err != nil {
-		log.Errorw("错误处理请求", "error", err, "request", req)
 		return nil, err
 	}
 
-	log.Infow("成功处理请求", "response", resp)
 	return resp, nil
 }
 

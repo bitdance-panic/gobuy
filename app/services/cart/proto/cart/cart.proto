@@ -38,15 +38,24 @@ message AddCartItemResponse {
   bool success = 1;
 }
 
-// 定义添加商品请求
-message AddItemReq {
-  string user_id = 1;
-  CartItem item = 2;
+// 定义 ProtoAddItemReq 字段
+message ProtoAddItemReq {
+    string user_id = 1;
+    string product_id = 2;
+    int32 quantity = 3;
 }
 
-// 定义添加商品响应
-message AddItemResp {
-  bool success = 1;
+// 定义 ProtoAddItemResp 字段
+message ProtoAddItemResp {
+    bool success = 1;
+    string message = 2;
+}
+
+// 定义 ProtoCartItem 字段
+message ProtoCartItem {
+    string product_id = 1;
+    int32 quantity = 2;
+    float price = 3;
 }
 
 // 定义购物车服务
