@@ -2,8 +2,7 @@
 package handler
 
 import (
-    "context"
-    "github.com/zeromicro/go-zero/zrpc/zrpcutil/zrpcutil_test/cart"
+	"context"
 )
 
 func (l *CartHandler) RemoveCartItem(ctx context.Context, req *cart.RemoveCartItemRequest) (*cart.RemoveCartItemResponse, error) {

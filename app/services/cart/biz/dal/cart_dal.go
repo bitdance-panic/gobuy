@@ -39,7 +39,7 @@ func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 	// 检查商品是否已在购物车中且未被删除
 	for _, item := range cart.Items {
 		if item.ProductID == productID && !item.IsDeleted {
-			item.Quantity += quantity
+			item.Quantity += uint(quantity)
 			return dal.db.Save(&item).Error
 		}
 	}
@@ -49,7 +49,7 @@ func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 		UserID:    userID,
 		CartID:    uint(cart.ID),
 		ProductID: productID,
-		Quantity:  quantity,
+		Quantity:  uint(quantity),
 		IsDeleted: false,
 	}
 	return dal.db.Create(&newItem).Error

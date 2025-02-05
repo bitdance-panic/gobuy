@@ -2,9 +2,9 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/cart/internal/svc"
+	"github.com/bitdance-panic/gobuy/app/services/cart/proto/cart"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -22,20 +22,27 @@ func NewGetCartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCartLo
 	}
 }
 
-func (l *EmptyCartLogic) EmptyCart(in *models.EmptyCartReq) (*models.EmptyCartResp, error) {
+func (l *GetCartLogic) GetCart(in *cart.GetCartReq) (*cart.GetCartResp, error) {
 	db := l.svcCtx.DB
-	// 查询用户的购物车
-	var cart models.Cart
-	err := db.Preload("Products").Where("user_id = ?", in.UserId).Take(&cart).Error
+	u := models.User{}
+
+	err := db.Preload("Cart").First(&u, in.UserId).Error
 	if err != nil {
-		return nil, fmt.Errorf("获取购物车失败: %v", err)
+		return nil, err
 	}
 
-	// 直接删除与该用户相关的所有购物车项
-	err = db.Where("cart_id = ?", cart.ID).Delete(&models.CartItem{}).Error
+	c := make([]models.Product, 0)
+	err = db.Model(&models.CartItem{}).Where("cart_id = ?", u.Cart.ID).Find(&c).Error
 	if err != nil {
-		return nil, fmt.Errorf("清空购物车失败: %v", err)
+		return nil, err
 	}
 
-	return &cart.EmptyCartResp{}, nil
+	res := cart.GetCartResp{Items: make([]*cart.CartItem, len(c))}
+	for i, v := range c {
+		res.Items[i] = new(cart.CartItem)
+		res.Items[i].ProductId = uint32(v.ProductID)
+		res.Items[i].Quantity = uint32(v.Quantity)
+	}
+	return &res, nil
+
 }

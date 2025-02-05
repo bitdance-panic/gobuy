@@ -14,8 +14,7 @@ import (
 func initTiDB() (*gorm.DB, error) {
 	//TiDB 的连接信息
 
-dsn:
-	"%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
+	dsn := "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
