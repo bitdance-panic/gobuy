@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"app/services/cart/internal/logic"
-	"app/services/cart/internal/svc"
-	"app/services/cart/proto/cart"
+	"github.com/bitdance-panic/gobuy/app/services/cart/internal/logic"
+	"github.com/bitdance-panic/gobuy/app/services/cart/internal/svc"
+	"github.com/bitdance-panic/gobuy/app/services/cart/proto/cart"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 

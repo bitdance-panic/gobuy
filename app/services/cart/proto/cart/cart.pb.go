@@ -61,3 +61,16 @@ func file_proto_cart_cart_proto_init() {
 	file_proto_cart_cart_proto_goTypes = nil
 	file_proto_cart_cart_proto_depIdxs = nil
 }
+
+type ProtoAddItemReq struct { // 重命名类型以避免冲突
+    UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+    Item   *ProtoCartItem `protobuf:"bytes,2,opt,name=item,proto3" json:"item,omitempty"`
+}
+
+type ProtoAddItemResp struct { // 重命名类型以避免冲突
+}
+
+type ProtoCartItem struct { // 重命名类型以避免冲突
+    ProductId int64 `protobuf:"varint,1,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+    Quantity  uint32 `protobuf:"varint,2,opt,name=quantity,proto3" json:"quantity,omitempty"`
+}

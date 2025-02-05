@@ -10,7 +10,7 @@ import (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CartServiceClient interface {
 	GetCart(ctx context.Context, in *GetCartRequest, opts ...grpc.CallOption) (*GetCartResponse, error)
-	AddCartItem(ctx context.Context, in *AddCartItemRequest, opts ...grpc.CallOption) (*AddCartItemResponse, error)
+	AddItem(ctx context.Context, in *ProtoAddItemReq, opts ...grpc.CallOption) (*ProtoAddItemResp, error)
 	RemoveCartItem(ctx context.Context, in *RemoveCartItemRequest, opts ...grpc.CallOption) (*RemoveCartItemResponse, error)
 }
 
@@ -31,9 +31,9 @@ func (c *cartServiceClient) GetCart(ctx context.Context, in *GetCartRequest, opt
 	return out, nil
 }
 
-func (c *cartServiceClient) AddCartItem(ctx context.Context, in *AddCartItemRequest, opts ...grpc.CallOption) (*AddCartItemResponse, error) {
-	out := new(AddCartItemResponse)
-	err := c.cc.Invoke(ctx, "/cart.CartService/AddCartItem", in, out, opts...)
+func (c *cartServiceClient) AddItem(ctx context.Context, in *ProtoAddItemReq, opts ...grpc.CallOption) (*ProtoAddItemResp, error) {
+	out := new(ProtoAddItemResp)
+	err := c.cc.Invoke(ctx, "/cart.CartService/AddItem", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *cartServiceClient) RemoveCartItem(ctx context.Context, in *RemoveCartIt
 // for forward compatibility
 type CartServiceServer interface {
 	GetCart(context.Context, *GetCartRequest) (*GetCartResponse, error)
-	AddCartItem(context.Context, *AddCartItemRequest) (*AddCartItemResponse, error)
+	AddItem(context.Context, *ProtoAddItemReq) (*ProtoAddItemResp, error)
 	RemoveCartItem(context.Context, *RemoveCartItemRequest) (*RemoveCartItemResponse, error)
 	mustEmbedUnimplementedCartServiceServer()
 }
@@ -106,20 +106,20 @@ func _CartService_GetCart_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CartService_AddCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddCartItemRequest)
+func _CartService_AddItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProtoAddItemReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CartServiceServer).AddCartItem(ctx, in)
+		return srv.(CartServiceServer).AddItem(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cart.CartService/AddCartItem",
+		FullMethod: "/cart.CartService/AddItem",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CartServiceServer).AddCartItem(ctx, req.(*AddCartItemRequest))
+		return srv.(CartServiceServer).AddItem(ctx, req.(*ProtoAddItemReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

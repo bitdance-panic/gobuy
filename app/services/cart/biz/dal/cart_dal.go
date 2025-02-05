@@ -3,7 +3,7 @@ package dal
 // 数据访问层
 
 import (
-	"app/models"
+	"github.com/bitdance-panic/gobuy/app/models"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +47,7 @@ func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 	// 商品不在购物车中，添加新的购物车项
 	newItem := models.CartItem{
 		UserID:    userID,
-		CartID:    cart.ID,
+		CartID:    uint(cart.ID),
 		ProductID: productID,
 		Quantity:  quantity,
 		IsDeleted: false,
@@ -55,7 +55,7 @@ func (dal *CartDAL) AddItemToCart(userID, productID uint, quantity int) error {
 	return dal.db.Create(&newItem).Error
 }
 
-//从购物车中移除商品
+// 从购物车中移除商品
 func (dal *CartDAL) RemoveItemFromCart(userID, productID uint) error {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除
@@ -74,7 +74,7 @@ func (dal *CartDAL) RemoveItemFromCart(userID, productID uint) error {
 	return nil
 }
 
-//清空购物车
+// 清空购物车
 func (dal *CartDAL) ClearCart(userID uint) error {
 	var cart models.Cart
 	// 先确保用户的购物车存在且未被删除

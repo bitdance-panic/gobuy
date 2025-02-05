@@ -1,8 +1,8 @@
 package bll
 
 import (
-	"app/models"
-	"app/services/cart/biz/dal"
+	"github.com/bitdance-panic/gobuy/app/models"
+	"github.com/bitdance-panic/gobuy/app/services/cart/biz/dal"
 )
 
 // CartBLL 定义购物车业务逻辑层结构体

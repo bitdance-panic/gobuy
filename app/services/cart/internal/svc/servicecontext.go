@@ -1,34 +1,30 @@
 package svc
 
 import (
+	"github.com/bitdance-panic/gobuy/app/services/cart/proto/cart"
+	"github.com/cloudwego/thriftgo/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"app/services/cart/conf"
-	"mall/service/cart/internal"
 	"time"
 )
 
 type ServiceContext struct {
-	Config config.Config
-	DB     *gorm.DB
-	Log    *mlog.Log
+	Config   config.Config
+	DB       *gorm.DB
 	CartRepo cart.CartRepo
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	log := mlog.NewLog("CartService")
 	ctx := &ServiceContext{Config: c}
 	dsn := "DJnAaVe8x5ioexY.root:3NeJC53vJdFYSqz8@tcp(gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000)/@gateway01.ap-southeast-1.prod.aws.tidbcloud.com?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		log.Error(err.Error())
 		return ctx
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Warn(err.Error())
 	} else {
 		sqlDB.SetMaxOpenConns(16)
 		sqlDB.SetMaxIdleConns(8)
@@ -36,7 +32,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	ctx.DB = db
-	ctx.Log = log
 	ctx.CartRepo = cart.NewCartRepo(db)
 
 	return ctx

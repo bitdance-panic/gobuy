@@ -1,8 +1,8 @@
 package main
 
 import (
-	"app/services/cart/biz/bll"
-	"app/services/cart/biz/dal"
+	"github.com/bitdance-panic/gobuy/app/services/cart/biz/bll"
+	"github.com/bitdance-panic/gobuy/app/services/cart/biz/dal"
 	//"github.com/bitdance-panic/gobuy/hertz/pkg/app/server"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -13,6 +13,7 @@ import (
 // 初始化 TiDB 连接
 func initTiDB() (*gorm.DB, error) {
 	//TiDB 的连接信息
+
 dsn:
 	"%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

@@ -61,16 +61,19 @@ type Product struct {
 
 type Cart struct {
 	Base
-	UserID uint       // 用户 ID
-	Items  []CartItem // 购物车项
+	UserID  uint       // 用户 ID
+	Items   []CartItem // 购物车项
+	IsValid bool       // 购物车是否有效
 }
 
 type CartItem struct {
 	Base
 	CartID    uint    // 购物车 ID
 	ProductID uint    // 商品 ID
-	Quantity  int     `gorm:"not null"`             // 商品数量
+	Quantity  uint    `gorm:"not null"`             // 商品数量
 	Product   Product `gorm:"foreignKey:ProductID"` // 关联商品
+	UserID    uint    `gorm:"not null"`             //关联用户
+	IsDeleted bool    //逻辑删除，默认为false
 }
 
 type Order struct {
