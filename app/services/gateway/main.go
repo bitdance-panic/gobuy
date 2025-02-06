@@ -59,12 +59,12 @@ func main() {
 	productservice = cp
 
 	h.GET("/ping", handlePong)
-	h.GET("/login", handleLogin)
+	h.POST("/login", handleLogin)
 	product := h.Group("/product")
 	{
 		product.GET("/search", handleProductSearch)
 		product.GET("/:id", handleProductGet)
-		product.DELETE("/:id", handleProductDELETE)
+		//product.DELETE("/:id", handleProductDELETE)
 		product.PUT("/:id", handleProductPut)
 		product.POST("", handleProductPost)
 	}
