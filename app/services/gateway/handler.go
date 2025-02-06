@@ -10,6 +10,7 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/cloudwego/kitex/client/callopt"
 )
@@ -25,13 +26,15 @@ func handlePong(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /login [get]
 func handleLogin(ctx context.Context, c *app.RequestContext) {
-	// 通过 /login?email=1234&pass=1234 测试
-	email := c.Query("email")
-	password := c.Query("pass")
-	req := rpc_user.LoginReq{
-		Email:    email,
-		Password: password,
+	req := rpc_user.LoginReq{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("Login failed for email: %s, validation error: %v", req.Email, err)
+		utils.Fail(c, err.Error())
+		return
 	}
+
 	resp, err := userservice.Login(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
@@ -40,7 +43,7 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 	if resp.Success {
 		utils.Success(c, utils.H{"userID": resp.UserId})
 	} else {
-		utils.FailFull(c, consts.StatusUnauthorized, "登录失败", nil)
+		utils.FailFull(c, consts.StatusUnauthorized, "Login failed. Invalid email or password.", nil)
 	}
 }
 
