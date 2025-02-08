@@ -30,5 +30,5 @@ func (s *UserBLL) Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.
 		resp.Success = true
 		resp.UserId = int32(userPO.ID)
 	}
-	return &resp, nil
+	return &resp, err
 }
