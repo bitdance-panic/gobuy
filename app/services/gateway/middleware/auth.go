@@ -2,121 +2,219 @@ package middleware
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
+	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
+	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 
+	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
+
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
+	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/client/callopt"
 	"github.com/hertz-contrib/jwt"
 )
 
 type User = models.User
 
-var identityKey = "username"
+var identityKey = "uid"
 
-func RegsterAuth(h *server.Hertz) {
-	authMiddleware, err := jwt.New(&jwt.HertzJWTMiddleware{
-		Realm:            "test zone",
+var secret = "panic-bitdance"
+
+var UserClient userservice.Client
+
+const (
+	AccessTokenExpire  = 12 * time.Hour
+	RefreshTokenExpire = 7 * 24 * time.Hour
+)
+
+var AuthMiddleware *jwt.HertzJWTMiddleware
+
+// WhiteList      = gutils.NewSet()
+// BlackList      = gutils.NewSyncSet()
+
+func InitAuth() {
+	// cfg := conf.GetConf()
+	// 初始化白名单
+	// initWhiteList(cfg.Auth.WhiteList)
+
+	// JWT中间件配置
+	initJWTMiddleware()
+}
+
+// func initWhiteList(paths []string) {
+// 	for _, path := range paths {
+// 		WhiteList.Add(path)
+// 	}
+// }
+
+func initJWTMiddleware() {
+	var err error
+	AuthMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
+		Realm:            "gobuy auth",
 		SigningAlgorithm: "HS256",
-		Key:              []byte("panic-bitdance"),
-		Timeout:          time.Hour,
-		MaxRefresh:       time.Hour,
-		// 登录验证器
-		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
-			// 处理登录逻辑
-			// 返回token
-			return map[string]interface{}{
-				"username": "1234",
-			}, nil
-			// 出错
-			// return nil, jwt.ErrFailedAuthentication
-		},
-		// 是否可以访问Realm
-		// 鉴权验证器
-		Authorizator: func(data interface{}, ctx context.Context, c *app.RequestContext) bool {
-			if v, ok := data.(*User); ok && v.Username == "admin" {
-				return true
-			}
-			return false
-		},
-		// 生成token时放入的参数
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*User); ok {
-				return jwt.MapClaims{
-					identityKey: v.Username,
-				}
-			}
-			return jwt.MapClaims{}
-		},
-		// 无权限的响应
-		Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
-			c.JSON(code, map[string]interface{}{
-				"code":    code,
-				"message": message,
-			})
-		},
-		// 登录鉴权的响应
-		LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
-			c.JSON(http.StatusOK, map[string]interface{}{
-				"code":   http.StatusOK,
-				"token":  token,
-				"expire": expire.Format(time.RFC3339),
-			})
-		},
-		// 登出的响应
-		// 登出可能会自动删除token
-		LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
-			c.JSON(http.StatusOK, map[string]interface{}{
-				"code": http.StatusOK,
-			})
-		},
-		// refresh token
-		RefreshResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
-			c.JSON(http.StatusOK, map[string]interface{}{
-				"code":   http.StatusOK,
-				"token":  token,
-				"expire": expire.Format(time.RFC3339),
-			})
-		},
-		// 不知道干嘛的
-		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
-			claims := jwt.ExtractClaims(ctx, c)
-			return &User{
-				Username: claims[identityKey].(string),
-			}
-		},
-		IdentityKey: identityKey,
+		Key:              []byte(secret),
+		Timeout:          AccessTokenExpire,
+		MaxRefresh:       RefreshTokenExpire,
 		// 从请求头的Authorization提取token
 		TokenLookup:                 "header: Authorization",
 		TokenHeadName:               "Bearer",
+		SendAuthorization:           true,
 		WithoutDefaultTokenHeadName: false,
 		TimeFunc:                    time.Now,
 		HTTPStatusMessageFunc: func(e error, ctx context.Context, c *app.RequestContext) string {
 			return e.Error()
 		},
-		SendAuthorization: true,
-		DisabledAbort:     false,
+		DisabledAbort: false,
+
+		PayloadFunc: func(data interface{}) jwt.MapClaims {
+			str := fmt.Sprintf("%v", data)
+			userID, err := strconv.Atoi(str)
+			if err != nil {
+				return jwt.MapClaims{}
+			}
+			return jwt.MapClaims{
+				identityKey: userID,
+			}
+		},
+		Authenticator: authenticate,
+		LoginResponse: loginResponse,
+		// Authorizator: authorize,
+		Unauthorized: unauthorizedHandler,
+		// 登出的响应
+		// 登出可能会自动删除token
+		// LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
+		// 	c.JSON(http.StatusOK, map[string]interface{}{
+		// 		"code": http.StatusOK,
+		// 	})
+		// },
+		RefreshResponse: refreshResponse,
+		IdentityKey:     identityKey,
+		IdentityHandler: identityHandler,
 	})
+
+	_ = AuthMiddleware
 	if err != nil {
-		log.Fatal("auth middleware Error:" + err.Error())
+		hlog.Fatalf("auth middleware Error:" + err.Error())
 	}
-	// 之后在这里写handler
-	// h.POST("/login", authMiddleware.LoginHandler)
-	// h.POST("/logout", authMiddleware.LogoutHandler)
-	// h.NoRoute(authMiddleware.MiddlewareFunc(), func(ctx context.Context, c *app.RequestContext) {
-	// 	claims := jwt.ExtractClaims(ctx, c)
-	// 	hlog.Infof("NoRoute claims: %#v\n", claims)
-	// 	c.JSON(404, map[string]string{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
-	// })
-	// 该组接口都需要走middleware
-	auth := h.Group("/auth")
-	// Refresh time can be longer than token timeout
-	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	// auth.Use(authMiddleware.MiddlewareFunc())
-	// {
-	// 	auth.GET("/ping", PingHandler)
-	// }
+}
+
+// 认证处理，用于用户登录时提取并验证登录凭据
+func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, error) {
+	loginReq := rpc_user.LoginReq{}
+
+	if err := c.Bind(&loginReq); err != nil {
+		return nil, jwt.ErrMissingLoginValues
+	}
+
+	// 检查黑名单...
+
+	loginResp, err := UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
+	if err != nil {
+		return nil, jwt.ErrFailedAuthentication
+	}
+	c.Set("uid", int(loginResp.UserId))
+	return loginResp.UserId, nil
+}
+
+// 登录响应
+func loginResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
+	// 生成RefreshToken
+	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": "刷新Token失败",
+		})
+		return
+	}
+
+	// 保存refreshToken
+	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+		hlog.Errorf("Failed to save refresh token, error: %v", err)
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": "保存refreshToken失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":          http.StatusOK,
+		"access_token":  token,
+		"expire":        expire.Unix(),
+		"refresh_token": refreshToken,
+	})
+}
+
+// 授权处理
+// func authorize(data interface{}, ctx context.Context, c *app.RequestContext) bool {
+// 	uid, ok := data.(int)
+// 	if !ok {
+// 		return false
+// 	}
+
+// 	// 获取请求信息
+// 	method := string(c.Request.Method())
+// 	path := string(c.Request.Path())
+
+// 	// 检查权限
+// 	return gutils.Enforcer.Enforce(
+// 		fmt.Sprint(uid),
+// 		path,
+// 		method,
+// 	)
+// }
+
+// refreshResponse 刷新Token响应
+func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
+	// 生成新的RefreshToken
+	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": "刷新refreshToken失败",
+		})
+		return
+	}
+
+	// 更新数据库中的RefreshToken
+	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+		hlog.Errorf("Failed to save refresh token, error: %v", err)
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": "保存Token失败",
+		})
+		return
+	}
+
+	// 返回新的双Token
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":          http.StatusOK,
+		"access_token":  token,
+		"expire":        expire.Unix(),
+		"refresh_token": refreshToken,
+	})
+}
+
+// 身份处理
+func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
+	claims := jwt.ExtractClaims(ctx, c)
+	return claims["uid"]
+}
+
+// 统一错误处理
+func unauthorizedHandler(ctx context.Context, c *app.RequestContext, code int, message string) {
+	c.JSON(code, map[string]interface{}{
+		"code":    code,
+		"message": message,
+	})
+	c.Abort()
 }

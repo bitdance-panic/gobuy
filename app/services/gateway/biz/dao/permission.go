@@ -1,11 +1,8 @@
 package dao
 
 import (
-	"github.com/bitdance-panic/gobuy/app/models"
 	"gorm.io/gorm"
 )
-
-type User = models.User
 
 func HasPermission(db *gorm.DB, userID uint, permissionName string) bool {
 	var count int64
