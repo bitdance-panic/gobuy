@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -97,6 +98,118 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 	} else {
 		utils.FailFull(c, consts.StatusUnauthorized, "Login failed. Invalid email or password.", nil)
 	}
+}
+
+// 获取用户信息
+func GetUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	// 调用 user 服务的 GetUser RPC
+	req := rpc_user.GetUserReq{UserId: userID}
+	resp, err := userservice.GetUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusNotFound, map[string]interface{}{
+			"code": http.StatusNotFound,
+			"msg":  "User not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":     http.StatusOK,
+		"msg":      "User found",
+		"user_id":  resp.UserId,
+		"email":    resp.Email,
+		"username": resp.Username,
+	})
+}
+
+// 用户信息更新
+func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	var req rpc_user.UpdateUserReq
+	if err := c.BindAndValidate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid input",
+		})
+		return
+	}
+
+	// 解析 Query 参数
+	email := c.Query("email")
+	username := c.Query("username")
+
+	// 赋值到 `req`
+	req.UserId = userID
+	req.Email = &email
+	req.Username = &username
+
+	// 赋值 user_id
+	req.UserId = userID
+
+	// 调用 user 服务的 UpdateUser RPC
+	resp, err := userservice.UpdateUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  "Update failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code": http.StatusOK,
+		"msg":  "User updated successfully",
+	})
+}
+
+// 封禁用户
+func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	// 构造请求
+	req := rpc_user.DeleteUserReq{UserId: userID}
+
+	// 调用 user 服务的 DeleteUser RPC
+	resp, err := userservice.DeleteUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  "User deletion failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code": http.StatusOK,
+		"msg":  "User deleted successfully",
+	})
 }
 
 // handleProductPut 这是更新商品

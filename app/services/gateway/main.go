@@ -90,6 +90,12 @@ func registerRoutes(h *server.Hertz) {
 		product.POST("", handleProductPost)
 	}
 
+	user := h.Group("/user")
+	{
+		user.PUT("/:userid", UpdateUserHandler)
+		user.GET("/:userid", GetUserHandler)
+		user.POST("/:userid", DeleteUserHandler)
+	}
 	// // 受保护的业务 API
 	// authGroup := h.Group("/api")
 	// authGroup.Use(middleware.AuthMiddleware.MiddlewareFunc()) // JWT 认证
