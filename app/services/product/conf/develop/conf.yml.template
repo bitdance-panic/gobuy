@@ -1,9 +1,9 @@
-tidb:
-  dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4&parseTime=True"
-  user: DJnAaVe8x5ioexY.root
-  password: 3NeJC53vJdFYSqz8
-  host: gateway01.ap-southeast-1.prod.aws.tidbcloud.com
-  port: 4000
+tidb: 
+    dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
+    user: <user>
+    password: <password>
+    host: <host>
+    port: 4000
 
 kitex:
   service: "user"
