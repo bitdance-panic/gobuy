@@ -47,7 +47,7 @@ func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, req *rpc_order.Get
 	}
 	//输出订单信息
 	for _, order := range orders {
-		fmt.Printf("Order ID: %s, User ID: %s, Items: %v, Amount: %.2f, Status: %s\n",
+		fmt.Printf("Order ID: %d, User ID: %s, Items: %v, Amount: %.2f, Status: %s\n",
 			order.ID, order.UserID, order.Items, order.TotalAmount, order.Status)
 	}
 	return &rpc_order.GetUserOrdersResponse{

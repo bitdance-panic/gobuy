@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"errors"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 
 	"gorm.io/gorm"
@@ -62,9 +62,9 @@ func GetUserByID(db *gorm.DB, ctx context.Context, userID int) (*User, error) {
 
 // 更新
 func UpdateUserByID(db *gorm.DB, ctx context.Context, userID int, username, email string) error {
-	if db.DB == nil {
-		return errors.New("database connection is nil")
-	}
+	// if db.DB == nil {
+	// 	return errors.New("database connection is nil")
+	// }
 
 	return db.WithContext(ctx).
 		Model(&User{}).
