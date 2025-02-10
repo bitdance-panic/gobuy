@@ -3,6 +3,7 @@ package bll
 import (
 	// "common/model"
 	"context"
+	"strconv"
 
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 	"github.com/bitdance-panic/gobuy/app/services/user/biz/dal/tidb"
@@ -31,4 +32,64 @@ func (s *UserBLL) Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.
 		resp.UserId = int32(userPO.ID)
 	}
 	return &resp, err
+}
+
+func GetUser(ctx context.Context, userID int) (*rpc_user.GetUserResp, error) {
+	if userID <= 0 {
+		return &rpc_user.GetUserResp{Success: false}, nil
+	}
+
+	user, err := dao.GetUserByID(tidb.DB, ctx, userID)
+	if err != nil {
+		return &rpc_user.GetUserResp{Success: false}, nil
+	}
+
+	return &rpc_user.GetUserResp{
+		Success:  true,
+		UserId:   strconv.Itoa(user.ID), //将 user.ID 转换为 string
+		Email:    user.Email,
+		Username: user.Username,
+	}, nil
+}
+
+// 更新用户信息
+func UpdateUser(ctx context.Context, req *rpc_user.UpdateUserReq) (*rpc_user.UpdateUserResp, error) {
+	userID, err := strconv.Atoi(req.UserId)
+	if err != nil || userID <= 0 {
+		return &rpc_user.UpdateUserResp{Success: false}, nil
+	}
+
+	// 处理 nil 指针
+	username := ""
+	email := ""
+
+	if req.Username != nil {
+		username = *req.Username
+	}
+	if req.Email != nil {
+		email = *req.Email
+	}
+
+	err = dao.UpdateUserByID(tidb.DB, ctx, userID, username, email)
+
+	if err != nil {
+		return &rpc_user.UpdateUserResp{Success: false}, nil
+	}
+
+	return &rpc_user.UpdateUserResp{Success: true}, nil
+}
+
+// 封禁用户
+func DeleteUser(ctx context.Context, req *rpc_user.DeleteUserReq) (*rpc_user.DeleteUserResp, error) {
+	userID, err := strconv.Atoi(req.UserId)
+	if err != nil || userID <= 0 {
+		return &rpc_user.DeleteUserResp{Success: false}, nil
+	}
+
+	err = dao.DeleteUserByID(tidb.DB, ctx, userID)
+	if err != nil {
+		return &rpc_user.DeleteUserResp{Success: false}, nil
+	}
+
+	return &rpc_user.DeleteUserResp{Success: true}, nil
 }
