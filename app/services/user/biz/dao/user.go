@@ -47,3 +47,38 @@ func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, passw
 func CreateUser(db *gorm.DB, ctx context.Context, user *User) error {
 	return db.WithContext(ctx).Create(user).Error
 }
+
+// GetUserByID 根据用户 ID 查询用户信息
+func GetUserByID(db *gorm.DB, ctx context.Context, userID int) (*User, error) {
+	user := &User{}
+
+	err := db.WithContext(ctx).
+		Where("id = ?", userID).
+		First(user).
+		Error
+
+	return user, err
+}
+
+// 更新
+func UpdateUserByID(db *gorm.DB, ctx context.Context, userID int, username, email string) error {
+	// if db.DB == nil {
+	// 	return errors.New("database connection is nil")
+	// }
+
+	return db.WithContext(ctx).
+		Model(&User{}).
+		Where("id = ?", userID).
+		Updates(map[string]interface{}{
+			"username": username,
+			"email":    email,
+		}).Error
+}
+
+// 封禁
+func DeleteUserByID(db *gorm.DB, ctx context.Context, userID int) error {
+	return db.WithContext(ctx).
+		Model(&User{}).
+		Where("id = ?", userID).
+		Update("is_deleted", 1).Error
+}
