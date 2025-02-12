@@ -24,6 +24,7 @@ type Config struct {
 	Postgres Postgres `yaml:"postgres"`
 	Redis    Redis    `yaml:"redis"`
 	Registry Registry `yaml:"registry"`
+	Auth     Auth     `yaml:"auth"`
 }
 
 type Tidb struct {
@@ -80,6 +81,10 @@ type Registry struct {
 	RegistryAddress []string `yaml:"registry_address"`
 	Username        string   `yaml:"username"`
 	Password        string   `yaml:"password"`
+}
+
+type Auth struct {
+	WhiteList []string `yaml:"white_list"`
 }
 
 // GetConf gets configuration instance
