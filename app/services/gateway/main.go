@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
+
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	// 引入 product 和 user 服务的客户端
 	productservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
@@ -16,6 +18,7 @@ import (
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
 
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/kitex/client"
 	"github.com/hertz-contrib/cors"
@@ -45,22 +48,23 @@ var (
 // @schemes http
 func main() {
 	// 初始化数据库等
+
 	dal.Init()
+
+	// 初始化Casbin
+	// if err := casbin.InitCasbin(tidb.DB); err != nil {
+	// 	hlog.Fatalf("Casbin初始化失败: %v", err)
+	// }
+
+	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
 	s := fmt.Sprintf("localhost%s", address)
 	h := server.New(server.WithHostPorts(s))
-	h.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // 允许所有来源
-		AllowMethods:     []string{"*"}, // 允许所有方法
-		AllowHeaders:     []string{"*"}, // 允许所有头信息
-		ExposeHeaders:    []string{"*"}, // 暴露所有头信息
-		AllowCredentials: true,          // 允许携带凭证（如 cookies）
-	}))
 
 	// 初始化 userservice 客户端
 	c, err := userservice_.NewClient("user", client.WithHostPorts("0.0.0.0:8881"))
 	if err != nil {
-		log.Fatal(err)
+		hlog.Fatal(err)
 	}
 	userservice = c
 	middleware.UserClient = userservice
@@ -68,7 +72,7 @@ func main() {
 	// 初始化 productservice 客户端
 	cp, errp := productservice_.NewClient("product", client.WithHostPorts("0.0.0.0:8882"))
 	if errp != nil {
-		log.Fatal(err)
+		hlog.Fatal(err)
 	}
 	productservice = cp
 
@@ -81,19 +85,51 @@ func main() {
 
 	// 初始化中间件
 	middleware.InitAuth()
+
+	// 中间件链
+	h.Use(
+		// middleware.CasbinMiddleware(), // 权限中间件
+		cors.New(cors.Config{
+			AllowOrigins:     []string{"*"}, // 允许所有来源
+			AllowMethods:     []string{"*"}, // 允许所有方法
+			AllowHeaders:     []string{"*"}, // 允许所有头信息
+			ExposeHeaders:    []string{"*"}, // 暴露所有头信息
+			AllowCredentials: true,          // 允许携带凭证（如 cookies）
+		}),
+	)
+
+	// 注册路由
 	registerRoutes(h)
+
 
 	// 启动 Swagger 文档服务
 	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
 	h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))
+
+	// 注册Swagger
+	registerSwagger(h, s)
+
 	h.Spin()
 }
 
 func registerRoutes(h *server.Hertz) {
+
 	// 用户相关路由
 	h.POST("/login", middleware.AuthMiddleware.LoginHandler) // 用户登录
 
+	// 用户路由
+	user := h.Group("/")
+	user.Use(
+		middleware.WhiteListMiddleware(),
+		conditionalAuthMiddleware())
+	{
+		user.POST("/login", middleware.AuthMiddleware.LoginHandler)
+	}
+
+
+	// 需要认证的路由
 	adminGroup := h.Group("/auth")
+	adminGroup.Use(middleware.RBACMiddleware("admin"))
 	{
 		adminGroup.POST("/refresh", RefreshTokenHandler) // 令牌刷新
 	}
@@ -114,6 +150,7 @@ func registerRoutes(h *server.Hertz) {
 		user.POST("/:userid", DeleteUserHandler)
 	}
 
+
 	// 处理与支付相关的路由
 	payment := h.Group("/payment")
 	{
@@ -121,5 +158,33 @@ func registerRoutes(h *server.Hertz) {
 		payment.GET("/:paymentId", handleGetPayment)
 		payment.PUT("/:paymentId", handleUpdatePayment)
 		payment.DELETE("/:paymentId", handleDeletePayment)
+
+	// // 受保护的业务 API
+	// authGroup := h.Group("/api")
+	// authGroup.Use(middleware.AuthMiddleware.MiddlewareFunc()) // JWT 认证
+	// {
+	// 	authGroup.GET("/profile", handler.ProfileHandler) // 获取用户信息
+	// 	authGroup.POST("/update", handler.UpdateProfile)  // 更新用户信息
+	// }
+}
+
+func registerSwagger(h *server.Hertz, addr string) {
+	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", addr))
+	h.GET("/swagger/*any",
+		swagger.WrapHandler(swaggerFiles.Handler,
+			swagger.DefaultModelsExpandDepth(-1), // 隐藏模型定义
+			url,
+		),
+	)
+}
+
+func conditionalAuthMiddleware() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
+			c.Next(ctx) // 跳过认证
+			return
+		}
+		middleware.AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
+
 	}
 }
