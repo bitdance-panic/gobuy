@@ -94,6 +94,16 @@ type OrderItem struct {
 	ProductName string
 }
 
+// 新增一个 Payment 模型
+
+type Payment struct {
+	Base
+	UserID  uint    // 对应用户ID
+	OrderID uint    // 对应订单ID
+	Amount  float64 // 支付金额
+	Status  int     // 支付状态(可用枚举或 int 表示)
+}
+
 func (User) TableName() string {
 	return "user"
 }
@@ -134,6 +144,10 @@ func (Product) TableName() string {
 	return "product"
 }
 
+func (Payment) TableName() string {
+	return "payment"
+}
+
 // 调用这个来自动调整表结构
 func AutoMigrate(db *gorm.DB) {
 	if os.Getenv("GO_ENV") != "production" {
@@ -150,6 +164,7 @@ func AutoMigrate(db *gorm.DB) {
 			&Order{},
 			&OrderItem{},
 			&Product{},
+			&Payment{}, // 新增的 Payment 模型
 		)
 	}
 }
