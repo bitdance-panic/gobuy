@@ -50,8 +50,7 @@ func RefreshTokenHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// access_token 过期，提取 uid
-	str := fmt.Sprintf("%v", claims["uid"])
-	userID, err := strconv.Atoi(str)
+	userID := int(claims["uid"].(float64))
 
 	// 查询数据库中的 refresh_token
 	storedRefreshToken, err := dao.GetRefreshTokenByUserID(tidb.DB, userID)
