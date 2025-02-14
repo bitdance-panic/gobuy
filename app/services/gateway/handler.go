@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
+	rpc_payment "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment"
 	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
-
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
@@ -97,6 +98,118 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 	} else {
 		utils.FailFull(c, consts.StatusUnauthorized, "Login failed. Invalid email or password.", nil)
 	}
+}
+
+// 获取用户信息
+func GetUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	// 调用 user 服务的 GetUser RPC
+	req := rpc_user.GetUserReq{UserId: userID}
+	resp, err := userservice.GetUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusNotFound, map[string]interface{}{
+			"code": http.StatusNotFound,
+			"msg":  "User not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":     http.StatusOK,
+		"msg":      "User found",
+		"user_id":  resp.UserId,
+		"email":    resp.Email,
+		"username": resp.Username,
+	})
+}
+
+// 用户信息更新
+func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	var req rpc_user.UpdateUserReq
+	if err := c.BindAndValidate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid input",
+		})
+		return
+	}
+
+	// 解析 Query 参数
+	email := c.Query("email")
+	username := c.Query("username")
+
+	// 赋值到 `req`
+	req.UserId = userID
+	req.Email = &email
+	req.Username = &username
+
+	// 赋值 user_id
+	req.UserId = userID
+
+	// 调用 user 服务的 UpdateUser RPC
+	resp, err := userservice.UpdateUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  "Update failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code": http.StatusOK,
+		"msg":  "User updated successfully",
+	})
+}
+
+// 封禁用户
+func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
+	userID := c.Param("userid") // 获取 URL 参数中的 userid
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "User ID is required",
+		})
+		return
+	}
+
+	// 构造请求
+	req := rpc_user.DeleteUserReq{UserId: userID}
+
+	// 调用 user 服务的 DeleteUser RPC
+	resp, err := userservice.DeleteUser(context.Background(), &req)
+
+	if err != nil || !resp.Success {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  "User deletion failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code": http.StatusOK,
+		"msg":  "User deleted successfully",
+	})
 }
 
 // handleProductPut 这是更新商品
@@ -214,4 +327,205 @@ func handleProductSearch(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	utils.Success(c, utils.H{"products": resp.Products})
+}
+
+// handleCreatePayment 创建支付记录
+// @Summary 创建支付记录
+// @Description 创建一个新的支付记录并返回相关信息
+// @Accept application/json
+// @Produce application/json
+// @Router /payment [post]
+func handleCreatePayment(ctx context.Context, c *app.RequestContext) {
+	// 解析 Query 参数
+	userId := c.Query("user_id")
+	orderId := c.Query("order_id")
+	amount := c.Query("amount")
+
+	// 转换 userId 和 orderId 为 int32
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid user_id",
+		})
+		return
+	}
+
+	orderIdInt, err := strconv.Atoi(orderId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid order_id",
+		})
+		return
+	}
+
+	// 转换 amount 为 float64
+	amountFloat, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid amount",
+		})
+		return
+	}
+
+	// 创建 req 并赋值
+	req := rpc_payment.CreatePaymentRequest{
+		UserId:  int32(userIdInt),  // 转换为 int32
+		OrderId: int32(orderIdInt), // 转换为 int32
+		Amount:  amountFloat,       // 转换为 float64
+	}
+
+	// 调用支付服务创建支付记录
+	resp, err := paymentservice.CreatePayment(context.Background(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 返回创建的支付记录信息
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    http.StatusOK,
+		"msg":     "成功创建支付订单",
+		"payment": resp.Payment,
+	})
+}
+
+// handleGetPayment 获取支付记录
+// @Summary 获取支付记录
+// @Description 根据支付记录ID获取支付记录详情
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [get]
+func handleGetPayment(ctx context.Context, c *app.RequestContext) {
+	payment_id := c.Param("paymentId")
+	if payment_id == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Payment ID is required",
+		})
+		return
+	}
+
+	// 转换 payment_id 为 int32
+	paymentIdInt, err := strconv.Atoi(payment_id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid payment_id",
+		})
+		return
+	}
+
+	// 调用支付服务获取支付记录
+	req := rpc_payment.GetPaymentRequest{PaymentId: int32(paymentIdInt)}
+	resp, err := paymentservice.GetPayment(context.Background(), &req)
+	if err != nil {
+		c.JSON(http.StatusNotFound, map[string]interface{}{
+			"code": http.StatusNotFound,
+			"msg":  "Payment not found",
+		})
+		return
+	}
+
+	// 返回支付记录详情
+	utils.Success(c, utils.H{"payment": resp.Payment})
+}
+
+// handleUpdatePayment 更新支付记录
+// @Summary 更新支付记录
+// @Description 更新指定支付记录的状态或其他信息
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [put]
+func handleUpdatePayment(ctx context.Context, c *app.RequestContext) {
+	payment_id := c.Param("paymentId")
+	status := c.Query("status")
+
+	if payment_id == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Payment ID is required",
+		})
+		return
+	}
+
+	paymentIdInt, err := strconv.Atoi(payment_id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid payment_id",
+		})
+		return
+	}
+
+	statusInt64, err := strconv.ParseInt(status, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid status",
+		})
+		return
+	}
+
+	// 调用支付服务获取支付记录
+	req := rpc_payment.UpdatePaymentRequest{
+		PaymentId: int32(paymentIdInt),
+		Status:    rpc_payment.PaymentStatus(statusInt64), // 进行类型转换
+	}
+
+	// 调用支付服务更新支付记录
+	resp, err := paymentservice.UpdatePayment(context.Background(), &req)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 返回更新后的支付记录信息
+	utils.Success(c, utils.H{"payment": resp.Payment})
+}
+
+// handleDeletePayment 删除支付记录
+// @Summary 删除支付记录
+// @Description 删除指定ID的支付记录
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [delete]
+func handleDeletePayment(ctx context.Context, c *app.RequestContext) {
+	payment_id := c.Param("paymentId")
+	if payment_id == "" {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Payment ID is required",
+		})
+		return
+	}
+
+	// 转换 payment_id 为 int32
+	paymentIdInt, err := strconv.Atoi(payment_id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid payment_id",
+		})
+		return
+	}
+
+	// 调用支付服务获取支付记录
+	req := rpc_payment.DeletePaymentRequest{PaymentId: int32(paymentIdInt)}
+	resp, err := paymentservice.DeletePayment(context.Background(), &req)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	if resp.Success {
+		utils.Success(c, nil)
+	} else {
+		utils.Fail(c, "删除支付记录失败")
+	}
 }
