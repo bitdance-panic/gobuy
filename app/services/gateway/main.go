@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
@@ -101,10 +102,9 @@ func main() {
 	// 注册路由
 	registerRoutes(h)
 
-
 	// 启动 Swagger 文档服务
-	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
-	h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))
+	// url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
+	// h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))
 
 	// 注册Swagger
 	registerSwagger(h, s)
@@ -118,14 +118,13 @@ func registerRoutes(h *server.Hertz) {
 	h.POST("/login", middleware.AuthMiddleware.LoginHandler) // 用户登录
 
 	// 用户路由
-	user := h.Group("/")
-	user.Use(
-		middleware.WhiteListMiddleware(),
-		conditionalAuthMiddleware())
-	{
-		user.POST("/login", middleware.AuthMiddleware.LoginHandler)
-	}
-
+	// user := h.Group("/")
+	// user.Use(
+	// 	middleware.WhiteListMiddleware(),
+	// 	conditionalAuthMiddleware())
+	// {
+	// 	user.POST("/login", middleware.AuthMiddleware.LoginHandler)
+	// }
 
 	// 需要认证的路由
 	adminGroup := h.Group("/auth")
@@ -150,7 +149,6 @@ func registerRoutes(h *server.Hertz) {
 		user.POST("/:userid", DeleteUserHandler)
 	}
 
-
 	// 处理与支付相关的路由
 	payment := h.Group("/payment")
 	{
@@ -158,6 +156,7 @@ func registerRoutes(h *server.Hertz) {
 		payment.GET("/:paymentId", handleGetPayment)
 		payment.PUT("/:paymentId", handleUpdatePayment)
 		payment.DELETE("/:paymentId", handleDeletePayment)
+	}
 
 	// // 受保护的业务 API
 	// authGroup := h.Group("/api")
@@ -185,6 +184,5 @@ func conditionalAuthMiddleware() app.HandlerFunc {
 			return
 		}
 		middleware.AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
-
 	}
 }
