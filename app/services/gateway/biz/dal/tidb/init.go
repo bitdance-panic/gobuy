@@ -35,8 +35,10 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
+
 	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
 	// 	panic(err)
 	// }
-	// models.AutoMigrate(DB);第一次连接后就关闭
+
+	// models.AutoMigrate(DB) // 第一次连接后就关闭
 }
