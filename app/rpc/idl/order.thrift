@@ -44,7 +44,7 @@ service OrderService{
     CreateOrderResponse createOrder(1: CreateOrderRequest req);
     UpdateOrderResponse updateOrder(1: UpdateOrderRequest req);
     GetUserOrdersResponse getUserOrders(1: GetUserOrdersRequest req);
-
+    DeleteOrderResponse deleteOrder(1: DeleteOrderRequest req);
 }
 //创建订单请求
 struct CreateOrderRequest{
@@ -69,6 +69,14 @@ struct GetUserOrdersRequest{
 //获取用户订单响应
 struct GetUserOrdersResponse{
     1: list<Order> orders;//用户订单列表
+}
+//删除订单请求
+struct DeleteOrderRequest{
+    1:i32 order_id;
+}
+struct DeleteOrderResponse{
+    1:bool success;//是否删除成功
+    2:string message;//返回信息
 }
 
 
