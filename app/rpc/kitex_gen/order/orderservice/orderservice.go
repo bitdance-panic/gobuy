@@ -34,6 +34,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"deleteOrder": kitex.NewMethodInfo(
+		deleteOrderHandler,
+		newOrderServiceDeleteOrderArgs,
+		newOrderServiceDeleteOrderResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -154,6 +161,24 @@ func newOrderServiceGetUserOrdersResult() interface{} {
 	return order.NewOrderServiceGetUserOrdersResult()
 }
 
+func deleteOrderHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceDeleteOrderArgs)
+	realResult := result.(*order.OrderServiceDeleteOrderResult)
+	success, err := handler.(order.OrderService).DeleteOrder(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceDeleteOrderArgs() interface{} {
+	return order.NewOrderServiceDeleteOrderArgs()
+}
+
+func newOrderServiceDeleteOrderResult() interface{} {
+	return order.NewOrderServiceDeleteOrderResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -189,6 +214,16 @@ func (p *kClient) GetUserOrders(ctx context.Context, req *order.GetUserOrdersReq
 	_args.Req = req
 	var _result order.OrderServiceGetUserOrdersResult
 	if err = p.c.Call(ctx, "getUserOrders", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest) (r *order.DeleteOrderResponse, err error) {
+	var _args order.OrderServiceDeleteOrderArgs
+	_args.Req = req
+	var _result order.OrderServiceDeleteOrderResult
+	if err = p.c.Call(ctx, "deleteOrder", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
