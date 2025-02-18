@@ -15,6 +15,15 @@ type Base struct {
 	IsDeleted bool
 }
 
+// 定义订单状态常量
+type OrderStatus int
+
+const (
+	OrderStatusPending   OrderStatus = 1 // 待支付
+	OrderStatusPaid      OrderStatus = 2 // 已支付
+	OrderStatusCancelled OrderStatus = 3 // 已取消
+)
+
 // 贫血模型
 type User struct {
 	Base
@@ -82,6 +91,7 @@ type Order struct {
 	// OrderStatus
 	Status int         `gorm:"type:varchar(20);not null"` // 订单状态
 	Items  []OrderItem // 订单项
+	
 }
 
 type OrderItem struct {
