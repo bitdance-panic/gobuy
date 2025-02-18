@@ -102,8 +102,15 @@ func handleLogin(ctx context.Context, c *app.RequestContext) {
 
 // 获取用户信息
 func GetUserHandler(ctx context.Context, c *app.RequestContext) {
-	userID := c.Param("userid") // 获取 URL 参数中的 userid
-	if userID == "" {
+	req := rpc_user.GetUserReq{}
+	// 绑定请求体到 req 结构体
+	if err := c.Bind(&req); err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 校验 UserId
+	if req.UserId == "" {
 		c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"code": http.StatusBadRequest,
 			"msg":  "User ID is required",
@@ -112,8 +119,8 @@ func GetUserHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 user 服务的 GetUser RPC
-	req := rpc_user.GetUserReq{UserId: userID}
-	resp, err := userservice.GetUser(context.Background(), &req)
+	reqRPC := rpc_user.GetUserReq{UserId: req.UserId}
+	resp, err := userservice.GetUser(context.Background(), &reqRPC)
 
 	if err != nil || !resp.Success {
 		c.JSON(http.StatusNotFound, map[string]interface{}{
@@ -209,6 +216,82 @@ func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"code": http.StatusOK,
 		"msg":  "User deleted successfully",
+	})
+}
+
+// RegisterHandler 处理用户注册
+func RegisterHandler(ctx context.Context, c *app.RequestContext) {
+	var req rpc_user.RegisterReq
+
+	// 从请求体中绑定参数
+	if err := c.BindAndValidate(&req); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"code": http.StatusBadRequest,
+			"msg":  "Invalid input",
+		})
+		return
+	}
+
+	// 调用 user 服务的 Register RPC
+	resp, err := userservice.Register(context.Background(), &req)
+
+	// 注册接口的错误处理
+	if err != nil || resp.UserId <= 0 {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code": http.StatusInternalServerError,
+			"msg":  "Registration failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    http.StatusOK,
+		"message": resp.Message,
+		"data": map[string]interface{}{
+			"user_id": resp.UserId,
+		},
+	})
+}
+
+// GetUsersHandler 获取所有用户信息
+func GetUsersHandler(ctx context.Context, c *app.RequestContext) {
+	// 获取请求参数，默认页码为 1，默认每页大小为 10
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("page_size", "10")
+
+	// 将查询参数转换为整数类型
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1 // 设置默认值
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize <= 0 {
+		pageSize = 10 // 设置默认值
+	}
+
+	// 构造请求
+	req := &rpc_user.GetUsersReq{
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+	}
+
+	// 调用 user 服务的 GetUsers RPC
+	resp, err := userservice.GetUsers(context.Background(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"code":    http.StatusInternalServerError,
+			"message": "Failed to get users",
+			"data":    nil,
+		})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    http.StatusOK,
+		"message": resp.Message,
+		"data":    resp.Users,
 	})
 }
 
