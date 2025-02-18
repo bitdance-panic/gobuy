@@ -2357,6 +2357,7 @@ func (p *GetUserOrdersResponse) Field1DeepEqual(src []*Order) bool {
 	return true
 }
 
+
 type DeleteOrderRequest struct {
 	OrderId int32 `thrift:"order_id,1" frugal:"1,default,i32" json:"order_id"`
 }
@@ -3129,6 +3130,7 @@ func (p *OrderServiceUpdateOrderArgs) IsSetReq() bool {
 
 func (p *OrderServiceUpdateOrderArgs) Read(iprot thrift.TProtocol) (err error) {
 
+
 	var fieldTypeId thrift.TType
 	var fieldId int16
 
@@ -3183,6 +3185,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
+
 func (p *OrderServiceUpdateOrderArgs) ReadField1(iprot thrift.TProtocol) error {
 	_field := NewUpdateOrderRequest()
 	if err := _field.Read(iprot); err != nil {
@@ -3191,6 +3194,7 @@ func (p *OrderServiceUpdateOrderArgs) ReadField1(iprot thrift.TProtocol) error {
 	p.Req = _field
 	return nil
 }
+
 
 func (p *OrderServiceUpdateOrderArgs) Write(oprot thrift.TProtocol) (err error) {
 
@@ -3257,6 +3261,7 @@ func (p *OrderServiceUpdateOrderArgs) DeepEqual(ano *OrderServiceUpdateOrderArgs
 	}
 	return true
 }
+
 
 func (p *OrderServiceUpdateOrderArgs) Field1DeepEqual(src *UpdateOrderRequest) bool {
 
@@ -3353,6 +3358,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
+
 func (p *OrderServiceUpdateOrderResult) ReadField0(iprot thrift.TProtocol) error {
 	_field := NewUpdateOrderResponse()
 	if err := _field.Read(iprot); err != nil {
@@ -3361,6 +3367,7 @@ func (p *OrderServiceUpdateOrderResult) ReadField0(iprot thrift.TProtocol) error
 	p.Success = _field
 	return nil
 }
+
 
 func (p *OrderServiceUpdateOrderResult) Write(oprot thrift.TProtocol) (err error) {
 
@@ -3391,6 +3398,7 @@ WriteStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
 }
 
+
 func (p *OrderServiceUpdateOrderResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err = oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
@@ -3409,6 +3417,7 @@ WriteFieldBeginError:
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 0 end error: ", p), err)
 }
+
 
 func (p *OrderServiceUpdateOrderResult) String() string {
 	if p == nil {
@@ -3430,13 +3439,14 @@ func (p *OrderServiceUpdateOrderResult) DeepEqual(ano *OrderServiceUpdateOrderRe
 	return true
 }
 
-func (p *OrderServiceUpdateOrderResult) Field0DeepEqual(src *UpdateOrderResponse) bool {
 
+func (p *OrderServiceUpdateOrderResult) Field0DeepEqual(src *UpdateOrderResponse) bool {
 	if !p.Success.DeepEqual(src) {
 		return false
 	}
 	return true
 }
+
 
 type OrderServiceGetUserOrdersArgs struct {
 	Req *GetUserOrdersRequest `thrift:"req,1" frugal:"1,default,GetUserOrdersRequest" json:"req"`
@@ -3600,6 +3610,7 @@ func (p *OrderServiceGetUserOrdersArgs) DeepEqual(ano *OrderServiceGetUserOrders
 	return true
 }
 
+
 func (p *OrderServiceGetUserOrdersArgs) Field1DeepEqual(src *GetUserOrdersRequest) bool {
 
 	if !p.Req.DeepEqual(src) {
@@ -3640,7 +3651,6 @@ func (p *OrderServiceGetUserOrdersResult) IsSetSuccess() bool {
 }
 
 func (p *OrderServiceGetUserOrdersResult) Read(iprot thrift.TProtocol) (err error) {
-
 	var fieldTypeId thrift.TType
 	var fieldId int16
 
@@ -3772,6 +3782,7 @@ func (p *OrderServiceGetUserOrdersResult) DeepEqual(ano *OrderServiceGetUserOrde
 	return true
 }
 
+
 func (p *OrderServiceGetUserOrdersResult) Field0DeepEqual(src *GetUserOrdersResponse) bool {
 
 	if !p.Success.DeepEqual(src) {
@@ -3857,6 +3868,7 @@ ReadStructBeginError:
 ReadFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
 ReadFieldError:
+
 	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_OrderServiceDeleteOrderArgs[fieldId]), err)
 SkipFieldError:
 	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
@@ -3867,6 +3879,7 @@ ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
 }
 
+
 func (p *OrderServiceDeleteOrderArgs) ReadField1(iprot thrift.TProtocol) error {
 	_field := NewDeleteOrderRequest()
 	if err := _field.Read(iprot); err != nil {
@@ -3875,6 +3888,7 @@ func (p *OrderServiceDeleteOrderArgs) ReadField1(iprot thrift.TProtocol) error {
 	p.Req = _field
 	return nil
 }
+
 
 func (p *OrderServiceDeleteOrderArgs) Write(oprot thrift.TProtocol) (err error) {
 
@@ -3941,6 +3955,7 @@ func (p *OrderServiceDeleteOrderArgs) DeepEqual(ano *OrderServiceDeleteOrderArgs
 	}
 	return true
 }
+
 
 func (p *OrderServiceDeleteOrderArgs) Field1DeepEqual(src *DeleteOrderRequest) bool {
 

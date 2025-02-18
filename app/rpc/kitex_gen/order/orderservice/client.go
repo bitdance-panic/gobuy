@@ -61,7 +61,9 @@ func (p *kOrderServiceClient) GetUserOrders(ctx context.Context, req *order.GetU
 	return p.kClient.GetUserOrders(ctx, req)
 }
 
+
 func (p *kOrderServiceClient) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest, callOptions ...callopt.Option) (r *order.DeleteOrderResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.DeleteOrder(ctx, req)
 }
+

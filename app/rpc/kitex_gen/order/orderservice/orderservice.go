@@ -34,6 +34,7 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+
 	"deleteOrder": kitex.NewMethodInfo(
 		deleteOrderHandler,
 		newOrderServiceDeleteOrderArgs,
@@ -161,6 +162,7 @@ func newOrderServiceGetUserOrdersResult() interface{} {
 	return order.NewOrderServiceGetUserOrdersResult()
 }
 
+
 func deleteOrderHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*order.OrderServiceDeleteOrderArgs)
 	realResult := result.(*order.OrderServiceDeleteOrderResult)
@@ -219,6 +221,7 @@ func (p *kClient) GetUserOrders(ctx context.Context, req *order.GetUserOrdersReq
 	return _result.GetSuccess(), nil
 }
 
+
 func (p *kClient) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest) (r *order.DeleteOrderResponse, err error) {
 	var _args order.OrderServiceDeleteOrderArgs
 	_args.Req = req
@@ -228,3 +231,4 @@ func (p *kClient) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest
 	}
 	return _result.GetSuccess(), nil
 }
+

@@ -1,8 +1,10 @@
 package bll
 
 import (
+
 	//"context"
 	"errors"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/order/biz/dal"
 )
@@ -34,6 +36,7 @@ func (bll *OrderBLL) GetOrder(orderID int32) (*models.Order, error) {
 		return nil, err
 	}
 	if order == nil || order.IsDeleted {
+
 		return nil, errors.New("order not found")
 	}
 	return order, nil
@@ -51,6 +54,7 @@ func (bll *OrderBLL) GetOrdersByUserID(userID int32) ([]models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	//过滤掉已经软删除的订单
 	activeOrders := make([]models.Order, 0)
 	for _, order := range orders {
@@ -68,4 +72,5 @@ func (bll *OrderBLL) SoftDeleteOrder(orderID int32) error {
 		return err
 	}
 	return nil
+
 }
