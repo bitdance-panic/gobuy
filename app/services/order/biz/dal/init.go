@@ -22,7 +22,7 @@ func SaveOrder(order *models.Order) error {
 }
 func GetOrderByUserId(userId int32) ([]models.Order, error) {
 	var orders []models.Order
-	result := db.Where("user_id = ?", userId).Find(&orders)
+	result := db.Where("user_id = ? AND is_deleted = false", userId).Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -33,7 +33,7 @@ func GetOrderByUserId(userId int32) ([]models.Order, error) {
 }
 func GetOrderById(orderId int32) (*models.Order, error) {
 	var order models.Order
-	result := db.First(&order, "id = ?", orderId)
+	result := db.Where("id = ? AND is_deleted = false", orderId).First(&order)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -42,8 +42,8 @@ func GetOrderById(orderId int32) (*models.Order, error) {
 	}
 	return &order, nil
 }
-func UpdateOrderStatus(orderId int32, newStatus int) error {
-	var order *models.Order
+func UpdateOrderStatus(orderId int32, newStatus int) (*models.Order, error) {
+	var order models.Order
 	result := db.Model(&order).Where("id = ?", orderId).Update("status", newStatus)
 	if result.Error != nil {
 		return nil, result.Error
@@ -52,4 +52,28 @@ func UpdateOrderStatus(orderId int32, newStatus int) error {
 		return nil, gorm.ErrRecordNotFound
 	}
 	return &order, nil
+}
+
+/*
+*
+安装订单状态获取订单
+*/
+func GetOrdersByStatus(status models.OrderStatus) ([]models.Order, error) {
+	var orders []models.Order
+	result := db.Where("status = ?", status).Find(&orders)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return orders, nil
+}
+func SoftDeleteOrder(orderId int32) error {
+	//更新订单的IsDeleted字段为true
+	result := db.Where("order_id = ?", orderId).Update("is_deleted", true)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
