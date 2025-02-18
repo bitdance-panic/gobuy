@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order/orderservice"
@@ -15,12 +16,15 @@ import (
 	"strings"
 	"time"
 
+
 	"github.com/cloudwego/kitex/server"
 )
+
 
 type OrderServiceAdapter struct {
 	orderService *OrderServiceImpl
 }
+
 
 func kitexInit() (opts []server.Option) {
 	address := conf.GetConf().Kitex.Address
@@ -39,12 +43,15 @@ func main() {
 	dal.Init()
 	opts := kitexInit()
 
+
 	svr := orderservice.NewServer(new(OrderServiceImpl), opts...)
 	orderservice := &OrderServiceImpl{}
+
 	err := svr.Run()
 	if err != nil {
 		log.Println(err.Error())
 	}
+
 	//创建适配器
 	adapter := NewOrderServiceAdapter(orderservice)
 	//初始化Gin路由
@@ -177,4 +184,5 @@ func isOrderExpired(order models.Order) bool {
 	//假设订单创建后30分钟未支付则过期
 	expirationTime := order.CreatedAt.Add(30 * time.Minute)
 	return time.Now().After(expirationTime)
+
 }

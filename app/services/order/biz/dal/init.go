@@ -22,7 +22,9 @@ func SaveOrder(order *models.Order) error {
 }
 func GetOrderByUserId(userId int32) ([]models.Order, error) {
 	var orders []models.Order
+
 	result := db.Where("user_id = ? AND is_deleted = false", userId).Find(&orders)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -33,7 +35,9 @@ func GetOrderByUserId(userId int32) ([]models.Order, error) {
 }
 func GetOrderById(orderId int32) (*models.Order, error) {
 	var order models.Order
+
 	result := db.Where("id = ? AND is_deleted = false", orderId).First(&order)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -43,7 +47,9 @@ func GetOrderById(orderId int32) (*models.Order, error) {
 	return &order, nil
 }
 func UpdateOrderStatus(orderId int32, newStatus int) (*models.Order, error) {
+
 	var order models.Order
+
 	result := db.Model(&order).Where("id = ?", orderId).Update("status", newStatus)
 	if result.Error != nil {
 		return nil, result.Error
@@ -51,6 +57,7 @@ func UpdateOrderStatus(orderId int32, newStatus int) (*models.Order, error) {
 	if result.RowsAffected == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}
+
 	return &order, nil
 }
 
@@ -76,4 +83,5 @@ func SoftDeleteOrder(orderId int32) error {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+
 }

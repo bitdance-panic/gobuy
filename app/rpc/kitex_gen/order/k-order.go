@@ -1539,7 +1539,6 @@ func (p *GetUserOrdersResponse) field1Length() int {
 	}
 	return l
 }
-
 func (p *DeleteOrderRequest) FastRead(buf []byte) (int, error) {
 
 	var err error
@@ -2573,7 +2572,6 @@ func (p *OrderServiceDeleteOrderResult) field0Length() int {
 	}
 	return l
 }
-
 func (p *OrderServiceCreateOrderArgs) GetFirstArgument() interface{} {
 	return p.Req
 }
@@ -2597,7 +2595,6 @@ func (p *OrderServiceGetUserOrdersArgs) GetFirstArgument() interface{} {
 func (p *OrderServiceGetUserOrdersResult) GetResult() interface{} {
 	return p.Success
 }
-
 func (p *OrderServiceDeleteOrderArgs) GetFirstArgument() interface{} {
 	return p.Req
 }

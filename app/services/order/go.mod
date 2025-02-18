@@ -9,6 +9,7 @@ replace (
 	github.com/bitdance-panic/gobuy/app/utils => ../../utils
 )
 
+
 require (
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-00010101000000-000000000000
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-00010101000000-000000000000
@@ -80,3 +81,4 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
