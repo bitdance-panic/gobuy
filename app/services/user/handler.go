@@ -1,5 +1,6 @@
 package main
 
+//kitex -module github.com/bitdance-panic/gobuy/app/rpc -service user idl/user.thrift
 import (
 	"context"
 	"strconv"
@@ -20,7 +21,7 @@ type UserServiceImpl struct{}
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *rpc_user.RegisterReq) (resp *rpc_user.RegisterResp, err error) {
 	// TODO: Your code here...
-	return
+	return bll.Register(ctx, req)
 }
 
 // Login implements the UserServiceImpl interface.
@@ -37,6 +38,10 @@ func (s *UserServiceImpl) GetUser(ctx context.Context, req *rpc_user.GetUserReq)
 		return &rpc_user.GetUserResp{Success: false}, nil
 	}
 	return bll.GetUser(ctx, userID)
+}
+
+func (s *UserServiceImpl) GetUsers(ctx context.Context, req *rpc_user.GetUsersReq) (*rpc_user.GetUsersResp, error) {
+	return bll.GetUsers(ctx, req)
 }
 
 // 更新用户信息

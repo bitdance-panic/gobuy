@@ -74,7 +74,9 @@ func main() {
 func registerRoutes(h *server.Hertz) {
 	// h.GET("/ping", handlePong)
 	// 用户相关路由
-	h.POST("/login", middleware.AuthMiddleware.LoginHandler) // 用户登录
+	h.POST("/login", middleware.AuthMiddleware.LoginHandler)   // 用户登录
+	h.POST("/logout", middleware.AuthMiddleware.LogoutHandler) // 用户登录
+	h.POST("/register", RegisterHandler)
 
 	adminGroup := h.Group("/auth")
 	{
@@ -93,8 +95,12 @@ func registerRoutes(h *server.Hertz) {
 	user := h.Group("/user")
 	{
 		user.PUT("/:userid", UpdateUserHandler)
-		user.GET("/:userid", GetUserHandler)
+		user.GET("/get_user", GetUserHandler)
 		user.POST("/:userid", DeleteUserHandler)
+	}
+	admin := h.Group("/admin")
+	{
+		admin.GET("/users", GetUsersHandler)
 	}
 	// // 受保护的业务 API
 	// authGroup := h.Group("/api")
