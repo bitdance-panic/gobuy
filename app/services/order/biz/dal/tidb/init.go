@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/bitdance-panic/gobuy/app/models"
+
 	"github.com/bitdance-panic/gobuy/app/services/order/conf"
 	driver "github.com/go-sql-driver/mysql"
 
@@ -40,6 +40,6 @@ func Init() {
 	// 	panic(err)
 	// }
 
-	// 第一次连接后就关闭
-	models.AutoMigrate(DB)
+	//models.AutoMigrate(DB);第一次连接后就关闭
+
 }

@@ -14,6 +14,7 @@ type Client interface {
 	CreateOrder(ctx context.Context, req *order.CreateOrderRequest, callOptions ...callopt.Option) (r *order.CreateOrderResponse, err error)
 	UpdateOrder(ctx context.Context, req *order.UpdateOrderRequest, callOptions ...callopt.Option) (r *order.UpdateOrderResponse, err error)
 	GetUserOrders(ctx context.Context, req *order.GetUserOrdersRequest, callOptions ...callopt.Option) (r *order.GetUserOrdersResponse, err error)
+	DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest, callOptions ...callopt.Option) (r *order.DeleteOrderResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -59,3 +60,10 @@ func (p *kOrderServiceClient) GetUserOrders(ctx context.Context, req *order.GetU
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetUserOrders(ctx, req)
 }
+
+
+func (p *kOrderServiceClient) DeleteOrder(ctx context.Context, req *order.DeleteOrderRequest, callOptions ...callopt.Option) (r *order.DeleteOrderResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.DeleteOrder(ctx, req)
+}
+
