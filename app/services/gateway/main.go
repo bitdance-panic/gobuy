@@ -15,6 +15,8 @@ import (
 	paymentservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment/paymentservice"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
@@ -53,9 +55,14 @@ func main() {
 	dal.Init()
 
 	// 初始化Casbin
-	// if err := casbin.InitCasbin(tidb.DB); err != nil {
-	// 	hlog.Fatalf("Casbin初始化失败: %v", err)
-	// }
+	if err := casbin.InitCasbin(tidb.DB); err != nil {
+		hlog.Fatalf("Casbin初始化失败: %v", err)
+	}
+
+	// 初始化RBAC基础数据
+	if err := casbin.InitRBACData(tidb.DB, casbin.Enforcer); err != nil {
+		hlog.Fatalf("RBAC数据初始化失败: %v", err)
+	}
 
 	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
@@ -87,9 +94,13 @@ func main() {
 	// 初始化中间件
 	middleware.InitAuth()
 
+	// h.Use(middleware.WhiteListMiddleware())
+
 	// 中间件链
 	h.Use(
-		// middleware.CasbinMiddleware(), // 权限中间件
+		middleware.WhiteListMiddleware(),
+		conditionalAuthMiddleware(),
+		middleware.CasbinMiddleware(), // 权限检查
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"*"}, // 允许所有来源
 			AllowMethods:     []string{"*"}, // 允许所有方法
@@ -113,24 +124,20 @@ func main() {
 }
 
 func registerRoutes(h *server.Hertz) {
-
-	// 用户相关路由
-	h.POST("/login", middleware.AuthMiddleware.LoginHandler) // 用户登录
-
 	// 用户路由
-	// user := h.Group("/")
-	// user.Use(
-	// 	middleware.WhiteListMiddleware(),
-	// 	conditionalAuthMiddleware())
-	// {
-	// 	user.POST("/login", middleware.AuthMiddleware.LoginHandler)
-	// }
+	user := h.Group("/")
+	{
+		user.POST("/login", middleware.AuthMiddleware.LoginHandler)
+		user.POST("/get_user", GetUserHandler)
+		user.POST("/update_user", UpdateUserHandler)
+	}
 
 	// 需要认证的路由
 	adminGroup := h.Group("/auth")
 	adminGroup.Use(middleware.RBACMiddleware("admin"))
 	{
-		adminGroup.POST("/refresh", RefreshTokenHandler) // 令牌刷新
+		adminGroup.POST("/delete_user", DeleteUserHandler)
+		adminGroup.POST("/refresh", RefreshTokenHandler)
 	}
 
 	product := h.Group("/product")
@@ -142,39 +149,14 @@ func registerRoutes(h *server.Hertz) {
 		product.POST("", handleProductPost)
 	}
 
-	user := h.Group("/user")
-	{
-		user.PUT("/:userid", UpdateUserHandler)
-		user.GET("/:userid", GetUserHandler)
-		user.POST("/:userid", DeleteUserHandler)
-	}
-
 	// 处理与支付相关的路由
 	payment := h.Group("/payment")
 	{
 		payment.POST("/create", handleCreatePayment)
-		payment.GET("/:paymentId", handleGetPayment)
-		payment.PUT("/:paymentId", handleUpdatePayment)
-		payment.DELETE("/:paymentId", handleDeletePayment)
+		payment.POST("/get", handleGetPayment)
+		payment.POST("/update", handleUpdatePayment)
+		payment.POST("/delete", handleDeletePayment)
 	}
-
-	// // 受保护的业务 API
-	// authGroup := h.Group("/api")
-	// authGroup.Use(middleware.AuthMiddleware.MiddlewareFunc()) // JWT 认证
-	// {
-	// 	authGroup.GET("/profile", handler.ProfileHandler) // 获取用户信息
-	// 	authGroup.POST("/update", handler.UpdateProfile)  // 更新用户信息
-	// }
-}
-
-func registerSwagger(h *server.Hertz, addr string) {
-	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", addr))
-	h.GET("/swagger/*any",
-		swagger.WrapHandler(swaggerFiles.Handler,
-			swagger.DefaultModelsExpandDepth(-1), // 隐藏模型定义
-			url,
-		),
-	)
 }
 
 func conditionalAuthMiddleware() app.HandlerFunc {
@@ -185,4 +167,14 @@ func conditionalAuthMiddleware() app.HandlerFunc {
 		}
 		middleware.AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
 	}
+}
+
+func registerSwagger(h *server.Hertz, addr string) {
+	url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", addr))
+	h.GET("/swagger/*any",
+		swagger.WrapHandler(swaggerFiles.Handler,
+			swagger.DefaultModelsExpandDepth(-1), // 隐藏模型定义
+			url,
+		),
+	)
 }

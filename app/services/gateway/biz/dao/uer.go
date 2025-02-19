@@ -2,8 +2,10 @@ package dao
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/bitdance-panic/gobuy/app/models"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"gorm.io/gorm"
 )
 
@@ -24,4 +26,41 @@ func GetRefreshTokenByUserID(db *gorm.DB, userID int) (string, error) {
 		return "", errors.New("refresh token not found")
 	}
 	return user.RefreshToken, nil
+}
+
+// 添加用户角色并同步Casbin策略
+func AddUserRole(db *gorm.DB, userID uint, roleID uint) error {
+	// 查询角色信息
+	var role models.Role
+	if err := db.First(&role, roleID).Error; err != nil {
+		return err
+	}
+
+	// 添加用户角色关联
+	userRole := models.UserRole{UserID: userID, RoleID: uint(role.Base.ID)}
+	if err := db.Create(&userRole).Error; err != nil {
+		return err
+	}
+
+	// 同步到Casbin策略
+	_, err := casbin.Enforcer.AddGroupingPolicy(fmt.Sprintf("%d", userID), role.Name)
+	return err
+}
+
+// 删除用户角色并同步Casbin策略
+func DeleteUserRole(db *gorm.DB, userID uint, roleID uint) error {
+	// 查询角色信息
+	var role models.Role
+	if err := db.First(&role, roleID).Error; err != nil {
+		return err
+	}
+
+	// 删除用户角色关联
+	if err := db.Where("user_id = ? AND role_id = ?", userID, roleID).Delete(&models.UserRole{}).Error; err != nil {
+		return err
+	}
+
+	// 同步到Casbin策略
+	_, err := casbin.Enforcer.RemoveGroupingPolicy(fmt.Sprintf("%d", userID), role.Name)
+	return err
 }
