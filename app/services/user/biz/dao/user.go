@@ -9,28 +9,53 @@ import (
 )
 
 type User = models.User
-type Base = models.Base
 
-// func GetByID(db *gorm.DB, ctx context.Context, userID string) (*User, error) {
-// 	err = db.WithContext(ctx).Model(&User{}).Where(&User{ID: userID}).First(&user).Error
-// 	return
-// }
+//type Base = models.Base
 
-func GetUserByIDAndPass(db *gorm.DB, ctx context.Context, userID int, password string) (*User, error) {
-	userPO := &User{}
-	err := db.WithContext(ctx).
-		Model(&User{}).
-		Where(&User{
-			Base: Base{
-				ID: userID,
-			},
-			PasswordHashed: password,
-		}).
-		First(userPO).
-		Error
+func RegisterUser(db *gorm.DB, ctx context.Context, username, password, email string) (*User, error) {
+	hashedPassword := password
 
-	return userPO, err
+	user := &User{
+		Username:       username,
+		PasswordHashed: hashedPassword,
+		Email:          email,
+	}
+
+	// 插入新用户
+	err := db.WithContext(ctx).Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
+
+// GetUsers 查询所有用户信息，并进行分页
+func GetUsers(db *gorm.DB, ctx context.Context, page int, pageSize int) ([]User, error) {
+	var users []User
+	offset := (page - 1) * pageSize
+	err := db.WithContext(ctx).Limit(pageSize).Offset(offset).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+//func GetUserByIDAndPass(db *gorm.DB, ctx context.Context, userID int, password string) (*User, error) {
+//	userPO := &User{}
+//	err := db.WithContext(ctx).
+//		Model(&User{}).
+//		Where(&User{
+//			Base: Base{
+//				ID: userID,
+//			},
+//			PasswordHashed: password,
+//		}).
+//		First(userPO).
+//		Error
+//
+//	return userPO, err
+//}
 
 func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, password string) (*User, error) {
 	userPO := &User{}

@@ -48,6 +48,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"GetUsers": kitex.NewMethodInfo(
+		getUsersHandler,
+		newUserServiceGetUsersArgs,
+		newUserServiceGetUsersResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -204,6 +211,24 @@ func newUserServiceDeleteUserResult() interface{} {
 	return user.NewUserServiceDeleteUserResult()
 }
 
+func getUsersHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceGetUsersArgs)
+	realResult := result.(*user.UserServiceGetUsersResult)
+	success, err := handler.(user.UserService).GetUsers(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceGetUsersArgs() interface{} {
+	return user.NewUserServiceGetUsersArgs()
+}
+
+func newUserServiceGetUsersResult() interface{} {
+	return user.NewUserServiceGetUsersResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -259,6 +284,16 @@ func (p *kClient) DeleteUser(ctx context.Context, req *user.DeleteUserReq) (r *u
 	_args.Req = req
 	var _result user.UserServiceDeleteUserResult
 	if err = p.c.Call(ctx, "DeleteUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetUsers(ctx context.Context, req *user.GetUsersReq) (r *user.GetUsersResp, err error) {
+	var _args user.UserServiceGetUsersArgs
+	_args.Req = req
+	var _result user.UserServiceGetUsersResult
+	if err = p.c.Call(ctx, "GetUsers", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

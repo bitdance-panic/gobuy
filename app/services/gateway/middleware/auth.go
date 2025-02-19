@@ -73,12 +73,12 @@ func initJWTMiddleware() {
 		// Authorizator: authorize,
 		Unauthorized: unauthorizedHandler,
 		// 登出的响应
-		// 登出可能会自动删除token
-		// LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
-		// 	c.JSON(http.StatusOK, map[string]interface{}{
-		// 		"code": http.StatusOK,
-		// 	})
-		// },
+		// 登出会自动删除token
+		LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
+			c.JSON(http.StatusOK, map[string]interface{}{
+				"code": http.StatusOK,
+			})
+		},
 		RefreshResponse: refreshResponse,
 		IdentityKey:     identityKey,
 		IdentityHandler: identityHandler,
