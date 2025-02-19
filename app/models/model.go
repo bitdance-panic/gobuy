@@ -45,8 +45,10 @@ type Role struct {
 
 type Permission struct {
 	Base
-	Name  string `gorm:"unique;not null"`            // 权限名称，例如 "create_user", "delete_user"
-	Roles []Role `gorm:"many2many:role_permission;"` // 权限和角色的多对多关系
+	Name   string `gorm:"unique;not null"`            // 权限名称，例如 "create_user", "delete_user"
+	Path   string `gorm:"not null"`                   // 资源路径，支持通配符如 /product/*
+	Method string `gorm:"not null"`                   // 请求方法，支持正则如 GET|POST
+	Roles  []Role `gorm:"many2many:role_permission;"` // 权限和角色的多对多关系
 }
 
 type UserRole struct {
@@ -91,7 +93,6 @@ type Order struct {
 	// OrderStatus
 	Status int         `gorm:"type:varchar(20);not null"` // 订单状态
 	Items  []OrderItem // 订单项
-	
 }
 
 type OrderItem struct {
