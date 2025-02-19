@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"net/http"
+	"strconv"
+
+
 	"github.com/bitdance-panic/gobuy/app/models"
 
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
@@ -17,6 +21,17 @@ func init() {
 }
 
 type OrderServiceImpl struct{}
+
+
+func (s *OrderServiceImpl) DeleteOrder(ctx context.Context, req *rpc_order.DeleteOrderRequest) (r *rpc_order.DeleteOrderResponse, err error) {
+	//TODO implement me
+	orderBll.SoftDeleteOrder(req.GetOrderId())
+	return &rpc_order.DeleteOrderResponse{
+		Success: true,
+		Message: "success",
+	}, nil
+}
+
 
 func (s *OrderServiceImpl) CreateOrder(ctx context.Context, req *rpc_order.CreateOrderRequest) (*rpc_order.CreateOrderResponse, error) {
 	//调用业务逻辑层创建订单
@@ -92,6 +107,21 @@ func (s *OrderServiceImpl) UpdateOrder(ctx context.Context, req *rpc_order.Updat
 		Order: rpcOrder,
 	}, nil
 }
+
+func (s *OrderServiceImpl) SoftDeleteOrder(ctx context.Context) int {
+	orderIdStr := ctx.Value("orderId").(string)
+	orderId, err := strconv.Atoi(orderIdStr)
+	if err != nil {
+		return 0
+	}
+	err = orderBll.SoftDeleteOrder(int32(orderId))
+	if err != nil {
+		return 0
+	}
+	return http.StatusOK
+}
+
+
 func ConvertOrderItems(items []*rpc_order.OrderItem) []models.OrderItem {
 	var orderItems []models.OrderItem
 	for _, item := range items {

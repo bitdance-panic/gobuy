@@ -2,9 +2,7 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
@@ -37,23 +35,12 @@ const (
 
 var AuthMiddleware *jwt.HertzJWTMiddleware
 
-// WhiteList      = gutils.NewSet()
 // BlackList      = gutils.NewSyncSet()
 
 func InitAuth() {
-	// cfg := conf.GetConf()
-	// 初始化白名单
-	// initWhiteList(cfg.Auth.WhiteList)
-
 	// JWT中间件配置
 	initJWTMiddleware()
 }
-
-// func initWhiteList(paths []string) {
-// 	for _, path := range paths {
-// 		WhiteList.Add(path)
-// 	}
-// }
 
 func initJWTMiddleware() {
 	var err error
@@ -75,11 +62,8 @@ func initJWTMiddleware() {
 		DisabledAbort: false,
 
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			str := fmt.Sprintf("%v", data)
-			userID, err := strconv.Atoi(str)
-			if err != nil {
-				return jwt.MapClaims{}
-			}
+			userID := int(data.(int32))
+
 			return jwt.MapClaims{
 				identityKey: userID,
 			}
@@ -161,18 +145,6 @@ func loginResponse(ctx context.Context, c *app.RequestContext, code int, token s
 // 		return false
 // 	}
 
-// 	// 获取请求信息
-// 	method := string(c.Request.Method())
-// 	path := string(c.Request.Path())
-
-// 	// 检查权限
-// 	return gutils.Enforcer.Enforce(
-// 		fmt.Sprint(uid),
-// 		path,
-// 		method,
-// 	)
-// }
-
 // refreshResponse 刷新Token响应
 func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
 	// 生成新的RefreshToken
@@ -207,7 +179,7 @@ func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token
 // 身份处理
 func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
 	claims := jwt.ExtractClaims(ctx, c)
-	return claims["uid"]
+	return claims["roles"]
 }
 
 // 统一错误处理

@@ -1,6 +1,8 @@
 package bll
 
 import (
+
+	//"context"
 	"errors"
 
 	"github.com/bitdance-panic/gobuy/app/models"
@@ -33,7 +35,8 @@ func (bll *OrderBLL) GetOrder(orderID int32) (*models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	if order == nil {
+	if order == nil || order.IsDeleted {
+
 		return nil, errors.New("order not found")
 	}
 	return order, nil
@@ -51,5 +54,23 @@ func (bll *OrderBLL) GetOrdersByUserID(userID int32) ([]models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	return orders, nil
+
+	//过滤掉已经软删除的订单
+	activeOrders := make([]models.Order, 0)
+	for _, order := range orders {
+		if !order.IsDeleted {
+			activeOrders = append(activeOrders, order)
+		}
+	}
+	return activeOrders, nil
+}
+
+// 软删除订单
+func (bll *OrderBLL) SoftDeleteOrder(orderID int32) error {
+	err := dal.SoftDeleteOrder(orderID)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

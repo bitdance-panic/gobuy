@@ -3,13 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
+	rpc_payment "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment"
 	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
-
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
@@ -19,6 +18,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/cloudwego/kitex/client/callopt"
+	"github.com/hertz-contrib/jwt"
 )
 
 func handlePong(ctx context.Context, c *app.RequestContext) {
@@ -31,6 +31,29 @@ func handlePong(ctx context.Context, c *app.RequestContext) {
 // @Accept application/json
 // @Produce application/json
 // @Router /login [get]
+
+// 封禁用户
+func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.DeleteUserReq{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("User deletion failed for user id: %s, validation error: %v", req.UserId, err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	resp, err := userservice.DeleteUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	if resp.Success {
+		utils.Success(c, utils.H{"userID": req.UserId})
+	} else {
+		utils.FailFull(c, consts.StatusInternalServerError, "User deletion failed", nil)
+	}
+}
 
 // RefreshTokenHandler 处理 Token 续期
 func RefreshTokenHandler(ctx context.Context, c *app.RequestContext) {
@@ -50,8 +73,7 @@ func RefreshTokenHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// access_token 过期，提取 uid
-	str := fmt.Sprintf("%v", claims["uid"])
-	userID, err := strconv.Atoi(str)
+	userID := int(claims["uid"].(float64))
 
 	// 查询数据库中的 refresh_token
 	storedRefreshToken, err := dao.GetRefreshTokenByUserID(tidb.DB, userID)
@@ -78,221 +100,61 @@ func RefreshTokenHandler(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-func handleLogin(ctx context.Context, c *app.RequestContext) {
-	req := rpc_user.LoginReq{}
+// 获取用户信息
+func GetUserHandler(ctx context.Context, c *app.RequestContext) {
+	claims := jwt.ExtractClaims(ctx, c)
+	// userID := int(claims["uid"].(float64))
+	userID := fmt.Sprintf("%v", claims["uid"].(float64))
+	req := rpc_user.GetUserReq{UserId: userID}
 
-	// 从请求体中绑定参数并验证
-	if err := c.BindAndValidate(&req); err != nil {
-		hlog.Warnf("Login failed for email: %s, validation error: %v", req.Email, err)
+	resp, err := userservice.GetUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	resp, err := userservice.Login(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if resp.Success {
+		utils.Success(c, utils.H{
+			"userID":   resp.UserId,
+			"email":    resp.Email,
+			"username": resp.Username,
+		})
+	} else {
+		utils.FailFull(c, consts.StatusInternalServerError, "Get user failed", nil)
+	}
+}
+
+// 更新用户信息
+func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
+	claims := jwt.ExtractClaims(ctx, c)
+	// userID := int(claims["uid"].(float64))
+	userID := fmt.Sprintf("%v", claims["uid"].(float64))
+
+	req := rpc_user.UpdateUserReq{UserId: userID}
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("User update failed for user id: %s, validation error: %v", req.UserId, err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// // 赋值到 `req`
+	// req.UserId = userID
+	// req.Email = &email
+	// req.Username = &username
+
+	// // 赋值 user_id
+	// req.UserId = userID
+
+	resp, err := userservice.UpdateUser(context.Background(), &req)
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 	if resp.Success {
-		utils.Success(c, utils.H{"userID": resp.UserId})
+		utils.Success(c, utils.H{"userID": req.UserId})
 	} else {
-		utils.FailFull(c, consts.StatusUnauthorized, "Login failed. Invalid email or password.", nil)
+		utils.FailFull(c, consts.StatusInternalServerError, "User update failed", nil)
 	}
-}
-
-// 获取用户信息
-func GetUserHandler(ctx context.Context, c *app.RequestContext) {
-	req := rpc_user.GetUserReq{}
-	// 绑定请求体到 req 结构体
-	if err := c.Bind(&req); err != nil {
-		utils.Fail(c, err.Error())
-		return
-	}
-
-	// 校验 UserId
-	if req.UserId == "" {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"code": http.StatusBadRequest,
-			"msg":  "User ID is required",
-		})
-		return
-	}
-
-	// 调用 user 服务的 GetUser RPC
-	reqRPC := rpc_user.GetUserReq{UserId: req.UserId}
-	resp, err := userservice.GetUser(context.Background(), &reqRPC)
-
-	if err != nil || !resp.Success {
-		c.JSON(http.StatusNotFound, map[string]interface{}{
-			"code": http.StatusNotFound,
-			"msg":  "User not found",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":     http.StatusOK,
-		"msg":      "User found",
-		"user_id":  resp.UserId,
-		"email":    resp.Email,
-		"username": resp.Username,
-	})
-}
-
-// 用户信息更新
-func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
-	userID := c.Param("userid") // 获取 URL 参数中的 userid
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"code": http.StatusBadRequest,
-			"msg":  "User ID is required",
-		})
-		return
-	}
-
-	var req rpc_user.UpdateUserReq
-	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"code": http.StatusBadRequest,
-			"msg":  "Invalid input",
-		})
-		return
-	}
-
-	// 解析 Query 参数
-	email := c.Query("email")
-	username := c.Query("username")
-
-	// 赋值到 `req`
-	req.UserId = userID
-	req.Email = &email
-	req.Username = &username
-
-	// 赋值 user_id
-	req.UserId = userID
-
-	// 调用 user 服务的 UpdateUser RPC
-	resp, err := userservice.UpdateUser(context.Background(), &req)
-
-	if err != nil || !resp.Success {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code": http.StatusInternalServerError,
-			"msg":  "Update failed",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code": http.StatusOK,
-		"msg":  "User updated successfully",
-	})
-}
-
-// 封禁用户
-func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
-	userID := c.Param("userid") // 获取 URL 参数中的 userid
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"code": http.StatusBadRequest,
-			"msg":  "User ID is required",
-		})
-		return
-	}
-
-	// 构造请求
-	req := rpc_user.DeleteUserReq{UserId: userID}
-
-	// 调用 user 服务的 DeleteUser RPC
-	resp, err := userservice.DeleteUser(context.Background(), &req)
-
-	if err != nil || !resp.Success {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code": http.StatusInternalServerError,
-			"msg":  "User deletion failed",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code": http.StatusOK,
-		"msg":  "User deleted successfully",
-	})
-}
-
-// RegisterHandler 处理用户注册
-func RegisterHandler(ctx context.Context, c *app.RequestContext) {
-	var req rpc_user.RegisterReq
-
-	// 从请求体中绑定参数
-	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"code": http.StatusBadRequest,
-			"msg":  "Invalid input",
-		})
-		return
-	}
-
-	// 调用 user 服务的 Register RPC
-	resp, err := userservice.Register(context.Background(), &req)
-
-	// 注册接口的错误处理
-	if err != nil || resp.UserId <= 0 {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code": http.StatusInternalServerError,
-			"msg":  "Registration failed",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    http.StatusOK,
-		"message": resp.Message,
-		"data": map[string]interface{}{
-			"user_id": resp.UserId,
-		},
-	})
-}
-
-// GetUsersHandler 获取所有用户信息
-func GetUsersHandler(ctx context.Context, c *app.RequestContext) {
-	// 获取请求参数，默认页码为 1，默认每页大小为 10
-	pageStr := c.DefaultQuery("page", "1")
-	pageSizeStr := c.DefaultQuery("page_size", "10")
-
-	// 将查询参数转换为整数类型
-	page, err := strconv.Atoi(pageStr)
-	if err != nil || page <= 0 {
-		page = 1 // 设置默认值
-	}
-
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil || pageSize <= 0 {
-		pageSize = 10 // 设置默认值
-	}
-
-	// 构造请求
-	req := &rpc_user.GetUsersReq{
-		Page:     int32(page),
-		PageSize: int32(pageSize),
-	}
-
-	// 调用 user 服务的 GetUsers RPC
-	resp, err := userservice.GetUsers(context.Background(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code":    http.StatusInternalServerError,
-			"message": "Failed to get users",
-			"data":    nil,
-		})
-		return
-	}
-
-	// 返回成功响应
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    http.StatusOK,
-		"message": resp.Message,
-		"data":    resp.Users,
-	})
 }
 
 // handleProductPut 这是更新商品
@@ -410,4 +272,104 @@ func handleProductSearch(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	utils.Success(c, utils.H{"products": resp.Products})
+}
+
+// handleCreatePayment 创建支付记录
+// @Summary 创建支付记录
+// @Description 创建一个新的支付记录并返回相关信息
+// @Accept application/json
+// @Produce application/json
+// @Router /payment [post]
+func handleCreatePayment(ctx context.Context, c *app.RequestContext) {
+	req := rpc_payment.CreatePaymentRequest{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("CreatePayment failed , validation error: %v", err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	resp, err := paymentservice.CreatePayment(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.FailFull(c, consts.StatusInternalServerError, fmt.Sprintf("Create payment failed: %v", err.Error()), nil)
+		return
+	} else {
+		utils.Success(c, utils.H{"payment": resp.Payment})
+	}
+}
+
+// handleGetPayment 获取支付记录
+// @Summary 获取支付记录
+// @Description 根据支付记录ID获取支付记录详情
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [get]
+func handleGetPayment(ctx context.Context, c *app.RequestContext) {
+	req := rpc_payment.GetPaymentRequest{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("GetPayment failed , validation error: %v", err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	resp, err := paymentservice.GetPayment(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.FailFull(c, consts.StatusNotFound, fmt.Sprintf("Payment not found: %v", err.Error()), nil)
+		return
+	} else {
+		utils.Success(c, utils.H{"payment": resp.Payment})
+	}
+}
+
+// handleUpdatePayment 更新支付记录
+// @Summary 更新支付记录
+// @Description 更新指定支付记录的状态或其他信息
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [put]
+func handleUpdatePayment(ctx context.Context, c *app.RequestContext) {
+	req := rpc_payment.UpdatePaymentRequest{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("UpdatePayment failed , validation error: %v", err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	resp, err := paymentservice.UpdatePayment(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.FailFull(c, consts.StatusInternalServerError, fmt.Sprintf("UpdatePayment failed: %v", err.Error()), nil)
+		return
+	} else {
+		utils.Success(c, utils.H{"payment": resp.Payment})
+	}
+}
+
+// handleDeletePayment 删除支付记录
+// @Summary 删除支付记录
+// @Description 删除指定ID的支付记录
+// @Accept application/json
+// @Produce application/json
+// @Router /payment/{id} [delete]
+func handleDeletePayment(ctx context.Context, c *app.RequestContext) {
+	req := rpc_payment.DeletePaymentRequest{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("DeletePayment failed , validation error: %v", err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	_, err := paymentservice.DeletePayment(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.FailFull(c, consts.StatusInternalServerError, fmt.Sprintf("DeletePayment failed: %v", err.Error()), nil)
+		return
+	} else {
+		utils.Success(c, utils.H{"payment_id": req.PaymentId})
+	}
 }

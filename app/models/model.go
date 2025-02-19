@@ -15,6 +15,15 @@ type Base struct {
 	IsDeleted bool
 }
 
+// 定义订单状态常量
+type OrderStatus int
+
+const (
+	OrderStatusPending   OrderStatus = 1 // 待支付
+	OrderStatusPaid      OrderStatus = 2 // 已支付
+	OrderStatusCancelled OrderStatus = 3 // 已取消
+)
+
 // 贫血模型
 type User struct {
 	Base
@@ -36,8 +45,10 @@ type Role struct {
 
 type Permission struct {
 	Base
-	Name  string `gorm:"unique;not null"`            // 权限名称，例如 "create_user", "delete_user"
-	Roles []Role `gorm:"many2many:role_permission;"` // 权限和角色的多对多关系
+	Name   string `gorm:"unique;not null"`            // 权限名称，例如 "create_user", "delete_user"
+	Path   string `gorm:"not null"`                   // 资源路径，支持通配符如 /product/*
+	Method string `gorm:"not null"`                   // 请求方法，支持正则如 GET|POST
+	Roles  []Role `gorm:"many2many:role_permission;"` // 权限和角色的多对多关系
 }
 
 type UserRole struct {
@@ -94,6 +105,16 @@ type OrderItem struct {
 	ProductName string
 }
 
+// 新增一个 Payment 模型
+
+type Payment struct {
+	Base
+	UserID  uint    // 对应用户ID
+	OrderID uint    // 对应订单ID
+	Amount  float64 // 支付金额
+	Status  int     // 支付状态(可用枚举或 int 表示)
+}
+
 func (User) TableName() string {
 	return "user"
 }
@@ -134,6 +155,10 @@ func (Product) TableName() string {
 	return "product"
 }
 
+func (Payment) TableName() string {
+	return "payment"
+}
+
 // 调用这个来自动调整表结构
 func AutoMigrate(db *gorm.DB) {
 	if os.Getenv("GO_ENV") != "production" {
@@ -150,6 +175,7 @@ func AutoMigrate(db *gorm.DB) {
 			&Order{},
 			&OrderItem{},
 			&Product{},
+			&Payment{}, // 新增的 Payment 模型
 		)
 	}
 }
