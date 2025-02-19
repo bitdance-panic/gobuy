@@ -1,10 +1,11 @@
+!.gitkeep
+.DS_Store
+/.idea
+/.vscode
+
 go.sum
 go.work.sum
 .env
-
 conf.y*ml
-.vscode
 
 *.pem
-
-.idea
