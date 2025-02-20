@@ -1,18 +1,29 @@
 namespace go user
 
 // 定义请求和响应的结构体
+//struct RegisterReq {
+//    1: string email
+//    2: string password
+//    3: string confirm_password
+//}
+//
+//struct RegisterResp {
+//    1: i32 user_id
+//}
 struct RegisterReq {
     1: string email
     2: string password
     3: string confirm_password
+    4: string username
 }
 
 struct RegisterResp {
     1: i32 user_id
+    2: string message
 }
 
 struct LoginReq {
-    1: string email
+    1: string username
     2: string password
 }
 
@@ -31,6 +42,24 @@ struct GetUserResp {
     2: string user_id
     3: string email
     4: string username
+}
+
+struct User {
+    1: i32 user_id
+    2: string username
+    3: string email
+    4: string refresh_token
+}
+
+struct GetUsersReq {
+    1: i32 page
+    2: i32 page_size
+}
+
+
+struct GetUsersResp {
+    1: list<User> users
+    2: string message
 }
 
 struct UpdateUserReq {
@@ -59,4 +88,5 @@ service UserService {
     GetUserResp GetUser(1: GetUserReq req)
     UpdateUserResp UpdateUser(1: UpdateUserReq req)
     DeleteUserResp DeleteUser(1: DeleteUserReq req)
+    GetUsersResp GetUsers(1: GetUsersReq req)
 }
