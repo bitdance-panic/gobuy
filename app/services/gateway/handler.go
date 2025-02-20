@@ -25,12 +25,25 @@ func handlePong(ctx context.Context, c *app.RequestContext) {
 	utils.Success(c, utils.H{"message": "pong"})
 }
 
-// handleLogin 这是一个handler
-// @Summary 这是一段Summary
-// @Description 这是一段Description
-// @Accept application/json
-// @Produce application/json
-// @Router /login [get]
+// 用户注册
+func RegisterHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.RegisterReq{}
+
+	// 从请求体中绑定参数并验证
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("User register failed, validation error: %v", err)
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	resp, err := userservice.Register(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	} else {
+		utils.Success(c, utils.H{"userID": resp.UserId})
+	}
+}
 
 // 封禁用户
 func DeleteUserHandler(ctx context.Context, c *app.RequestContext) {
@@ -136,14 +149,6 @@ func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-
-	// // 赋值到 `req`
-	// req.UserId = userID
-	// req.Email = &email
-	// req.Username = &username
-
-	// // 赋值 user_id
-	// req.UserId = userID
 
 	resp, err := userservice.UpdateUser(context.Background(), &req)
 	if err != nil {

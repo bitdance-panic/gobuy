@@ -2,18 +2,19 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
+	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/client/callopt"
@@ -72,13 +73,9 @@ func initJWTMiddleware() {
 		LoginResponse: loginResponse,
 		// Authorizator: authorize,
 		Unauthorized: unauthorizedHandler,
-		// 登出的响应
-		// 登出可能会自动删除token
-		// LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
-		// 	c.JSON(http.StatusOK, map[string]interface{}{
-		// 		"code": http.StatusOK,
-		// 	})
-		// },
+		LogoutResponse: func(ctx context.Context, c *app.RequestContext, code int) {
+			utils.Success(c, nil)
+		},
 		RefreshResponse: refreshResponse,
 		IdentityKey:     identityKey,
 		IdentityHandler: identityHandler,
@@ -113,25 +110,18 @@ func loginResponse(ctx context.Context, c *app.RequestContext, code int, token s
 	// 生成RefreshToken
 	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code":    http.StatusInternalServerError,
-			"message": "刷新Token失败",
-		})
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 保存refreshToken
 	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code":    http.StatusInternalServerError,
-			"message": "保存refreshToken失败",
-		})
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":          http.StatusOK,
+	utils.Success(c, map[string]interface{}{
 		"access_token":  token,
 		"expire":        expire.Unix(),
 		"refresh_token": refreshToken,
@@ -150,43 +140,32 @@ func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token
 	// 生成新的RefreshToken
 	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code":    http.StatusInternalServerError,
-			"message": "刷新refreshToken失败",
-		})
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 更新数据库中的RefreshToken
 	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
-		c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"code":    http.StatusInternalServerError,
-			"message": "保存Token失败",
-		})
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
 		return
 	}
 
 	// 返回新的双Token
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"code":          http.StatusOK,
-		"access_token":  token,
-		"expire":        expire.Unix(),
-		"refresh_token": refreshToken,
+	utils.Success(c, map[string]interface{}{
+		"access_token": token,
+		"expire":       expire.Unix(),
 	})
 }
 
 // 身份处理
 func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
 	claims := jwt.ExtractClaims(ctx, c)
-	return claims["roles"]
+	return claims["uid"]
 }
 
 // 统一错误处理
 func unauthorizedHandler(ctx context.Context, c *app.RequestContext, code int, message string) {
-	c.JSON(code, map[string]interface{}{
-		"code":    code,
-		"message": message,
-	})
+	utils.FailFull(c, code, message, nil)
 	c.Abort()
 }
