@@ -2,6 +2,7 @@ package casbin
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/casbin/casbin/v2"
@@ -22,6 +23,11 @@ func InitRBACData(db *gorm.DB, enforcer *casbin.Enforcer) error {
 	// 初始化权限
 	// ----------------------------
 	permissions := []models.Permission{
+		{
+			Name:   "all",
+			Path:   "/*",
+			Method: "(GET|POST|PUT|DELETE)",
+		},
 		{
 			Name:   "product_view",
 			Path:   "/product/*",
@@ -86,8 +92,9 @@ func InitRBACData(db *gorm.DB, enforcer *casbin.Enforcer) error {
 	}
 
 	// 同步到Casbin策略
+	adminIDStr := strconv.Itoa(int(adminRole.ID))
 	for _, perm := range allPermissions {
-		if _, err := enforcer.AddPolicy(adminRole.Name, perm.Path, perm.Method); err != nil {
+		if _, err := enforcer.AddPolicy(adminIDStr, perm.Path, perm.Method); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -102,7 +109,8 @@ func InitRBACData(db *gorm.DB, enforcer *casbin.Enforcer) error {
 		tx.Rollback()
 		return err
 	}
-	if _, err := enforcer.AddPolicy(userRole.Name, viewPerm.Path, viewPerm.Method); err != nil {
+	userIDStr := strconv.Itoa(int(userRole.ID))
+	if _, err := enforcer.AddPolicy(userIDStr, viewPerm.Path, viewPerm.Method); err != nil {
 		tx.Rollback()
 		return err
 	}

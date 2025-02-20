@@ -50,8 +50,7 @@ var (
 // @BasePath /
 // @schemes http
 func main() {
-	// 初始化数据库等
-
+	// 初始化数据库
 	dal.Init()
 
 	// 初始化Casbin
@@ -59,10 +58,10 @@ func main() {
 		hlog.Fatalf("Casbin初始化失败: %v", err)
 	}
 
-	// 初始化RBAC基础数据
-	if err := casbin.InitRBACData(tidb.DB, casbin.Enforcer); err != nil {
-		hlog.Fatalf("RBAC数据初始化失败: %v", err)
-	}
+	// // 初始化RBAC基础数据
+	// if err := casbin.InitRBACData(tidb.DB, casbin.Enforcer); err != nil {
+	// 	hlog.Fatalf("RBAC数据初始化失败: %v", err)
+	// }
 
 	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
@@ -128,16 +127,18 @@ func registerRoutes(h *server.Hertz) {
 	user := h.Group("/")
 	{
 		user.POST("/login", middleware.AuthMiddleware.LoginHandler)
+		user.POST("/register", RegisterHandler)
+		user.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
 		user.POST("/get_user", GetUserHandler)
 		user.POST("/update_user", UpdateUserHandler)
 	}
 
 	// 需要认证的路由
 	adminGroup := h.Group("/auth")
-	adminGroup.Use(middleware.RBACMiddleware("admin"))
+	// adminGroup.Use(middleware.RBACMiddleware("admin"))
 	{
 		adminGroup.POST("/delete_user", DeleteUserHandler)
-		adminGroup.POST("/refresh", RefreshTokenHandler)
+		adminGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
 	}
 
 	product := h.Group("/product")
