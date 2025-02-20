@@ -18,6 +18,60 @@ func NewUserBLL() *UserBLL {
 	return &UserBLL{}
 }
 
+// Register 业务逻辑：注册新用户
+func Register(ctx context.Context, req *rpc_user.RegisterReq) (*rpc_user.RegisterResp, error) {
+	// 校验邮箱、用户名和密码（简单验证）
+	if req.Username == "" || req.Email == "" || req.Password == "" || req.ConfirmPassword == "" {
+		return &rpc_user.RegisterResp{UserId: 0, Message: "All fields are required"}, nil
+	}
+
+	// 密码和确认密码是否一致
+	if req.Password != req.ConfirmPassword {
+		return &rpc_user.RegisterResp{UserId: 0, Message: "Passwords do not match"}, nil
+	}
+
+	// 调用 DAO 层创建用户
+	user, err := dao.RegisterUser(tidb.DB, ctx, req.Username, req.Password, req.Email)
+	if err != nil {
+		return &rpc_user.RegisterResp{UserId: 0, Message: "Registration failed"}, err
+	}
+
+	// 返回成功响应，包含新用户的 ID
+	return &rpc_user.RegisterResp{
+		UserId:  int32(user.ID), // 返回 user ID
+		Message: "User registered successfully",
+	}, nil
+}
+
+// GetUsers 获取所有用户信息
+func GetUsers(ctx context.Context, req *rpc_user.GetUsersReq) (*rpc_user.GetUsersResp, error) {
+	// 查询数据库中的所有用户信息，假设分页处理
+	users, err := dao.GetUsers(tidb.DB, ctx, int(req.Page), int(req.PageSize))
+	if err != nil {
+		return &rpc_user.GetUsersResp{
+			Users:   nil,
+			Message: "Failed to retrieve users",
+		}, err
+	}
+
+	// 将从数据库中查询到的用户数据转换为 *rpc_user.User 格式
+	var userList []*rpc_user.User
+	for _, u := range users {
+		userList = append(userList, &rpc_user.User{
+			UserId:       int32(u.ID), // 转换为 int32 类型
+			Username:     u.Username,
+			Email:        u.Email,
+			RefreshToken: u.RefreshToken,
+		})
+	}
+
+	// 返回响应
+	return &rpc_user.GetUsersResp{
+		Users:   userList, // 返回转换后的用户列表
+		Message: "Users retrieved successfully",
+	}, nil
+}
+
 func (s *UserBLL) Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.LoginResp, error) {
 	hlog.Infof("Login attempt for email=%s", req.Email)
 
