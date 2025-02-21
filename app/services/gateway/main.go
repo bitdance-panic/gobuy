@@ -15,6 +15,7 @@ import (
 	paymentservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment/paymentservice"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
@@ -59,9 +60,23 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
+	// 初始化Redis
+	redis.InitRedis(
+		"localhost:6379", // conf.GetConf().Redis.Address,
+		"",               // conf.GetConf().Redis.Password,
+		0,                // conf.GetConf().Redis.DB,
+	)
+	defer redis.CloseRedis()
+
+	// 同步黑名单到Redis
+	redis.SyncBlacklistToRedis()
+
+	// 启动自动清理任务
+	middleware.StartRedisCleanupTask()
+
 	// 初始化黑名单
-	middleware.InitBlacklistCache()
-	middleware.StartBlacklistCleanupTask()
+	// middleware.InitBlacklistCache()
+	// middleware.StartBlacklistCleanupTask()
 
 	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
