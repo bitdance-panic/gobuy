@@ -2,18 +2,20 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/bitdance-panic/gobuy/app/models"
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
+
+	// "github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	Redis "github.com/go-redis/redis/v8"
 	"github.com/hertz-contrib/jwt"
 )
 
@@ -22,62 +24,6 @@ var (
 	CacheMutex     sync.RWMutex // 缓存读写锁
 	LastSyncTime   time.Time    // 最后同步时间
 )
-
-// 初始化黑名单缓存
-func InitBlacklistCache() {
-	// 首次启动时全量加载
-	loadBlacklistFromDB()
-
-	// 定时同步（每5分钟同步一次）
-	go func() {
-		ticker := time.NewTicker(5 * time.Minute)
-		defer ticker.Stop()
-		for range ticker.C {
-			loadBlacklistFromDB()
-		}
-	}()
-}
-
-// 从数据库加载黑名单
-func loadBlacklistFromDB() {
-	// 通过加锁来确保后续操作的线程安全，防止多个 goroutine 同时修改黑名单缓存（blacklistCache）时出现竞态条件
-	CacheMutex.Lock()
-	// 在函数结束时，释放锁。defer 关键字确保即使发生错误，锁也会被释放
-	defer CacheMutex.Unlock()
-
-	var entries []models.Blacklist
-	if err := tidb.DB.Where("(expires_at > ? OR expires_at IS NULL) AND is_deleted = 0", time.Now()).Find(&entries).Error; err != nil {
-		hlog.Errorf("黑名单同步失败: %v", err)
-		return
-	}
-
-	// 更新缓存
-	tempMap := make(map[string]time.Time)
-	for _, entry := range entries {
-		tempMap[entry.Identifier] = entry.ExpiresAt
-	}
-	BlacklistCache = sync.Map{} // 清空缓存
-	for k, v := range tempMap {
-		BlacklistCache.Store(k, v)
-	}
-
-	LastSyncTime = time.Now()
-	hlog.Infof("黑名单缓存同步完成，当前条目数: %d", len(tempMap))
-}
-
-// 检查是否在黑名单中
-func IsBlocked(identifier string) bool {
-	// 先检查缓存
-	if expiry, ok := BlacklistCache.Load(identifier); ok {
-		// 永久封禁或未过期
-		if expiry.(time.Time).IsZero() || expiry.(time.Time).After(time.Now()) {
-			return true
-		}
-		// 已过期，从缓存移除
-		BlacklistCache.Delete(identifier)
-	}
-	return false
-}
 
 // 黑名单中间件
 func BlacklistMiddleware() app.HandlerFunc {
@@ -98,27 +44,84 @@ func BlacklistMiddleware() app.HandlerFunc {
 			identifier = fmt.Sprintf("ip:%s", c.ClientIP())
 		}
 
-		// 检查黑名单
-		if IsBlocked(identifier) {
+		// 检查Redis黑名单
+		if isBlocked, err := CheckBlockedInRedis(identifier); err != nil {
+			hlog.Errorf("Redis查询失败: %v", err)
+			c.AbortWithStatus(consts.StatusInternalServerError)
+			return
+		} else if isBlocked {
 			hlog.Warnf("拒绝黑名单用户访问: %s", identifier)
-			utils.FailFull(c, consts.StatusForbidden, "您的账户已被封禁", nil)
+			utils.FailFull(c, consts.StatusForbidden, "您的账户或设备已被封禁", nil)
 			c.Abort()
 			return
 		}
-
 		c.Next(ctx)
 	}
 }
 
-// 自动清理过期条目
-func StartBlacklistCleanupTask() {
+// 检查是否在黑名单中
+func CheckBlockedInRedis(identifier string) (bool, error) {
+	ctx := context.Background()
+
+	// 1. 检查Hash是否存在
+	data, err := redis.RedisClient.HGet(ctx, "blacklist:entries", identifier).Result()
+	if err == Redis.Nil {
+		return false, nil // 不在黑名单中
+	} else if err != nil {
+		return false, err
+	}
+
+	// 2. 解析数据
+	var entry struct {
+		Reason    string    `json:"reason"`
+		ExpiresAt time.Time `json:"expires_at"`
+	}
+	if err := json.Unmarshal([]byte(data), &entry); err != nil {
+		return false, err
+	}
+
+	// 3. 检查是否过期
+	if !entry.ExpiresAt.IsZero() && entry.ExpiresAt.Before(time.Now()) {
+		// 异步删除过期条目
+		go func() {
+			_ = redis.RedisClient.HDel(ctx, "blacklist:entries", identifier).Err()
+			_ = redis.RedisClient.ZRem(ctx, "blacklist:expiry", identifier).Err()
+		}()
+		return false, nil
+	}
+
+	return true, nil
+}
+
+// 启动定时任务清理过期条目（利用Redis的Sorted Set）
+func StartRedisCleanupTask() {
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour)
 		defer ticker.Stop()
 		for range ticker.C {
-			// 删除过期条目
-			if err := dao.ClearExpBlacklist(tidb.DB); err != nil {
-				hlog.Errorf("黑名单清理失败: %v", err)
+			ctx := context.Background()
+			now := time.Now().UnixNano()
+
+			// 查询所有过期的标识符
+			expiredIDs, err := redis.RedisClient.ZRangeByScore(ctx, "blacklist:expiry", &Redis.ZRangeBy{
+				Min: "0",
+				Max: fmt.Sprintf("%d", now),
+			}).Result()
+			if err != nil {
+				hlog.Errorf("Redis清理查询失败: %v", err)
+				continue
+			}
+
+			// 批量删除
+			if len(expiredIDs) > 0 {
+				pipe := redis.RedisClient.Pipeline()
+				pipe.HDel(ctx, "blacklist:entries", expiredIDs...)
+				pipe.ZRemRangeByScore(ctx, "blacklist:expiry", "0", fmt.Sprintf("%d", now))
+				if _, err := pipe.Exec(ctx); err != nil {
+					hlog.Errorf("Redis清理失败: %v", err)
+				} else {
+					hlog.Infof("清理 %d 个过期黑名单条目", len(expiredIDs))
+				}
 			}
 		}
 	}()
