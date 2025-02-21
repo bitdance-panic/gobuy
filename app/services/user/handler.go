@@ -1,6 +1,6 @@
 package main
 
-//kitex -module github.com/bitdance-panic/gobuy/app/rpc -service user idl/user.thrift
+// kitex -module github.com/bitdance-panic/gobuy/app/rpc -service user idl/user.thrift
 import (
 	"context"
 	"strconv"
@@ -49,7 +49,17 @@ func (s *UserServiceImpl) UpdateUser(ctx context.Context, req *rpc_user.UpdateUs
 	return bll.UpdateUser(ctx, req)
 }
 
-// 封禁用户
+// 删除用户
 func (s *UserServiceImpl) DeleteUser(ctx context.Context, req *rpc_user.DeleteUserReq) (*rpc_user.DeleteUserResp, error) {
 	return bll.DeleteUser(ctx, req)
+}
+
+// 封禁用户
+func (s *UserServiceImpl) BlockUser(ctx context.Context, req *rpc_user.BlockUserReq) (*rpc_user.BlockUserResp, error) {
+	return bll.BlockUser(ctx, req)
+}
+
+// 解禁用户
+func (s *UserServiceImpl) UnblockUser(ctx context.Context, req *rpc_user.UnblockUserReq) (*rpc_user.UnblockUserResp, error) {
+	return bll.UnblockUser(ctx, req)
 }

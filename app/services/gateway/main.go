@@ -57,11 +57,11 @@ func main() {
 	if err := casbin.InitCasbin(tidb.DB); err != nil {
 		hlog.Fatalf("Casbin初始化失败: %v", err)
 	}
+	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	// // 初始化RBAC基础数据
-	// if err := casbin.InitRBACData(tidb.DB, casbin.Enforcer); err != nil {
-	// 	hlog.Fatalf("RBAC数据初始化失败: %v", err)
-	// }
+	// 初始化黑名单
+	middleware.InitBlacklistCache()
+	middleware.StartBlacklistCleanupTask()
 
 	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
@@ -99,7 +99,8 @@ func main() {
 	h.Use(
 		middleware.WhiteListMiddleware(),
 		conditionalAuthMiddleware(),
-		middleware.CasbinMiddleware(), // 权限检查
+		middleware.BlacklistMiddleware(), // 黑名单检查
+		middleware.CasbinMiddleware(),    // 权限检查
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"*"}, // 允许所有来源
 			AllowMethods:     []string{"*"}, // 允许所有方法
@@ -133,12 +134,12 @@ func registerRoutes(h *server.Hertz) {
 		user.POST("/update_user", UpdateUserHandler)
 	}
 
-	// 需要认证的路由
-	adminGroup := h.Group("/auth")
-	// adminGroup.Use(middleware.RBACMiddleware("admin"))
+	adminGroup := h.Group("/admin")
 	{
 		adminGroup.POST("/delete_user", DeleteUserHandler)
 		adminGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
+		adminGroup.POST("/block_user", AddToBlacklistHandler)
+		adminGroup.POST("/unblock_user", RemoveFromBlacklistHandler)
 	}
 
 	product := h.Group("/product")

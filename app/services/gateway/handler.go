@@ -37,7 +37,7 @@ func RegisterHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp, err := userservice.Register(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
-	if err != nil {
+	if err != nil || !resp.Success {
 		utils.Fail(c, err.Error())
 		return
 	} else {
@@ -160,6 +160,66 @@ func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
 	} else {
 		utils.FailFull(c, consts.StatusInternalServerError, "User update failed", nil)
 	}
+}
+
+// 封禁用户
+// @Summary 添加黑名单条目
+// @Description 封禁指定用户/IP
+// @Accept json
+// @Produce json
+// @Router /admin/block_user [post]
+func AddToBlacklistHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.BlockUserReq{}
+
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("Block user failed for: %s, validation error: %v", req.Identifier, err)
+		utils.Fail(c, "参数错误: "+err.Error())
+		return
+	}
+
+	resp, err := userservice.BlockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+
+	if err != nil || !resp.Success {
+		utils.Fail(c, "封禁失败: "+err.Error())
+		return
+	}
+
+	// 更新缓存
+	middleware.CacheMutex.Lock()
+	middleware.BlacklistCache.Store(req.Identifier, req.ExpiresAt)
+	middleware.CacheMutex.Unlock()
+
+	utils.Success(c, utils.H{"blockID": resp.BlockId})
+}
+
+// 解封用户
+// @Summary 移除黑名单条目
+// @Description 解除封禁
+// @Accept json
+// @Produce json
+// @Router /admin/unblock_user [delete]
+func RemoveFromBlacklistHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.UnblockUserReq{}
+
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("Unblock user failed for: %s, validation error: %v", req.Identifier, err)
+		utils.Fail(c, "参数错误: "+err.Error())
+		return
+	}
+
+	resp, err := userservice.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+
+	if err != nil || !resp.Success {
+		utils.Fail(c, "解禁失败: "+err.Error())
+		return
+	}
+
+	// 更新缓存
+	middleware.CacheMutex.Lock()
+	middleware.BlacklistCache.Delete(req.Identifier)
+	middleware.CacheMutex.Unlock()
+
+	utils.Success(c, nil)
 }
 
 // handleProductPut 这是更新商品

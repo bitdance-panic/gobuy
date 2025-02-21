@@ -28,7 +28,7 @@ func CasbinMiddleware() app.HandlerFunc {
 
 		// 提取用户ID
 		claims := jwt.ExtractClaims(ctx, c)
-		userID := claims[identityKey].(float64)
+		userID := claims[IdentityKey].(float64)
 		userIDStr := strconv.Itoa(int(userID))
 
 		// 提取请求路径和方法
