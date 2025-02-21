@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
@@ -23,7 +24,7 @@ import (
 
 type User = models.User
 
-var identityKey = "uid"
+var IdentityKey = "uid"
 
 var secret = "panic-bitdance"
 
@@ -63,10 +64,10 @@ func initJWTMiddleware() {
 		DisabledAbort: false,
 
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			userID := int(data.(int32))
+			userID := data
 
 			return jwt.MapClaims{
-				identityKey: userID,
+				IdentityKey: userID,
 			}
 		},
 		Authenticator: authenticate,
@@ -77,7 +78,7 @@ func initJWTMiddleware() {
 			utils.Success(c, nil)
 		},
 		RefreshResponse: refreshResponse,
-		IdentityKey:     identityKey,
+		IdentityKey:     IdentityKey,
 		IdentityHandler: identityHandler,
 	})
 
@@ -95,14 +96,13 @@ func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, erro
 		return nil, jwt.ErrMissingLoginValues
 	}
 
-	// 检查黑名单...
-
 	loginResp, err := UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
-	c.Set("uid", int(loginResp.UserId))
-	return loginResp.UserId, nil
+	user_id, _ := strconv.Atoi(loginResp.UserId)
+	c.Set("uid", user_id)
+	return user_id, nil
 }
 
 // 登录响应

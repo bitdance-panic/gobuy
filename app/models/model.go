@@ -115,6 +115,22 @@ type Payment struct {
 	Status  int     // 支付状态(可用枚举或 int 表示)
 }
 
+// 黑名单条目模型
+type Blacklist struct {
+	Base
+	Identifier string    `gorm:"type:varchar(255);uniqueIndex;not null"` // 封禁标识（用户ID）
+	Reason     string    `gorm:"type:text;not null"`                     // 封禁原因
+	ExpiresAt  time.Time `gorm:"index"`                                  // 过期时间（为空表示永久封禁）
+}
+
+// 操作类型（用于日志）
+type BlacklistOperation string
+
+const (
+	AddToBlacklist      BlacklistOperation = "ADD"
+	RemoveFromBlacklist BlacklistOperation = "REMOVE"
+)
+
 func (User) TableName() string {
 	return "user"
 }
@@ -159,6 +175,10 @@ func (Payment) TableName() string {
 	return "payment"
 }
 
+func (Blacklist) TableName() string {
+	return "blacklist"
+}
+
 // 调用这个来自动调整表结构
 func AutoMigrate(db *gorm.DB) {
 	if os.Getenv("GO_ENV") != "production" {
@@ -176,6 +196,7 @@ func AutoMigrate(db *gorm.DB) {
 			&OrderItem{},
 			&Product{},
 			&Payment{}, // 新增的 Payment 模型
+			&Blacklist{},
 		)
 	}
 }
