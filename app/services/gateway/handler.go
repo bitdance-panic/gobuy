@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	rpc_payment "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment"
 	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
@@ -18,6 +20,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/cloudwego/kitex/client/callopt"
+	Redis "github.com/go-redis/redis/v8"
 	"github.com/hertz-contrib/jwt"
 )
 
@@ -37,7 +40,7 @@ func RegisterHandler(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp, err := userservice.Register(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
-	if err != nil {
+	if err != nil || !resp.Success {
 		utils.Fail(c, err.Error())
 		return
 	} else {
@@ -160,6 +163,84 @@ func UpdateUserHandler(ctx context.Context, c *app.RequestContext) {
 	} else {
 		utils.FailFull(c, consts.StatusInternalServerError, "User update failed", nil)
 	}
+}
+
+// 封禁用户
+// @Summary 添加黑名单条目
+// @Description 封禁指定用户/IP
+// @Accept json
+// @Produce json
+// @Router /admin/block_user [post]
+func AddToBlacklistHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.BlockUserReq{}
+
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("Block user failed for: %s, validation error: %v", req.Identifier, err)
+		utils.Fail(c, "参数错误: "+err.Error())
+		return
+	}
+
+	resp, err := userservice.BlockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+
+	if err != nil || !resp.Success {
+		utils.Fail(c, "封禁失败: "+err.Error())
+		return
+	}
+
+	// 更新Redis
+	data, _ := json.Marshal(map[string]interface{}{
+		"reason":     req.Reason,
+		"expires_at": req.ExpiresAt,
+	})
+	pipe := redis.RedisClient.Pipeline()
+	pipe.HSet(ctx, "blacklist:entries", req.Identifier, data)
+	if req.ExpiresAt != 0 {
+		expirationTime := time.Unix(req.ExpiresAt, 0)
+		pipe.ZAdd(ctx, "blacklist:expiry", &Redis.Z{
+			Score:  float64(expirationTime.UnixNano()),
+			Member: req.Identifier,
+		})
+	}
+	if _, err := pipe.Exec(ctx); err != nil {
+		utils.Fail(c, "Redis更新失败: "+err.Error())
+		return
+	}
+
+	utils.Success(c, utils.H{"blockID": resp.BlockId})
+}
+
+// 解封用户
+// @Summary 移除黑名单条目
+// @Description 解除封禁
+// @Accept json
+// @Produce json
+// @Router /admin/unblock_user [delete]
+func RemoveFromBlacklistHandler(ctx context.Context, c *app.RequestContext) {
+	req := rpc_user.UnblockUserReq{}
+
+	if err := c.BindAndValidate(&req); err != nil {
+		hlog.Warnf("Unblock user failed for: %s, validation error: %v", req.Identifier, err)
+		utils.Fail(c, "参数错误: "+err.Error())
+		return
+	}
+
+	resp, err := userservice.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+
+	if err != nil || !resp.Success {
+		utils.Fail(c, "解禁失败: "+err.Error())
+		return
+	}
+
+	// 更新Redis
+	pipe := redis.RedisClient.Pipeline()
+	pipe.HDel(ctx, "blacklist:entries", req.Identifier)
+	pipe.ZRem(ctx, "blacklist:expiry", req.Identifier)
+	if _, err := pipe.Exec(ctx); err != nil {
+		utils.Fail(c, "Redis删除失败: "+err.Error())
+		return
+	}
+
+	utils.Success(c, nil)
 }
 
 // handleProductPut 这是更新商品

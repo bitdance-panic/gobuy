@@ -20,26 +20,16 @@ func NewUserBLL() *UserBLL {
 
 // Register 业务逻辑：注册新用户
 func Register(ctx context.Context, req *rpc_user.RegisterReq) (*rpc_user.RegisterResp, error) {
-	// 校验邮箱、用户名和密码（简单验证）
-	if req.Username == "" || req.Email == "" || req.Password == "" || req.ConfirmPassword == "" {
-		return &rpc_user.RegisterResp{UserId: 0, Message: "All fields are required"}, nil
-	}
-
-	// 密码和确认密码是否一致
-	if req.Password != req.ConfirmPassword {
-		return &rpc_user.RegisterResp{UserId: 0, Message: "Passwords do not match"}, nil
-	}
-
 	// 调用 DAO 层创建用户
 	user, err := dao.RegisterUser(tidb.DB, ctx, req.Username, req.Password, req.Email)
 	if err != nil {
-		return &rpc_user.RegisterResp{UserId: 0, Message: "Registration failed"}, err
+		return &rpc_user.RegisterResp{UserId: "", Success: false}, err
 	}
 
 	// 返回成功响应，包含新用户的 ID
 	return &rpc_user.RegisterResp{
-		UserId:  int32(user.ID), // 返回 user ID
-		Message: "User registered successfully",
+		UserId:  strconv.Itoa(user.ID), // 返回 user ID
+		Success: true,
 	}, nil
 }
 
@@ -83,7 +73,7 @@ func (s *UserBLL) Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.
 		resp.Success = false
 	} else {
 		resp.Success = true
-		resp.UserId = int32(userPO.ID)
+		resp.UserId = strconv.Itoa(userPO.ID)
 	}
 	return &resp, err
 }
@@ -100,7 +90,7 @@ func GetUser(ctx context.Context, userID int) (*rpc_user.GetUserResp, error) {
 
 	return &rpc_user.GetUserResp{
 		Success:  true,
-		UserId:   strconv.Itoa(user.ID), //将 user.ID 转换为 string
+		UserId:   strconv.Itoa(user.ID), // 将 user.ID 转换为 string
 		Email:    user.Email,
 		Username: user.Username,
 	}, nil
@@ -125,7 +115,6 @@ func UpdateUser(ctx context.Context, req *rpc_user.UpdateUserReq) (*rpc_user.Upd
 	}
 
 	err = dao.UpdateUserByID(tidb.DB, ctx, userID, username, email)
-
 	if err != nil {
 		return &rpc_user.UpdateUserResp{Success: false}, nil
 	}
@@ -133,7 +122,7 @@ func UpdateUser(ctx context.Context, req *rpc_user.UpdateUserReq) (*rpc_user.Upd
 	return &rpc_user.UpdateUserResp{Success: true}, nil
 }
 
-// 封禁用户
+// 删除用户
 func DeleteUser(ctx context.Context, req *rpc_user.DeleteUserReq) (*rpc_user.DeleteUserResp, error) {
 	userID, err := strconv.Atoi(req.UserId)
 	if err != nil || userID <= 0 {
@@ -146,4 +135,29 @@ func DeleteUser(ctx context.Context, req *rpc_user.DeleteUserReq) (*rpc_user.Del
 	}
 
 	return &rpc_user.DeleteUserResp{Success: true}, nil
+}
+
+// 封禁用户 ：将用户加入黑名单
+func BlockUser(ctx context.Context, req *rpc_user.BlockUserReq) (*rpc_user.BlockUserResp, error) {
+	user, err := dao.BlockUser(tidb.DB, ctx, req.Identifier, req.Reason, req.ExpiresAt)
+	if err != nil {
+		return &rpc_user.BlockUserResp{BlockId: "", Success: false}, err
+	}
+
+	return &rpc_user.BlockUserResp{
+		BlockId: strconv.Itoa(user.ID), // 返回 user ID
+		Success: true,
+	}, nil
+}
+
+// 解禁用户
+func UnblockUser(ctx context.Context, req *rpc_user.UnblockUserReq) (*rpc_user.UnblockUserResp, error) {
+	err := dao.UnblockUser(tidb.DB, ctx, req.Identifier)
+	if err != nil {
+		return &rpc_user.UnblockUserResp{Success: false}, err
+	}
+
+	return &rpc_user.UnblockUserResp{
+		Success: true,
+	}, nil
 }
