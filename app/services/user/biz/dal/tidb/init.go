@@ -3,10 +3,11 @@ package tidb
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/bitdance-panic/gobuy/app/models"
+
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
 	driver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
+
 	// "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	// "gorm.io/plugin/opentelemetry/tracing"
@@ -34,11 +35,9 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	// 数据库迁移
-	models.AutoMigrate(DB)
 
 	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
 	// 	panic(err)
 	// }
-	//models.AutoMigrate(DB);第一次连接后就关闭
+	// models.AutoMigrate(DB);第一次连接后就关闭
 }

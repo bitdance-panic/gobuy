@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 
@@ -10,8 +11,7 @@ import (
 
 type User = models.User
 
-//type Base = models.Base
-
+// type Base = models.Base
 func RegisterUser(db *gorm.DB, ctx context.Context, username, password, email string) (*User, error) {
 	hashedPassword := password
 
@@ -60,12 +60,6 @@ func GetUsers(db *gorm.DB, ctx context.Context, page int, pageSize int) ([]User,
 func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, password string) (*User, error) {
 	userPO := &User{}
 	err := db.WithContext(ctx).Model(&User{}).Where(&User{Email: email, PasswordHashed: password}).First(userPO).Error
-	// newUser := &User{
-	// 	Email:          email,
-	// 	Username:       "qwer",
-	// 	PasswordHashed: password,
-	// }
-	// db.WithContext(ctx).Create(newUser)
 	return userPO, err
 }
 
@@ -100,10 +94,37 @@ func UpdateUserByID(db *gorm.DB, ctx context.Context, userID int, username, emai
 		}).Error
 }
 
-// 封禁
+// 删除
 func DeleteUserByID(db *gorm.DB, ctx context.Context, userID int) error {
 	return db.WithContext(ctx).
 		Model(&User{}).
 		Where("id = ?", userID).
 		Update("is_deleted", 1).Error
+}
+
+func BlockUser(db *gorm.DB, ctx context.Context, identifier string, reason string, expires_at int64) (*models.Blacklist, error) {
+	entry := &models.Blacklist{
+		Identifier: identifier,
+		Reason:     reason,
+		ExpiresAt:  time.Unix(expires_at, 0),
+	}
+
+	if err := db.WithContext(ctx).Create(entry).Error; err != nil {
+		return nil, err
+	}
+
+	return entry, nil
+}
+
+func UnblockUser(db *gorm.DB, ctx context.Context, identifier string) error {
+	return db.WithContext(ctx).
+		Model(&models.Blacklist{}).
+		Where("identifier = ?", identifier).
+		Update("is_deleted", 1).Error
+
+	// 删除记录
+	// if err := db.Where("identifier = ?", identifier).Delete(&models.Blacklist{}).Error; err != nil {
+	// 	return err
+	// }
+	// return nil
 }

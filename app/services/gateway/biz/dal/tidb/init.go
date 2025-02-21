@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	//"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	driver "github.com/go-sql-driver/mysql"
 

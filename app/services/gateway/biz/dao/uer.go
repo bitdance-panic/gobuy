@@ -3,6 +3,7 @@ package dao
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
@@ -63,4 +64,9 @@ func DeleteUserRole(db *gorm.DB, userID uint, roleID uint) error {
 	// 同步到Casbin策略
 	_, err := casbin.Enforcer.RemoveGroupingPolicy(fmt.Sprintf("%d", userID), role.Name)
 	return err
+}
+
+func ClearExpBlacklist(db *gorm.DB) error {
+	// 删除过期条目
+	return db.Where("expires_at < ?", time.Now()).Delete(&models.Blacklist{}).Error
 }
