@@ -2,16 +2,15 @@ package middleware
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
-	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
+	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
@@ -28,8 +27,6 @@ var IdentityKey = "uid"
 
 var secret = "panic-bitdance"
 
-var UserClient userservice.Client
-
 const (
 	AccessTokenExpire  = 12 * time.Hour
 	RefreshTokenExpire = 7 * 24 * time.Hour
@@ -39,7 +36,7 @@ var AuthMiddleware *jwt.HertzJWTMiddleware
 
 // BlackList      = gutils.NewSyncSet()
 
-func InitAuth() {
+func init() {
 	// JWT中间件配置
 	initJWTMiddleware()
 }
@@ -96,13 +93,11 @@ func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, erro
 		return nil, jwt.ErrMissingLoginValues
 	}
 
-	loginResp, err := UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
+	loginResp, err := clients.UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
-	user_id, _ := strconv.Atoi(loginResp.UserId)
-	c.Set("uid", user_id)
-	return user_id, nil
+	return loginResp.UserId, nil
 }
 
 // 登录响应

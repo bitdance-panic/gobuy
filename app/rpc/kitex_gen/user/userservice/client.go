@@ -15,9 +15,10 @@ type Client interface {
 	Login(ctx context.Context, req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error)
 	GetUser(ctx context.Context, req *user.GetUserReq, callOptions ...callopt.Option) (r *user.GetUserResp, err error)
 	UpdateUser(ctx context.Context, req *user.UpdateUserReq, callOptions ...callopt.Option) (r *user.UpdateUserResp, err error)
-	DeleteUser(ctx context.Context, req *user.DeleteUserReq, callOptions ...callopt.Option) (r *user.DeleteUserResp, err error)
+	RemoveUser(ctx context.Context, req *user.RemoveUserReq, callOptions ...callopt.Option) (r *user.RemoveUserResp, err error)
 	BlockUser(ctx context.Context, req *user.BlockUserReq, callOptions ...callopt.Option) (r *user.BlockUserResp, err error)
 	UnblockUser(ctx context.Context, req *user.UnblockUserReq, callOptions ...callopt.Option) (r *user.UnblockUserResp, err error)
+	AdminListUser(ctx context.Context, req *user.AdminListUserReq, callOptions ...callopt.Option) (r *user.AdminListUserResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -69,9 +70,9 @@ func (p *kUserServiceClient) UpdateUser(ctx context.Context, req *user.UpdateUse
 	return p.kClient.UpdateUser(ctx, req)
 }
 
-func (p *kUserServiceClient) DeleteUser(ctx context.Context, req *user.DeleteUserReq, callOptions ...callopt.Option) (r *user.DeleteUserResp, err error) {
+func (p *kUserServiceClient) RemoveUser(ctx context.Context, req *user.RemoveUserReq, callOptions ...callopt.Option) (r *user.RemoveUserResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.DeleteUser(ctx, req)
+	return p.kClient.RemoveUser(ctx, req)
 }
 
 func (p *kUserServiceClient) BlockUser(ctx context.Context, req *user.BlockUserReq, callOptions ...callopt.Option) (r *user.BlockUserResp, err error) {
@@ -82,4 +83,9 @@ func (p *kUserServiceClient) BlockUser(ctx context.Context, req *user.BlockUserR
 func (p *kUserServiceClient) UnblockUser(ctx context.Context, req *user.UnblockUserReq, callOptions ...callopt.Option) (r *user.UnblockUserResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UnblockUser(ctx, req)
+}
+
+func (p *kUserServiceClient) AdminListUser(ctx context.Context, req *user.AdminListUserReq, callOptions ...callopt.Option) (r *user.AdminListUserResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.AdminListUser(ctx, req)
 }

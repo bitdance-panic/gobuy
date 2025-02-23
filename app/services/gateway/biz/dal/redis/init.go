@@ -3,10 +3,12 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/go-redis/redis/v8"
@@ -14,15 +16,16 @@ import (
 
 var RedisClient *redis.Client
 
+type Z = redis.Z
+
 // Initialization
 // The InitRedis function initializes the Redis client and checks if the connection is successful using Ping.
-func InitRedis(addr, password string, db int) {
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
-	})
-
+func Init() {
+	conf_ := conf.GetConf()
+	dsn := fmt.Sprintf(conf_.Redis.DSN, conf_.Redis.Username, conf_.Redis.Password, conf_.Redis.Host, conf_.Redis.Port)
+	fmt.Println(dsn)
+	opt, _ := redis.ParseURL(dsn)
+	RedisClient := redis.NewClient(opt)
 	// 测试连接
 	if _, err := RedisClient.Ping(context.Background()).Result(); err != nil {
 		hlog.Fatalf("Redis连接失败: %v", err)
@@ -31,7 +34,7 @@ func InitRedis(addr, password string, db int) {
 
 // Graceful Shutdown
 // The CloseRedis function ensures the Redis connection is properly closed when it's no longer needed.
-func CloseRedis() {
+func Close() {
 	if RedisClient != nil {
 		_ = RedisClient.Close()
 	}

@@ -3,34 +3,42 @@ package main
 import (
 	"context"
 
-	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
+	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/bll"
 )
 
-var ub *bll.ProductBLL
+var b *bll.ProductBLL
 
 func init() {
-	ub = bll.NewProductBLL()
+	b = bll.NewProductBLL()
 }
 
 type ProductServiceImpl struct{}
 
-func (s *ProductServiceImpl) CreateProduct(ctx context.Context, req *product.CreateProductRequest) (*product.CreateProductResponse, error) {
-	return ub.CreateProduct(ctx, req)
+func (*ProductServiceImpl) ListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
+	return b.ListProduct(ctx, req)
 }
 
-func (s *ProductServiceImpl) UpdateProduct(ctx context.Context, req *product.UpdateProductRequest) (*product.UpdateProductResponse, error) {
-	return ub.UpdateProduct(ctx, req)
+func (*ProductServiceImpl) GetProductByID(ctx context.Context, req *rpc_product.GetProductByIDReq) (*rpc_product.GetProductByIDResp, error) {
+	return b.GetProductByID(ctx, req)
 }
 
-func (s *ProductServiceImpl) DeleteProduct(ctx context.Context, req *product.DeleteProductRequest) (*product.DeleteProductResponse, error) {
-	return ub.DeleteProduct(ctx, req)
+func (*ProductServiceImpl) CreateProduct(ctx context.Context, req *rpc_product.CreateProductReq) (*rpc_product.CreateProductResp, error) {
+	return b.CreateProduct(ctx, req)
 }
 
-func (s *ProductServiceImpl) GetProductByID(ctx context.Context, req *product.GetProductByIDRequest) (*product.GetProductByIDResponse, error) {
-	return ub.GetProductByID(ctx, req)
+func (*ProductServiceImpl) UpdateProduct(ctx context.Context, req *rpc_product.UpdateProductReq) (*rpc_product.UpdateProductResp, error) {
+	return b.UpdateProduct(ctx, req)
 }
 
-func (s *ProductServiceImpl) SearchProducts(ctx context.Context, req *product.SearchProductsRequest) (*product.SearchProductsResponse, error) {
-	return ub.SearchProducts(ctx, req)
+func (*ProductServiceImpl) RemoveProduct(ctx context.Context, req *rpc_product.RemoveProductReq) (*rpc_product.RemoveProductResp, error) {
+	return b.RemoveProduct(ctx, req)
+}
+
+func (*ProductServiceImpl) AdminListProduct(ctx context.Context, req *rpc_product.ListProductReq) (resp *rpc_product.ListProductResp, err error) {
+	return b.AdminListProduct(ctx, req)
+}
+
+func (*ProductServiceImpl) SearchProducts(ctx context.Context, req *rpc_product.SearchProductsReq) (*rpc_product.SearchProductsResp, error) {
+	return b.SearchProducts(ctx, req)
 }
