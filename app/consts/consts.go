@@ -1,11 +1,10 @@
 package consts
 
-type OrderStatus string
+// 定义订单状态常量
+type OrderStatus int
 
 const (
-	OrderStatusPending   OrderStatus = "pending"   // 待支付
-	OrderStatusPaid      OrderStatus = "paid"      // 已支付
-	OrderStatusShipped   OrderStatus = "shipped"   // 已发货
-	OrderStatusCompleted OrderStatus = "completed" // 已完成
-	OrderStatusCancelled OrderStatus = "cancelled" // 已取消
+	OrderStatusPending   OrderStatus = 1 // 待支付
+	OrderStatusPaid      OrderStatus = 2 // 已支付
+	OrderStatusCancelled OrderStatus = 3 // 已取消
 )

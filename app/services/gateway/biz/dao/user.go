@@ -30,7 +30,7 @@ func GetRefreshTokenByUserID(db *gorm.DB, userID int) (string, error) {
 }
 
 // 添加用户角色并同步Casbin策略
-func AddUserRole(db *gorm.DB, userID uint, roleID uint) error {
+func AddUserRole(db *gorm.DB, userID int, roleID int) error {
 	// 查询角色信息
 	var role models.Role
 	if err := db.First(&role, roleID).Error; err != nil {
@@ -38,7 +38,7 @@ func AddUserRole(db *gorm.DB, userID uint, roleID uint) error {
 	}
 
 	// 添加用户角色关联
-	userRole := models.UserRole{UserID: userID, RoleID: uint(role.Base.ID)}
+	userRole := models.UserRole{UserID: userID, RoleID: int(role.Base.ID)}
 	if err := db.Create(&userRole).Error; err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func AddUserRole(db *gorm.DB, userID uint, roleID uint) error {
 }
 
 // 删除用户角色并同步Casbin策略
-func DeleteUserRole(db *gorm.DB, userID uint, roleID uint) error {
+func DeleteUserRole(db *gorm.DB, userID int, roleID int) error {
 	// 查询角色信息
 	var role models.Role
 	if err := db.First(&role, roleID).Error; err != nil {

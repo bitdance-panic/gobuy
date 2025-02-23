@@ -9,11 +9,10 @@ replace (
 	github.com/bitdance-panic/gobuy/app/utils => ../../utils
 )
 
-
 require (
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-00010101000000-000000000000
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-00010101000000-000000000000
-	github.com/cloudwego/kitex v0.12.1
+	github.com/cloudwego/kitex v0.12.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/pkg/errors v0.9.1
@@ -28,19 +27,19 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/apache/thrift v0.13.0 // indirect
 	github.com/bytedance/gopkg v0.1.1 // indirect
-	github.com/bytedance/sonic v1.12.5 // indirect
-	github.com/bytedance/sonic/loader v0.2.0 // indirect
+	github.com/bytedance/sonic v1.12.7 // indirect
+	github.com/bytedance/sonic/loader v0.2.2 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/configmanager v0.2.2 // indirect
-	github.com/cloudwego/dynamicgo v0.4.7-0.20241220085612-55704ea4ca8f // indirect
+	github.com/cloudwego/dynamicgo v0.5.2 // indirect
 	github.com/cloudwego/fastpb v0.0.5 // indirect
 	github.com/cloudwego/frugal v0.2.3 // indirect
-	github.com/cloudwego/gopkg v0.1.3 // indirect
+	github.com/cloudwego/gopkg v0.1.4-0.20241217093255-8980b14172b7 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
-	github.com/cloudwego/kitex/pkg/protocol/bthrift v0.0.0-20250120071802-1de9e03154ac // indirect
-	github.com/cloudwego/localsession v0.1.1 // indirect
+	github.com/cloudwego/kitex/pkg/protocol/bthrift v0.0.0-20250218072853-8bde660e24b2 // indirect
+	github.com/cloudwego/localsession v0.1.2 // indirect
 	github.com/cloudwego/netpoll v0.6.5 // indirect
-	github.com/cloudwego/runtimex v0.1.0 // indirect
+	github.com/cloudwego/runtimex v0.1.1 // indirect
 	github.com/cloudwego/thriftgo v0.3.18 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
@@ -61,7 +60,6 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/gls v0.0.0-20220109145502-612d0167dce5 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -81,4 +79,3 @@ require (
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-

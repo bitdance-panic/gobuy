@@ -5,12 +5,15 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func WhiteListMiddleware() app.HandlerFunc {
-	whiteList := conf.GetConf().Auth.WhiteList
+	whiteList := []string{
+		"/login",
+		"/index/products",
+		"register",
+	}
 	return func(ctx context.Context, c *app.RequestContext) {
 		path := string(c.URI().Path())
 
