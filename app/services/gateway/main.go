@@ -3,16 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	// 引入 product 和 user 服务的客户端
-	productservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
 	userservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
-
-	// 引入 payment 服务的客户端
-	paymentservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/payment/paymentservice"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
@@ -20,21 +14,18 @@ import (
 	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/handlers"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	"github.com/cloudwego/kitex/client"
 	"github.com/hertz-contrib/cors"
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
 )
 
 var (
-	userservice    userservice_.Client
-	productservice productservice_.Client
-	// 定义 paymentservice 客户端
-	paymentservice paymentservice_.Client
+	userservice userservice_.Client
 )
 
 // @title userservice
@@ -60,14 +51,6 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	// 初始化Redis
-	redis.InitRedis(
-		"localhost:6379", // conf.GetConf().Redis.Address,
-		"",               // conf.GetConf().Redis.Password,
-		0,                // conf.GetConf().Redis.DB,
-	)
-	defer redis.CloseRedis()
-
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
 
@@ -83,39 +66,15 @@ func main() {
 	s := fmt.Sprintf("localhost%s", address)
 	h := server.New(server.WithHostPorts(s))
 
-	// 初始化 userservice 客户端
-	c, err := userservice_.NewClient("user", client.WithHostPorts("0.0.0.0:8881"))
-	if err != nil {
-		hlog.Fatal(err)
-	}
-	userservice = c
-	middleware.UserClient = userservice
-
-	// 初始化 productservice 客户端
-	cp, errp := productservice_.NewClient("product", client.WithHostPorts("0.0.0.0:8882"))
-	if errp != nil {
-		hlog.Fatal(err)
-	}
-	productservice = cp
-
-	// 初始化 paymentservice 客户端
-	cpmt, errpmt := paymentservice_.NewClient("payment", client.WithHostPorts("0.0.0.0:8883"))
-	if errpmt != nil {
-		log.Fatal(errpmt)
-	}
-	paymentservice = cpmt
-
-	// 初始化中间件
-	middleware.InitAuth()
-
-	// h.Use(middleware.WhiteListMiddleware())
-
 	// 中间件链
 	h.Use(
+		// 黑名单检查
+		middleware.BlacklistMiddleware(),
+		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
 		conditionalAuthMiddleware(),
-		middleware.BlacklistMiddleware(), // 黑名单检查
-		middleware.CasbinMiddleware(),    // 权限检查
+		// 用户权限检查
+		middleware.CasbinMiddleware(),
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"*"}, // 允许所有来源
 			AllowMethods:     []string{"*"}, // 允许所有方法
@@ -124,55 +83,94 @@ func main() {
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
 	)
-
 	// 注册路由
 	registerRoutes(h)
-
-	// 启动 Swagger 文档服务
-	// url := swagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", s))
-	// h.GET("/swagger/*any", swagger.WrapHandler(swaggerFiles.Handler, url))
-
 	// 注册Swagger
 	registerSwagger(h, s)
-
 	h.Spin()
 }
 
-func registerRoutes(h *server.Hertz) {
-	// 用户路由
-	user := h.Group("/")
-	{
-		user.POST("/login", middleware.AuthMiddleware.LoginHandler)
-		user.POST("/register", RegisterHandler)
-		user.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
-		user.POST("/get_user", GetUserHandler)
-		user.POST("/update_user", UpdateUserHandler)
-	}
+// 作为占位
+func TODOHandler(ctx context.Context, c *app.RequestContext) {}
 
+func registerRoutes(h *server.Hertz) {
+	noAuthGroup := h.Group("")
+	{
+		// 登陆
+		noAuthGroup.POST("/login", middleware.AuthMiddleware.LoginHandler)
+		// 注册
+		noAuthGroup.POST("/register", handlers.HandleRegister)
+		// 获取首页商品
+		noAuthGroup.GET("/index/products", handlers.HandleListIndexProduct)
+		// 让前端移除token就行，这里废弃
+		// noAuthGroup.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
+	}
+	authGroup := h.Group("/auth")
+	{
+		//TODO
+		authGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
+	}
+	userGroup := h.Group("/user")
+	{
+		userGroup.GET("", handlers.HandleGetUser)
+		userGroup.PUT("", handlers.HandleUpdateUser)
+	}
+	productGroup := h.Group("/product")
+	{
+		productGroup.GET("/search", handlers.HandleSearchProducts)
+		//获取单个商品详情
+		productGroup.GET("/:id", handlers.HandleGetProduct)
+	}
+	cartGroup := h.Group("/cart")
+	{
+		cartGroup.GET("", handlers.HandleListCartItem)
+		cartGroup.POST("/:productID", handlers.HandleCreateCartItem)
+		cartGroup.DELETE("/:itemID", handlers.HandleDeleteCartItem)
+		cartGroup.PUT("/:itemID", handlers.HandleUpdateCartItemQuantity)
+	}
+	orderGroup := h.Group("/order")
+	{
+		// 创建订单
+		orderGroup.POST("", handlers.HandleCreateOrder)
+		// 获取单个订单详情
+		orderGroup.GET("/:id", handlers.HandleGetOrder)
+		// 获取用户的所有订单
+		orderGroup.GET("/user", handlers.HandleListUserOrder)
+	}
+	paymentGroup := h.Group("/payment")
+	{
+		//TODO 只需要处理支付操作，应该是个回调的接口
+		paymentGroup.POST("/:orderID", TODOHandler)
+	}
+	agentGroup := h.Group("/agent")
+	{
+		//TODO 根据用户输入获取对应商品
+		agentGroup.POST("/product/search", TODOHandler)
+		//TODO 根据用户输入获取对应订单
+		agentGroup.POST("/order/search", TODOHandler)
+	}
 	adminGroup := h.Group("/admin")
 	{
-		adminGroup.POST("/delete_user", DeleteUserHandler)
-		adminGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
-		adminGroup.POST("/block_user", AddToBlacklistHandler)
-		adminGroup.POST("/unblock_user", RemoveFromBlacklistHandler)
-	}
-
-	product := h.Group("/product")
-	{
-		product.GET("/search", handleProductSearch)
-		product.GET("/:id", handleProductGet)
-		// product.DELETE("/:id", handleProductDELETE)
-		product.PUT("/:id", handleProductPut)
-		product.POST("", handleProductPost)
-	}
-
-	// 处理与支付相关的路由
-	payment := h.Group("/payment")
-	{
-		payment.POST("/create", handleCreatePayment)
-		payment.POST("/get", handleGetPayment)
-		payment.POST("/update", handleUpdatePayment)
-		payment.POST("/delete", handleDeletePayment)
+		adminProductGroup := adminGroup.Group("/product")
+		{
+			adminProductGroup.POST("", handlers.HandleCreateProduct)
+			adminProductGroup.PUT("/:id", handlers.HandleUpdateProduct)
+			adminProductGroup.DELETE("/:id", handlers.HandleRemoveProduct)
+			adminProductGroup.GET("", handlers.HandleAdminListProduct)
+		}
+		adminUserGroup := adminGroup.Group("/users")
+		{
+			// 获取所有的用户信息
+			adminUserGroup.GET("", handlers.HandleAdminListUser)
+			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
+			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
+			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
+		}
+		adminOrderGroup := adminGroup.Group("/orders")
+		{
+			// 获取所有的订单(分页)（订单包括支付信息）
+			adminOrderGroup.GET("", handlers.HandleAdminListOrder)
+		}
 	}
 }
 

@@ -20,8 +20,8 @@ func NewPaymentBLL() *PaymentBLL {
 // CreatePayment 创建支付记录
 func (b *PaymentBLL) CreatePayment(ctx context.Context, req *payment.CreatePaymentRequest) (*payment.CreatePaymentResponse, error) {
 	p := models.Payment{
-		UserID:  uint(req.UserId),
-		OrderID: uint(req.OrderId),
+		UserID:  int(req.UserId),
+		OrderID: int(req.OrderId),
 		Amount:  req.Amount,
 		Status:  1,
 	}

@@ -1,26 +1,27 @@
 namespace go product
 
 struct Product {
-    1: i32 id;  // 来自 Base 的 ID
+    1: i32 id;
     2: string name;
     3: double price;
     4: i32 stock;
-    5: string img;  // 对应 Go 结构体中的 Image
-    6: string description;  // 对应 Go 结构体中的 Description
-    7: string created_at;  // 来自 Base 的 CreatedAt，格式为字符串
-    8: string updated_at;  // 来自 Base 的 UpdatedAt，格式为字符串
-    9: bool is_deleted;  // 来自 Base 的 IsDeleted
+    5: string img;
+    6: string description;
+    7: string created_at;
+    8: bool is_deleted;
 }
 
 service ProductService {
-    CreateProductResponse createProduct(1: CreateProductRequest req);
-    UpdateProductResponse updateProduct(1: UpdateProductRequest req);
-    DeleteProductResponse deleteProduct(1: DeleteProductRequest req);
-    GetProductByIDResponse getProductByID(1: GetProductByIDRequest req);
-    SearchProductsResponse searchProducts(1: SearchProductsRequest req);
+    CreateProductResp createProduct(1: CreateProductReq req);
+    UpdateProductResp updateProduct(1: UpdateProductReq req);
+    RemoveProductResp removeProduct(1: RemoveProductReq req);
+    GetProductByIDResp getProductByID(1: GetProductByIDReq req);
+    ListProductResp listProduct(1: ListProductReq req);
+    ListProductResp adminListProduct(1: ListProductReq req);
+    SearchProductsResp searchProducts(1: SearchProductsReq req);
 }
 
-struct CreateProductRequest {
+struct CreateProductReq {
     1: string name;
     2: string description;
     3: double price;
@@ -28,11 +29,11 @@ struct CreateProductRequest {
     5: string img;
 }
 
-struct CreateProductResponse {
+struct CreateProductResp {
     1: Product product;
 }
 
-struct UpdateProductRequest {
+struct UpdateProductReq {
     1: i32 id;
     2: string name;
     3: string description;
@@ -41,30 +42,40 @@ struct UpdateProductRequest {
     6: string img;
 }
 
-struct UpdateProductResponse {
+struct UpdateProductResp {
     1: Product product;
 }
 
-struct DeleteProductRequest {
+struct RemoveProductReq {
     1: i32 id;
 }
 
-struct DeleteProductResponse {
+struct RemoveProductResp {
     1: bool success;
 }
 
-struct GetProductByIDRequest {
+struct GetProductByIDReq {
     1: i32 id;
 }
 
-struct GetProductByIDResponse {
+struct GetProductByIDResp {
     1: Product product;
 }
 
-struct SearchProductsRequest {
+struct SearchProductsReq {
     1: string query;
 }
 
-struct SearchProductsResponse {
+struct SearchProductsResp {
     1: list<Product> products;
+}
+
+struct ListProductReq {
+    1: i32 page_num;
+    2: i32 page_size;
+}
+
+struct ListProductResp {
+    1: list<Product> products;
+    2: bool success;
 }

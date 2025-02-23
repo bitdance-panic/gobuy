@@ -12,8 +12,15 @@ hertz:
   registry_addr: "localhost:8500"
 
 tidb: 
-    dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4&parseTime=True"
-    user: <user>
-    password: <password>
-    host: <host>
-    port: <port>
+  dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4&parseTime=True"
+  user: <user>
+  password: <password>
+  host: <host>
+  port: <port>
+
+redis:
+  dsn: "rediss://%s:%s@%s:%s"
+  username: default
+  host: <host>
+  password: <pass>
+  port: 6379

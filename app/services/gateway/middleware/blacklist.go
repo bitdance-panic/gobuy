@@ -28,12 +28,6 @@ var (
 // 黑名单中间件
 func BlacklistMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
-		// 检查是否跳过认证(白名单接口)
-		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
-			c.Next(ctx)
-			return
-		}
-
 		// 获取用户标识（示例：优先取用户ID，未登录则取IP）
 		var identifier string
 		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
