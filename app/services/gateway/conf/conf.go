@@ -43,10 +43,11 @@ type Postgres struct {
 }
 
 type Redis struct {
-	Address  string `yaml:"address"`
+	DSN      string `yaml:"dsn"`
+	Host     string `yaml:"host"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
-	DB       int    `yaml:"db"`
+	Port     string `yaml:"port"`
 }
 
 type Hertz struct {

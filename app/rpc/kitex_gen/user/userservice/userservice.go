@@ -13,14 +13,14 @@ import (
 var errInvalidMessageType = errors.New("invalid message type for service method handler")
 
 var serviceMethods = map[string]kitex.MethodInfo{
-	"Register": kitex.NewMethodInfo(
+	"register": kitex.NewMethodInfo(
 		registerHandler,
 		newUserServiceRegisterArgs,
 		newUserServiceRegisterResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"Login": kitex.NewMethodInfo(
+	"login": kitex.NewMethodInfo(
 		loginHandler,
 		newUserServiceLoginArgs,
 		newUserServiceLoginResult,
@@ -34,31 +34,38 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"UpdateUser": kitex.NewMethodInfo(
+	"updateUser": kitex.NewMethodInfo(
 		updateUserHandler,
 		newUserServiceUpdateUserArgs,
 		newUserServiceUpdateUserResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"DeleteUser": kitex.NewMethodInfo(
-		deleteUserHandler,
-		newUserServiceDeleteUserArgs,
-		newUserServiceDeleteUserResult,
+	"removeUser": kitex.NewMethodInfo(
+		removeUserHandler,
+		newUserServiceRemoveUserArgs,
+		newUserServiceRemoveUserResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"BlockUser": kitex.NewMethodInfo(
+	"blockUser": kitex.NewMethodInfo(
 		blockUserHandler,
 		newUserServiceBlockUserArgs,
 		newUserServiceBlockUserResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"UnblockUser": kitex.NewMethodInfo(
+	"unblockUser": kitex.NewMethodInfo(
 		unblockUserHandler,
 		newUserServiceUnblockUserArgs,
 		newUserServiceUnblockUserResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"adminListUser": kitex.NewMethodInfo(
+		adminListUserHandler,
+		newUserServiceAdminListUserArgs,
+		newUserServiceAdminListUserResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
@@ -200,22 +207,22 @@ func newUserServiceUpdateUserResult() interface{} {
 	return user.NewUserServiceUpdateUserResult()
 }
 
-func deleteUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*user.UserServiceDeleteUserArgs)
-	realResult := result.(*user.UserServiceDeleteUserResult)
-	success, err := handler.(user.UserService).DeleteUser(ctx, realArg.Req)
+func removeUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceRemoveUserArgs)
+	realResult := result.(*user.UserServiceRemoveUserResult)
+	success, err := handler.(user.UserService).RemoveUser(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
 	realResult.Success = success
 	return nil
 }
-func newUserServiceDeleteUserArgs() interface{} {
-	return user.NewUserServiceDeleteUserArgs()
+func newUserServiceRemoveUserArgs() interface{} {
+	return user.NewUserServiceRemoveUserArgs()
 }
 
-func newUserServiceDeleteUserResult() interface{} {
-	return user.NewUserServiceDeleteUserResult()
+func newUserServiceRemoveUserResult() interface{} {
+	return user.NewUserServiceRemoveUserResult()
 }
 
 func blockUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -254,6 +261,24 @@ func newUserServiceUnblockUserResult() interface{} {
 	return user.NewUserServiceUnblockUserResult()
 }
 
+func adminListUserHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user.UserServiceAdminListUserArgs)
+	realResult := result.(*user.UserServiceAdminListUserResult)
+	success, err := handler.(user.UserService).AdminListUser(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserServiceAdminListUserArgs() interface{} {
+	return user.NewUserServiceAdminListUserArgs()
+}
+
+func newUserServiceAdminListUserResult() interface{} {
+	return user.NewUserServiceAdminListUserResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -268,7 +293,7 @@ func (p *kClient) Register(ctx context.Context, req *user.RegisterReq) (r *user.
 	var _args user.UserServiceRegisterArgs
 	_args.Req = req
 	var _result user.UserServiceRegisterResult
-	if err = p.c.Call(ctx, "Register", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "register", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -278,7 +303,7 @@ func (p *kClient) Login(ctx context.Context, req *user.LoginReq) (r *user.LoginR
 	var _args user.UserServiceLoginArgs
 	_args.Req = req
 	var _result user.UserServiceLoginResult
-	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "login", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -298,17 +323,17 @@ func (p *kClient) UpdateUser(ctx context.Context, req *user.UpdateUserReq) (r *u
 	var _args user.UserServiceUpdateUserArgs
 	_args.Req = req
 	var _result user.UserServiceUpdateUserResult
-	if err = p.c.Call(ctx, "UpdateUser", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "updateUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) DeleteUser(ctx context.Context, req *user.DeleteUserReq) (r *user.DeleteUserResp, err error) {
-	var _args user.UserServiceDeleteUserArgs
+func (p *kClient) RemoveUser(ctx context.Context, req *user.RemoveUserReq) (r *user.RemoveUserResp, err error) {
+	var _args user.UserServiceRemoveUserArgs
 	_args.Req = req
-	var _result user.UserServiceDeleteUserResult
-	if err = p.c.Call(ctx, "DeleteUser", &_args, &_result); err != nil {
+	var _result user.UserServiceRemoveUserResult
+	if err = p.c.Call(ctx, "removeUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -318,7 +343,7 @@ func (p *kClient) BlockUser(ctx context.Context, req *user.BlockUserReq) (r *use
 	var _args user.UserServiceBlockUserArgs
 	_args.Req = req
 	var _result user.UserServiceBlockUserResult
-	if err = p.c.Call(ctx, "BlockUser", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "blockUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
@@ -328,7 +353,17 @@ func (p *kClient) UnblockUser(ctx context.Context, req *user.UnblockUserReq) (r 
 	var _args user.UserServiceUnblockUserArgs
 	_args.Req = req
 	var _result user.UserServiceUnblockUserResult
-	if err = p.c.Call(ctx, "UnblockUser", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "unblockUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) AdminListUser(ctx context.Context, req *user.AdminListUserReq) (r *user.AdminListUserResp, err error) {
+	var _args user.UserServiceAdminListUserArgs
+	_args.Req = req
+	var _result user.UserServiceAdminListUserResult
+	if err = p.c.Call(ctx, "adminListUser", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

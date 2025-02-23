@@ -19,16 +19,77 @@
     "host": "localhost:8888",
     "basePath": "/",
     "paths": {
-        "/login": {
-            "get": {
-                "description": "这是一段Description",
+        "/admin/block_user": {
+            "post": {
+                "description": "封禁指定用户/IP",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "这是一段Summary",
+                "summary": "添加黑名单条目",
+                "responses": {}
+            }
+        },
+        "/admin/unblock_user": {
+            "delete": {
+                "description": "解除封禁",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "移除黑名单条目",
+                "responses": {}
+            }
+        },
+        "/payment": {
+            "post": {
+                "description": "创建一个新的支付记录并返回相关信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "创建支付记录",
+                "responses": {}
+            }
+        },
+        "/payment/{id}": {
+            "get": {
+                "description": "根据支付记录ID获取支付记录详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "获取支付记录",
+                "responses": {}
+            },
+            "put": {
+                "description": "更新指定支付记录的状态或其他信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "更新支付记录",
+                "responses": {}
+            },
+            "delete": {
+                "description": "删除指定ID的支付记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "删除支付记录",
                 "responses": {}
             }
         },

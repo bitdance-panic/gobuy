@@ -15,15 +15,6 @@ type Base struct {
 	IsDeleted bool
 }
 
-// 定义订单状态常量
-type OrderStatus int
-
-const (
-	OrderStatusPending   OrderStatus = 1 // 待支付
-	OrderStatusPaid      OrderStatus = 2 // 已支付
-	OrderStatusCancelled OrderStatus = 3 // 已取消
-)
-
 // 贫血模型
 type User struct {
 	Base
@@ -33,7 +24,6 @@ type User struct {
 	RefreshToken   string
 
 	Roles  []Role `gorm:"many2many:user_role;"` // 用户和角色的多对多关系
-	Cart   Cart
 	Orders []Order
 }
 
@@ -52,13 +42,13 @@ type Permission struct {
 }
 
 type UserRole struct {
-	UserID uint
-	RoleID uint
+	UserID int
+	RoleID int
 }
 
 type RolePermission struct {
-	RoleID       uint
-	PermissionID uint
+	RoleID       int
+	PermissionID int
 }
 
 type Product struct {
@@ -68,51 +58,35 @@ type Product struct {
 	Stock       int
 	Image       string
 	Description string
-	// 规格
-}
-
-type Cart struct {
-	Base
-	UserID uint       // 用户 ID
-	Items  []CartItem // 购物车项
 }
 
 type CartItem struct {
 	Base
-	CartID    uint    // 购物车 ID
-	ProductID uint    // 商品 ID
-	Quantity  int     `gorm:"not null"`             // 商品数量
-	Product   Product `gorm:"foreignKey:ProductID"` // 关联商品
+	UserID    int
+	ProductID int
+	Quantity  int     `gorm:"not null"`
+	Product   Product `gorm:"foreignKey:ProductID"`
 }
 
 type Order struct {
 	Base
-	UserID      uint    // 用户 ID
-	OrderNumber string  `gorm:"unique;not null"` // 订单号
-	TotalAmount float64 `gorm:"not null"`        // 订单总金额
+	UserID     int
+	Number     string  `gorm:"unique;not null"`
+	TotalPrice float64 `gorm:"not null"`
 	// OrderStatus
-	Status int         `gorm:"type:varchar(20);not null"` // 订单状态
-	Items  []OrderItem // 订单项
+	Status  int `gorm:"type:varchar(20);not null"`
+	Items   []OrderItem
+	PayTime time.Time
 }
 
 type OrderItem struct {
 	Base
-	OrderID     uint    // 订单 ID
-	ProductID   uint    // 商品 ID
+	OrderID     int     // 订单 ID
+	ProductID   int     // 商品 ID
 	Quantity    int     `gorm:"not null"`             // 商品数量
 	Price       float64 `gorm:"not null"`             // 商品单价
 	Product     Product `gorm:"foreignKey:ProductID"` // 关联商品
 	ProductName string
-}
-
-// 新增一个 Payment 模型
-
-type Payment struct {
-	Base
-	UserID  uint    // 对应用户ID
-	OrderID uint    // 对应订单ID
-	Amount  float64 // 支付金额
-	Status  int     // 支付状态(可用枚举或 int 表示)
 }
 
 // 黑名单条目模型
@@ -151,10 +125,6 @@ func (RolePermission) TableName() string {
 	return "role_permission"
 }
 
-func (Cart) TableName() string {
-	return "cart"
-}
-
 func (CartItem) TableName() string {
 	return "cart_item"
 }
@@ -169,10 +139,6 @@ func (OrderItem) TableName() string {
 
 func (Product) TableName() string {
 	return "product"
-}
-
-func (Payment) TableName() string {
-	return "payment"
 }
 
 func (Blacklist) TableName() string {
@@ -190,12 +156,10 @@ func AutoMigrate(db *gorm.DB) {
 			&Permission{},
 			&UserRole{},
 			&RolePermission{},
-			&Cart{},
 			&CartItem{},
 			&Order{},
 			&OrderItem{},
 			&Product{},
-			&Payment{}, // 新增的 Payment 模型
 			&Blacklist{},
 		)
 	}

@@ -10,8 +10,8 @@ use (
 	services/agent
 	utils
 	services/product
-	services/stock
 	services/payment
+	services/cart
 )
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0

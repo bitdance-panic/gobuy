@@ -1,7 +1,8 @@
 package dao
 
 import (
-	"context"
+	"consts"
+
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -9,69 +10,56 @@ import (
 
 type Order = models.Order
 
-func CreateOrder(db *gorm.DB, ctx context.Context, order *models.Order) error {
-	return db.WithContext(ctx).Create(order).Error
+func CreateOrder(db *gorm.DB, order *Order) (*Order, error) {
+	if err := db.Create(order).Error; err != nil {
+		return nil, err
+	}
+	return order, nil
 }
 
-func DeleteOrder(db *gorm.DB, ctx context.Context, order *models.Order) error {
-	if order == nil {
-		return errors.New("order cannot be nil")
-	}
-	//删除订单
-	result := db.Delete(order)
+func GetOrderByID(db *gorm.DB, orderID int) (*Order, error) {
+	var order Order
+	result := db.First(&order, "id = ?", orderID)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("order not found")
+		return nil, nil
 	}
-	return nil
+	return &order, nil
 }
-func UpdateOrder(db *gorm.DB, ctx context.Context, order *models.Order) error {
+
+func UpdateOrderStatus(db *gorm.DB, order *Order, newStatus consts.OrderStatus) error {
 	if order == nil {
-		return errors.New("order can't be nil")
+		return errors.New("order is nil")
 	}
-	//更新订单状态
-	result := db.Model(&order).Updates(map[string]interface{}{
-		"status":      order.Status,
-		"totalamount": order.TotalAmount,
-		"items":       order.Items,
-	})
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("no row updated")
-	}
-	return nil
+	order.Status = int(newStatus)
+	return db.Save(order).Error
 }
-func GetOrder(db *gorm.DB, ctx context.Context, order *models.Order) error {
-	if order == nil {
-		return errors.New("order can't be nil")
-	}
-	//查询订单
-	result := db.First(order, "id = ?", order.ID)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("order not found")
-	}
-	return nil
-}
-func GetOrderList(db *gorm.DB, ctx context.Context, order *models.Order) error {
-	if order == nil {
-		return errors.New("order can't be nil")
-	}
-	//查询订单列表
+
+func ListUserOrder(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]models.Order, error) {
 	var orders []models.Order
-	result := db.Where("user_id = ?", order.UserID).Find(&orders)
-	if result.Error != nil {
-		return result.Error
+	err := db.Limit(pageSize).Offset((pageNum-1)*pageSize).Where("user_id = ?", userID).Find(&orders).Error
+	if err != nil {
+		return nil, err
 	}
-	if result.RowsAffected == 0 {
-		return errors.New("order not found")
+	return &orders, nil
+}
+
+func AdminListOrder(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]models.Order, error) {
+	var orders []models.Order
+	err := db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&orders).Error
+	if err != nil {
+		return nil, err
 	}
-	*order = orders[0] //假设只需要第一个订单
-	return nil
+	return &orders, nil
+}
+
+func ListPendingOrder(db *gorm.DB) (*[]models.Order, error) {
+	var orders []models.Order
+	err := db.Where("status = ?", consts.OrderStatusPending).Find(&orders).Error
+	if err != nil {
+		return nil, err
+	}
+	return &orders, nil
 }

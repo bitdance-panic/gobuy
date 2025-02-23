@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func HasPermission(db *gorm.DB, userID uint, permissionName string) bool {
+func HasPermission(db *gorm.DB, userID int, permissionName string) bool {
 	var count int64
 	db.Model(&User{}).
 		Joins("JOIN user_roles ON user_roles.user_id = users.id").
