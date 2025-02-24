@@ -5,7 +5,7 @@ struct CartItem {
     2: string name;
     3: double price;
     4: i32 quantity;
-    5: string img;
+    5: string image;
     6: bool valid;
 }
 

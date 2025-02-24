@@ -3,6 +3,7 @@ package tidb
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	driver "github.com/go-sql-driver/mysql"
@@ -35,6 +36,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
+	log.Println("数据库连接成功")
 	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
 	// 	panic(err)
 	// }

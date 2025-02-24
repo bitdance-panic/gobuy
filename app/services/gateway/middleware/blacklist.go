@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 
@@ -31,13 +30,15 @@ func BlacklistMiddleware() app.HandlerFunc {
 		// 获取用户标识（示例：优先取用户ID，未登录则取IP）
 		var identifier string
 		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
-			userID := claims[IdentityKey].(float64)
-			userIDStr := strconv.Itoa(int(userID))
-			identifier = fmt.Sprintf("user:%v", userIDStr)
+			userID, exists := claims[IdentityKey]
+			if exists {
+				identifier = fmt.Sprintf("user:%d", userID.(int))
+			} else {
+				identifier = fmt.Sprintf("ip:%s", c.ClientIP())
+			}
 		} else {
 			identifier = fmt.Sprintf("ip:%s", c.ClientIP())
 		}
-
 		// 检查Redis黑名单
 		if isBlocked, err := CheckBlockedInRedis(identifier); err != nil {
 			hlog.Errorf("Redis查询失败: %v", err)
