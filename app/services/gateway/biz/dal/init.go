@@ -6,7 +6,7 @@ import (
 )
 
 func Init() {
-	redis.Init()
 	tidb.Init()
+	redis.Init()
 	defer redis.Close()
 }

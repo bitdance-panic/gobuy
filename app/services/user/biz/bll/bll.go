@@ -73,7 +73,6 @@ func GetUser(ctx context.Context, userID int) (*rpc_user.GetUserResp, error) {
 	if err != nil {
 		return &rpc_user.GetUserResp{Success: false}, nil
 	}
-
 	return &rpc_user.GetUserResp{
 		Success:  true,
 		UserId:   int32(user.ID),

@@ -4,14 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-
-	userservice_ "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
-
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
-	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/handlers"
@@ -24,9 +18,15 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-var (
-	userservice userservice_.Client
-)
+func addUidMiddleware() app.HandlerFunc {
+	// claims := jwt.ExtractClaims(ctx, c)
+	// userID := claims["uid"].(int)
+	return func(ctx context.Context, c *app.RequestContext) {
+		fmt.Println("设置UID")
+		c.Set("uid", 450002)
+		c.Next(ctx)
+	}
+}
 
 // @title userservice
 // @version 1.0
@@ -45,10 +45,10 @@ func main() {
 	// 初始化数据库
 	dal.Init()
 
-	// 初始化Casbin
-	if err := casbin.InitCasbin(tidb.DB); err != nil {
-		hlog.Fatalf("Casbin初始化失败: %v", err)
-	}
+	// 不要每次都初始化Casbin
+	// if err := casbin.InitCasbin(tidb.DB); err != nil {
+	// 	hlog.Fatalf("Casbin初始化失败: %v", err)
+	// }
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
 	// 同步黑名单到Redis
@@ -68,13 +68,6 @@ func main() {
 
 	// 中间件链
 	h.Use(
-		// 黑名单检查
-		middleware.BlacklistMiddleware(),
-		// 白名单放行接口
-		middleware.WhiteListMiddleware(),
-		conditionalAuthMiddleware(),
-		// 用户权限检查
-		middleware.CasbinMiddleware(),
 		cors.New(cors.Config{
 			AllowOrigins:     []string{"*"}, // 允许所有来源
 			AllowMethods:     []string{"*"}, // 允许所有方法
@@ -82,6 +75,14 @@ func main() {
 			ExposeHeaders:    []string{"*"}, // 暴露所有头信息
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
+		// 黑名单检查
+		// middleware.BlacklistMiddleware(),
+		// 白名单放行接口
+		middleware.WhiteListMiddleware(),
+		// conditionalAuthMiddleware(),
+		addUidMiddleware(),
+		// 用户权限检查
+		// middleware.CasbinMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)
@@ -96,45 +97,51 @@ func TODOHandler(ctx context.Context, c *app.RequestContext) {}
 func registerRoutes(h *server.Hertz) {
 	noAuthGroup := h.Group("")
 	{
-		// 登陆
+		//TODO 登陆
 		noAuthGroup.POST("/login", middleware.AuthMiddleware.LoginHandler)
 		// 注册
 		noAuthGroup.POST("/register", handlers.HandleRegister)
-		// 获取首页商品
+		// 未登录时获取首页商品
 		noAuthGroup.GET("/index/products", handlers.HandleListIndexProduct)
 		// 让前端移除token就行，这里废弃
 		// noAuthGroup.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
 	}
 	authGroup := h.Group("/auth")
 	{
-		//TODO
+		//TODO 刷新token
 		authGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
 	}
 	userGroup := h.Group("/user")
 	{
+		// 自己获取自己信息
 		userGroup.GET("", handlers.HandleGetUser)
+		// 更新个人信息
 		userGroup.PUT("", handlers.HandleUpdateUser)
 	}
 	productGroup := h.Group("/product")
 	{
+		// 搜索商品
 		productGroup.GET("/search", handlers.HandleSearchProducts)
-		//获取单个商品详情
+		// 获取单个商品详情
 		productGroup.GET("/:id", handlers.HandleGetProduct)
 	}
 	cartGroup := h.Group("/cart")
 	{
+		// 获取用户购物车
 		cartGroup.GET("", handlers.HandleListCartItem)
+		// 将商品放入购物车
 		cartGroup.POST("/:productID", handlers.HandleCreateCartItem)
+		// 从购物车移除单个商品
 		cartGroup.DELETE("/:itemID", handlers.HandleDeleteCartItem)
 		cartGroup.PUT("/:itemID", handlers.HandleUpdateCartItemQuantity)
 	}
 	orderGroup := h.Group("/order")
 	{
-		// 创建订单
+		//TODO 创建订单
 		orderGroup.POST("", handlers.HandleCreateOrder)
-		// 获取单个订单详情
+		//TODO 获取单个订单详情
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
-		// 获取用户的所有订单
+		//TODO 获取用户的所有订单
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
 	}
 	paymentGroup := h.Group("/payment")
@@ -153,23 +160,30 @@ func registerRoutes(h *server.Hertz) {
 	{
 		adminProductGroup := adminGroup.Group("/product")
 		{
+			// 创建商品
 			adminProductGroup.POST("", handlers.HandleCreateProduct)
+			// 更新商品
 			adminProductGroup.PUT("/:id", handlers.HandleUpdateProduct)
+			// 移除商品
 			adminProductGroup.DELETE("/:id", handlers.HandleRemoveProduct)
-			adminProductGroup.GET("", handlers.HandleAdminListProduct)
+			// 获取所有商品
+			adminProductGroup.GET("/list", handlers.HandleAdminListProduct)
 		}
-		adminUserGroup := adminGroup.Group("/users")
+		adminUserGroup := adminGroup.Group("/user")
 		{
 			// 获取所有的用户信息
-			adminUserGroup.GET("", handlers.HandleAdminListUser)
+			adminUserGroup.GET("/list", handlers.HandleAdminListUser)
+			//TODO 封禁用户
 			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
+			//TODO 解封
 			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
+			// 移除用户
 			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
 		}
-		adminOrderGroup := adminGroup.Group("/orders")
+		adminOrderGroup := adminGroup.Group("/order")
 		{
-			// 获取所有的订单(分页)（订单包括支付信息）
-			adminOrderGroup.GET("", handlers.HandleAdminListOrder)
+			//TODO 获取所有的订单(分页)（订单包括支付信息）
+			adminOrderGroup.GET("/list", handlers.HandleAdminListOrder)
 		}
 	}
 }

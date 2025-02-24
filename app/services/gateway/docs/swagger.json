@@ -45,54 +45,6 @@
                 "responses": {}
             }
         },
-        "/payment": {
-            "post": {
-                "description": "创建一个新的支付记录并返回相关信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "创建支付记录",
-                "responses": {}
-            }
-        },
-        "/payment/{id}": {
-            "get": {
-                "description": "根据支付记录ID获取支付记录详情",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "获取支付记录",
-                "responses": {}
-            },
-            "put": {
-                "description": "更新指定支付记录的状态或其他信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "更新支付记录",
-                "responses": {}
-            },
-            "delete": {
-                "description": "删除指定ID的支付记录",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "删除支付记录",
-                "responses": {}
-            }
-        },
         "/product": {
             "get": {
                 "description": "这是一段Description",

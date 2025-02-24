@@ -2,7 +2,10 @@ module github.com/bitdance-panic/gobuy/app/utils
 
 go 1.22.1
 
-require github.com/cloudwego/hertz v0.9.5
+require (
+	github.com/cloudwego/hertz v0.9.5
+	github.com/google/uuid v1.6.0
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.0 // indirect

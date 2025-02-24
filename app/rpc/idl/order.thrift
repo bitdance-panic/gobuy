@@ -29,8 +29,8 @@ service OrderService{
     CreateOrderResp createOrder(1: CreateOrderReq req);
     UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
     GetOrderResp getOrder(1: GetOrderReq req);
-    ListUserOrderResp listUserOrder(1: ListUserOrderReq req);
-    ListUserOrderResp adminListOrder(1: ListUserOrderReq req);
+    ListOrderResp listUserOrder(1: ListOrderReq req);
+    ListOrderResp adminListOrder(1: ListOrderReq req);
 }
 struct CreateOrderReq{
     1: i32 user_id;
@@ -47,12 +47,12 @@ struct UpdateOrderStatusResp{
     1: i32 new_status;
     2: bool success;
 }
-struct ListUserOrderReq{
+struct ListOrderReq{
     1: i32 user_id;
     2: i32 page_num;
     3: i32 page_size;
 }
-struct ListUserOrderResp{
+struct ListOrderResp{
     1: list<Order> orders;
 }
 struct GetOrderReq{

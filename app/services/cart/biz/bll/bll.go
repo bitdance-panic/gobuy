@@ -16,11 +16,7 @@ import (
 
 type CartBLL struct{}
 
-func NewCartBLL() *CartBLL {
-	return &CartBLL{}
-}
-
-func (*CartBLL) CreateItem(ctx context.Context, req *rpc_cart.CreateItemReq) (*rpc_cart.CreateItemResp, error) {
+func CreateItem(ctx context.Context, req *rpc_cart.CreateItemReq) (*rpc_cart.CreateItemResp, error) {
 	// 先检查商品是否存在
 	getProductResp, err := clients.ProductClient.GetProductByID(ctx, &rpc_product.GetProductByIDReq{Id: int32(req.ProductId)})
 	if err != nil {
@@ -37,7 +33,7 @@ func (*CartBLL) CreateItem(ctx context.Context, req *rpc_cart.CreateItemReq) (*r
 	return &rpc_cart.CreateItemResp{Success: ok}, nil
 }
 
-func (*CartBLL) DeleteItem(ctx context.Context, req *rpc_cart.DeleteItemReq) (*rpc_cart.DeleteItemResp, error) {
+func DeleteItem(ctx context.Context, req *rpc_cart.DeleteItemReq) (*rpc_cart.DeleteItemResp, error) {
 	err := dao.Delete(tidb.DB, int(req.ItemId))
 	if err != nil {
 		return &cart.DeleteItemResp{Success: false}, err
@@ -45,7 +41,7 @@ func (*CartBLL) DeleteItem(ctx context.Context, req *rpc_cart.DeleteItemReq) (*r
 	return &cart.DeleteItemResp{Success: true}, nil
 }
 
-func (*CartBLL) UpdateQuantity(ctx context.Context, req *rpc_cart.UpdateQuantityReq) (*rpc_cart.UpdateQuantityResp, error) {
+func UpdateQuantity(ctx context.Context, req *rpc_cart.UpdateQuantityReq) (*rpc_cart.UpdateQuantityResp, error) {
 	item, err := dao.GetItemByID(tidb.DB, int(req.ItemId))
 	if err != nil {
 		return nil, err
@@ -65,7 +61,7 @@ func (*CartBLL) UpdateQuantity(ctx context.Context, req *rpc_cart.UpdateQuantity
 	}, nil
 }
 
-func (*CartBLL) ListItem(ctx context.Context, req *rpc_cart.ListItemReq) (*rpc_cart.ListItemResp, error) {
+func ListItem(ctx context.Context, req *rpc_cart.ListItemReq) (*rpc_cart.ListItemResp, error) {
 	items, err := dao.ListItemsByUserID(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
@@ -97,7 +93,7 @@ func convertToProtoCartItem(item *models.CartItem, p *rpc_product.Product) *rpc_
 		Name:     p.Name,
 		Price:    p.Price,
 		Quantity: int32(item.Quantity),
-		Img:      p.Img,
+		Image:    p.Image,
 		Valid:    true,
 	}
 }

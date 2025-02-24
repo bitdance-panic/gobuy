@@ -8,9 +8,7 @@ import (
 	driver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 
-	// "gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	// "gorm.io/plugin/opentelemetry/tracing"
 )
 
 var DB *gorm.DB
@@ -25,7 +23,6 @@ func Init() {
 		panic(err)
 	}
 	dsn := fmt.Sprintf(conf_.Tidb.DSN, conf_.Tidb.User, conf_.Tidb.Password, conf_.Tidb.Host, conf_.Tidb.Port)
-	// log.Printf("%s", dsn)
 	DB, err = gorm.Open(mysql.Open(dsn),
 		&gorm.Config{
 			PrepareStmt:            true,

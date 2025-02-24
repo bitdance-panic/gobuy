@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"time"
 
 	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
@@ -34,14 +36,28 @@ func HandleRegister(ctx context.Context, c *app.RequestContext) {
 
 // 搜索首页商品
 func HandleListIndexProduct(ctx context.Context, c *app.RequestContext) {
-	req := rpc_product.ListProductReq{}
+	pageNum, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	pageSize, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	req := rpc_product.ListProductReq{
+		PageNum:  int32(pageNum),
+		PageSize: int32(pageSize),
+	}
 	if err := c.BindAndValidate(&req); err != nil {
 		hlog.Warnf("ListIndexProduct failed, validation error: %v", err)
 		utils.Fail(c, err.Error())
 		return
 	}
 	resp, err := clients.ProductClient.ListProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
-	if err != nil || !resp.Success {
+	fmt.Println(resp, err)
+	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}

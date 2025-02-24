@@ -6,6 +6,7 @@ replace (
 	github.com/bitdance-panic/gobuy/app/models => ../../models
 	github.com/bitdance-panic/gobuy/app/rpc => ../../rpc
 	github.com/bitdance-panic/gobuy/app/utils => ../../utils
+	github.com/bitdance-panic/gobuy/app/consts => ../../consts
 )
 
 require (
