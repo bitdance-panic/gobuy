@@ -6,6 +6,8 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/casbin"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/handlers"
@@ -13,17 +15,29 @@ import (
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/cors"
+	"github.com/hertz-contrib/jwt"
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
+
+	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
 )
 
 func addUidMiddleware() app.HandlerFunc {
-	// claims := jwt.ExtractClaims(ctx, c)
-	// userID := claims["uid"].(int)
 	return func(ctx context.Context, c *app.RequestContext) {
-		fmt.Println("设置UID")
-		c.Set("uid", 450002)
+		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
+			c.Next(ctx) // 白名单跳过认证
+			return
+		}
+
+		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
+			fmt.Println("设置UID")
+			userID := claims[middleware.IdentityKey]
+			c.Set("uid", int(userID.(float64)))
+		}
+		// fmt.Println("设置UID")
+		// c.Set("uid", 450002)
 		c.Next(ctx)
 	}
 }
@@ -46,20 +60,18 @@ func main() {
 	dal.Init()
 
 	// 不要每次都初始化Casbin
-	// if err := casbin.InitCasbin(tidb.DB); err != nil {
-	// 	hlog.Fatalf("Casbin初始化失败: %v", err)
-	// }
+	if err := casbin.InitCasbin(tidb.DB); err != nil {
+		hlog.Fatalf("Casbin初始化失败: %v", err)
+	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
+
+	clients.Init()
 
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
 
 	// 启动自动清理任务
 	middleware.StartRedisCleanupTask()
-
-	// 初始化黑名单
-	// middleware.InitBlacklistCache()
-	// middleware.StartBlacklistCleanupTask()
 
 	// 创建Hertz实例
 	address := conf.GetConf().Hertz.Address
@@ -75,14 +87,14 @@ func main() {
 			ExposeHeaders:    []string{"*"}, // 暴露所有头信息
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
-		// 黑名单检查
-		// middleware.BlacklistMiddleware(),
 		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
-		// conditionalAuthMiddleware(),
+		conditionalAuthMiddleware(),
 		addUidMiddleware(),
+		// 黑名单检查
+		middleware.BlacklistMiddleware(),
 		// 用户权限检查
-		// middleware.CasbinMiddleware(),
+		middleware.CasbinMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)
@@ -97,7 +109,7 @@ func TODOHandler(ctx context.Context, c *app.RequestContext) {}
 func registerRoutes(h *server.Hertz) {
 	noAuthGroup := h.Group("")
 	{
-		//TODO 登陆
+		// TODO 登陆
 		noAuthGroup.POST("/login", middleware.AuthMiddleware.LoginHandler)
 		// 注册
 		noAuthGroup.POST("/register", handlers.HandleRegister)
@@ -108,7 +120,7 @@ func registerRoutes(h *server.Hertz) {
 	}
 	authGroup := h.Group("/auth")
 	{
-		//TODO 刷新token
+		// TODO 刷新token
 		authGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
 	}
 	userGroup := h.Group("/user")
@@ -137,23 +149,23 @@ func registerRoutes(h *server.Hertz) {
 	}
 	orderGroup := h.Group("/order")
 	{
-		//TODO 创建订单
+		// TODO 创建订单
 		orderGroup.POST("", handlers.HandleCreateOrder)
-		//TODO 获取单个订单详情
+		// TODO 获取单个订单详情
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
-		//TODO 获取用户的所有订单
+		// TODO 获取用户的所有订单
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
 	}
 	paymentGroup := h.Group("/payment")
 	{
-		//TODO 只需要处理支付操作，应该是个回调的接口
+		// TODO 只需要处理支付操作，应该是个回调的接口
 		paymentGroup.POST("/:orderID", TODOHandler)
 	}
 	agentGroup := h.Group("/agent")
 	{
-		//TODO 根据用户输入获取对应商品
+		// TODO 根据用户输入获取对应商品
 		agentGroup.POST("/product/search", TODOHandler)
-		//TODO 根据用户输入获取对应订单
+		// TODO 根据用户输入获取对应订单
 		agentGroup.POST("/order/search", TODOHandler)
 	}
 	adminGroup := h.Group("/admin")
@@ -173,16 +185,16 @@ func registerRoutes(h *server.Hertz) {
 		{
 			// 获取所有的用户信息
 			adminUserGroup.GET("/list", handlers.HandleAdminListUser)
-			//TODO 封禁用户
+			// TODO 封禁用户
 			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
-			//TODO 解封
+			// TODO 解封
 			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
 			// 移除用户
 			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
 		}
 		adminOrderGroup := adminGroup.Group("/order")
 		{
-			//TODO 获取所有的订单(分页)（订单包括支付信息）
+			// TODO 获取所有的订单(分页)（订单包括支付信息）
 			adminOrderGroup.GET("/list", handlers.HandleAdminListOrder)
 		}
 	}
