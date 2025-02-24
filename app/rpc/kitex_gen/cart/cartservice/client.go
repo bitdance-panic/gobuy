@@ -14,6 +14,7 @@ type Client interface {
 	CreateItem(ctx context.Context, req *cart.CreateItemReq, callOptions ...callopt.Option) (r *cart.CreateItemResp, err error)
 	UpdateQuantity(ctx context.Context, req *cart.UpdateQuantityReq, callOptions ...callopt.Option) (r *cart.UpdateQuantityResp, err error)
 	DeleteItem(ctx context.Context, req *cart.DeleteItemReq, callOptions ...callopt.Option) (r *cart.DeleteItemResp, err error)
+	GetItem(ctx context.Context, req *cart.GetItemReq, callOptions ...callopt.Option) (r *cart.GetItemResp, err error)
 	ListItem(ctx context.Context, req *cart.ListItemReq, callOptions ...callopt.Option) (r *cart.ListItemResp, err error)
 }
 
@@ -59,6 +60,11 @@ func (p *kCartServiceClient) UpdateQuantity(ctx context.Context, req *cart.Updat
 func (p *kCartServiceClient) DeleteItem(ctx context.Context, req *cart.DeleteItemReq, callOptions ...callopt.Option) (r *cart.DeleteItemResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.DeleteItem(ctx, req)
+}
+
+func (p *kCartServiceClient) GetItem(ctx context.Context, req *cart.GetItemReq, callOptions ...callopt.Option) (r *cart.GetItemResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetItem(ctx, req)
 }
 
 func (p *kCartServiceClient) ListItem(ctx context.Context, req *cart.ListItemReq, callOptions ...callopt.Option) (r *cart.ListItemResp, err error) {

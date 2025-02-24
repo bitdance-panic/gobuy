@@ -18,3 +18,13 @@ flush privileges;
 
 
 deleted的
+
+
+
+
+
+db.Debug()
+
+
+
+添加address

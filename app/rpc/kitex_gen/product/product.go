@@ -2730,7 +2730,8 @@ func (p *SearchProductsReq) Field3DeepEqual(src int32) bool {
 }
 
 type SearchProductsResp struct {
-	Products []*Product `thrift:"products,1" frugal:"1,default,list<Product>" json:"products"`
+	Products   []*Product `thrift:"products,1" frugal:"1,default,list<Product>" json:"products"`
+	TotalCount int64      `thrift:"total_count,2" frugal:"2,default,i64" json:"total_count"`
 }
 
 func NewSearchProductsResp() *SearchProductsResp {
@@ -2743,12 +2744,20 @@ func (p *SearchProductsResp) InitDefault() {
 func (p *SearchProductsResp) GetProducts() (v []*Product) {
 	return p.Products
 }
+
+func (p *SearchProductsResp) GetTotalCount() (v int64) {
+	return p.TotalCount
+}
 func (p *SearchProductsResp) SetProducts(val []*Product) {
 	p.Products = val
+}
+func (p *SearchProductsResp) SetTotalCount(val int64) {
+	p.TotalCount = val
 }
 
 var fieldIDToName_SearchProductsResp = map[int16]string{
 	1: "products",
+	2: "total_count",
 }
 
 func (p *SearchProductsResp) Read(iprot thrift.TProtocol) (err error) {
@@ -2773,6 +2782,14 @@ func (p *SearchProductsResp) Read(iprot thrift.TProtocol) (err error) {
 		case 1:
 			if fieldTypeId == thrift.LIST {
 				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 2:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -2830,6 +2847,17 @@ func (p *SearchProductsResp) ReadField1(iprot thrift.TProtocol) error {
 	p.Products = _field
 	return nil
 }
+func (p *SearchProductsResp) ReadField2(iprot thrift.TProtocol) error {
+
+	var _field int64
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.TotalCount = _field
+	return nil
+}
 
 func (p *SearchProductsResp) Write(oprot thrift.TProtocol) (err error) {
 
@@ -2840,6 +2868,10 @@ func (p *SearchProductsResp) Write(oprot thrift.TProtocol) (err error) {
 	if p != nil {
 		if err = p.writeField1(oprot); err != nil {
 			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
 			goto WriteFieldError
 		}
 	}
@@ -2885,6 +2917,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
+func (p *SearchProductsResp) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("total_count", thrift.I64, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.TotalCount); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
 func (p *SearchProductsResp) String() string {
 	if p == nil {
 		return "<nil>"
@@ -2902,6 +2951,9 @@ func (p *SearchProductsResp) DeepEqual(ano *SearchProductsResp) bool {
 	if !p.Field1DeepEqual(ano.Products) {
 		return false
 	}
+	if !p.Field2DeepEqual(ano.TotalCount) {
+		return false
+	}
 	return true
 }
 
@@ -2915,6 +2967,13 @@ func (p *SearchProductsResp) Field1DeepEqual(src []*Product) bool {
 		if !v.DeepEqual(_src) {
 			return false
 		}
+	}
+	return true
+}
+func (p *SearchProductsResp) Field2DeepEqual(src int64) bool {
+
+	if p.TotalCount != src {
+		return false
 	}
 	return true
 }
@@ -3143,8 +3202,9 @@ func (p *ListProductReq) Field2DeepEqual(src int32) bool {
 }
 
 type ListProductResp struct {
-	Products []*Product `thrift:"products,1" frugal:"1,default,list<Product>" json:"products"`
-	Success  bool       `thrift:"success,2" frugal:"2,default,bool" json:"success"`
+	Products   []*Product `thrift:"products,1" frugal:"1,default,list<Product>" json:"products"`
+	Success    bool       `thrift:"success,2" frugal:"2,default,bool" json:"success"`
+	TotalCount int64      `thrift:"total_count,3" frugal:"3,default,i64" json:"total_count"`
 }
 
 func NewListProductResp() *ListProductResp {
@@ -3161,16 +3221,24 @@ func (p *ListProductResp) GetProducts() (v []*Product) {
 func (p *ListProductResp) GetSuccess() (v bool) {
 	return p.Success
 }
+
+func (p *ListProductResp) GetTotalCount() (v int64) {
+	return p.TotalCount
+}
 func (p *ListProductResp) SetProducts(val []*Product) {
 	p.Products = val
 }
 func (p *ListProductResp) SetSuccess(val bool) {
 	p.Success = val
 }
+func (p *ListProductResp) SetTotalCount(val int64) {
+	p.TotalCount = val
+}
 
 var fieldIDToName_ListProductResp = map[int16]string{
 	1: "products",
 	2: "success",
+	3: "total_count",
 }
 
 func (p *ListProductResp) Read(iprot thrift.TProtocol) (err error) {
@@ -3203,6 +3271,14 @@ func (p *ListProductResp) Read(iprot thrift.TProtocol) (err error) {
 		case 2:
 			if fieldTypeId == thrift.BOOL {
 				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -3271,6 +3347,17 @@ func (p *ListProductResp) ReadField2(iprot thrift.TProtocol) error {
 	p.Success = _field
 	return nil
 }
+func (p *ListProductResp) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field int64
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.TotalCount = _field
+	return nil
+}
 
 func (p *ListProductResp) Write(oprot thrift.TProtocol) (err error) {
 
@@ -3285,6 +3372,10 @@ func (p *ListProductResp) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
 			goto WriteFieldError
 		}
 	}
@@ -3347,6 +3438,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
+func (p *ListProductResp) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("total_count", thrift.I64, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.TotalCount); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
 func (p *ListProductResp) String() string {
 	if p == nil {
 		return "<nil>"
@@ -3365,6 +3473,9 @@ func (p *ListProductResp) DeepEqual(ano *ListProductResp) bool {
 		return false
 	}
 	if !p.Field2DeepEqual(ano.Success) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.TotalCount) {
 		return false
 	}
 	return true
@@ -3386,6 +3497,13 @@ func (p *ListProductResp) Field1DeepEqual(src []*Product) bool {
 func (p *ListProductResp) Field2DeepEqual(src bool) bool {
 
 	if p.Success != src {
+		return false
+	}
+	return true
+}
+func (p *ListProductResp) Field3DeepEqual(src int64) bool {
+
+	if p.TotalCount != src {
 		return false
 	}
 	return true

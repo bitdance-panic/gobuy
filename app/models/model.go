@@ -76,17 +76,19 @@ type Order struct {
 	// OrderStatus
 	Status  int `gorm:"type:varchar(20);not null"`
 	Items   []OrderItem
-	PayTime time.Time
+	PayTime *time.Time
 }
 
 type OrderItem struct {
 	Base
-	OrderID     int     // 订单 ID
-	ProductID   int     // 商品 ID
-	Quantity    int     `gorm:"not null"`             // 商品数量
-	Price       float64 `gorm:"not null"`             // 商品单价
-	Product     Product `gorm:"foreignKey:ProductID"` // 关联商品
-	ProductName string
+	OrderID      int     // 订单 ID
+	ProductID    int     // 商品 ID
+	Quantity     int     `gorm:"not null"`             // 商品数量
+	Price        float64 `gorm:"not null"`             // 商品单价
+	Product      Product `gorm:"foreignKey:ProductID"` // 关联商品
+	Order        Order   `gorm:"foreignKey:OrderID"`   // 关联订单
+	ProductName  string
+	ProductImage string
 }
 
 // 黑名单条目模型

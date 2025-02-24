@@ -21,12 +21,12 @@ import (
 func HandleUpdateProduct(ctx context.Context, c *app.RequestContext) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.Fail(c, "参数错误")
+		utils.Fail(c, err.Error())
 		return
 	}
 	var req rpc_product.UpdateProductReq
 	if err := c.BindAndValidate(&req); err != nil {
-		utils.Fail(c, "参数错误")
+		utils.Fail(c, err.Error())
 		return
 	}
 	req.Id = int32(id)
@@ -47,7 +47,7 @@ func HandleUpdateProduct(ctx context.Context, c *app.RequestContext) {
 func HandleCreateProduct(ctx context.Context, c *app.RequestContext) {
 	var req rpc_product.CreateProductReq
 	if err := c.Bind(&req); err != nil {
-		utils.Fail(c, "参数错误")
+		utils.Fail(c, err.Error())
 		return
 	}
 	resp, err := clients.ProductClient.CreateProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
@@ -67,7 +67,7 @@ func HandleCreateProduct(ctx context.Context, c *app.RequestContext) {
 func HandleRemoveProduct(ctx context.Context, c *app.RequestContext) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.Fail(c, "参数错误")
+		utils.Fail(c, err.Error())
 		return
 	}
 	req := rpc_product.RemoveProductReq{
@@ -94,7 +94,7 @@ func HandleRemoveProduct(ctx context.Context, c *app.RequestContext) {
 func HandleGetProduct(ctx context.Context, c *app.RequestContext) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.Fail(c, "参数错误")
+		utils.Fail(c, err.Error())
 		return
 	}
 	req := rpc_product.GetProductByIDReq{
@@ -127,16 +127,17 @@ func HandleSearchProducts(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-	var body struct {
-		Query string `json:"query"`
-	}
-	err = c.Bind(&body)
-	if err != nil {
-		utils.Fail(c, err.Error())
-		return
-	}
+	// var body struct {
+	// 	Query string `json:"query"`
+	// }
+	// err = c.Bind(&body)
+	// if err != nil {
+	// 	utils.Fail(c, err.Error())
+	// 	return
+	// }
+	query := c.Query("query")
 	req := rpc_product.SearchProductsReq{
-		Query:    body.Query,
+		Query:    query,
 		PageNum:  int32(pageNum),
 		PageSize: int32(pageSize),
 	}
@@ -145,7 +146,7 @@ func HandleSearchProducts(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-	utils.Success(c, utils.H{"products": resp.Products})
+	utils.Success(c, utils.H{"products": resp.Products, "total_count": resp.TotalCount})
 }
 
 // handleProductSearch 这是模糊查询商品
@@ -174,5 +175,5 @@ func HandleAdminListProduct(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-	utils.Success(c, utils.H{"products": resp.Products})
+	utils.Success(c, utils.H{"products": resp.Products, "total_count": resp.TotalCount})
 }
