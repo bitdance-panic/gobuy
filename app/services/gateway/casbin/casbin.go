@@ -14,7 +14,7 @@ func InitCasbin(db *gorm.DB) error {
 		return err
 	}
 
-	enforcer, err := casbin.NewEnforcer("rbac_model.conf", adapter)
+	enforcer, err := casbin.NewEnforcer("./casbin/rbac_model.conf", adapter)
 	if err != nil {
 		return err
 	}

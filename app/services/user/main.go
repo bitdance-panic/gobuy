@@ -9,8 +9,16 @@ import (
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/bitdance-panic/gobuy/app/services/user/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
+	"github.com/bitdance-panic/gobuy/common/mtl"
+
+	"github.com/bitdance-panic/gobuy/common/serversuite"
 
 	"github.com/cloudwego/kitex/server"
+)
+
+var (
+	ServiceName  = conf.GetConf().Kitex.Service
+	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
 )
 
 func kitexInit() (opts []server.Option) {
@@ -25,15 +33,24 @@ func kitexInit() (opts []server.Option) {
 	if err != nil {
 		panic(err)
 	}
-	opts = append(opts, server.WithServiceAddr(addr))
-	// opts = append(opts, server.WithServiceAddr(addr), server.WithSuite(serversuite.CommonServerSuite{CurrentServiceName: serviceName, RegistryAddr: conf.GetConf().Registry.RegistryAddress[0]}))
+
+	opts = append(opts, server.WithServiceAddr(addr), server.WithSuite(serversuite.CommonServerSuite{
+		CurrentServiceName: ServiceName,
+		RegistryAddr:       RegistryAddr,
+	}))
+
 	return
 }
 
 func main() {
+	// 初始化指标监控
+	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr)
+
 	dal.Init()
+
 	opts := kitexInit()
 	svr := userservice.NewServer(new(UserServiceImpl), opts...)
+
 	err := svr.Run()
 	if err != nil {
 		log.Println(err.Error())

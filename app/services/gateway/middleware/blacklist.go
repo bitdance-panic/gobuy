@@ -15,7 +15,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	Redis "github.com/go-redis/redis/v8"
-	"github.com/hertz-contrib/jwt"
 )
 
 var (
@@ -29,13 +28,8 @@ func BlacklistMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		// 获取用户标识（示例：优先取用户ID，未登录则取IP）
 		var identifier string
-		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
-			userID, exists := claims[IdentityKey]
-			if exists {
-				identifier = fmt.Sprintf("user:%d", userID.(int))
-			} else {
-				identifier = fmt.Sprintf("ip:%s", c.ClientIP())
-			}
+		if userID, exists := c.Get("uid"); exists {
+			identifier = fmt.Sprintf("user:%d", userID.(int))
 		} else {
 			identifier = fmt.Sprintf("ip:%s", c.ClientIP())
 		}

@@ -1,7 +1,7 @@
 package crontask
 
 import (
-	"consts"
+	"github.com/bitdance-panic/gobuy/app/consts"
 	"log"
 	"time"
 
