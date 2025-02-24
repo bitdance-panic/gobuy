@@ -1,7 +1,7 @@
 package serversuite
 
 import (
-	"github.com/bitdance-panic/gobuy/common/mtl"
+	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/transmeta"

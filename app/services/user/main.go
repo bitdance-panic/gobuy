@@ -6,12 +6,12 @@ import (
 	"net"
 	"strings"
 
+	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/bitdance-panic/gobuy/app/services/user/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
-	"github.com/bitdance-panic/gobuy/common/mtl"
 
-	"github.com/bitdance-panic/gobuy/common/serversuite"
+	"github.com/bitdance-panic/gobuy/app/common/serversuite"
 
 	"github.com/cloudwego/kitex/server"
 )
