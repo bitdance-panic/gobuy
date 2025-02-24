@@ -9,3 +9,5 @@ go.work.sum
 conf.y*ml
 
 *.pem
+
+tmp
