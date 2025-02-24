@@ -18,7 +18,7 @@ type OrderServiceImpl struct{}
 func (*OrderServiceImpl) CreateOrder(ctx context.Context, req *rpc_order.CreateOrderReq) (*rpc_order.CreateOrderResp, error) {
 	return orderBll.CreateOrder(ctx, req)
 }
-func (*OrderServiceImpl) ListUserOrder(ctx context.Context, req *rpc_order.ListUserOrderReq) (*rpc_order.ListUserOrderResp, error) {
+func (*OrderServiceImpl) ListUserOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	return orderBll.ListUserOrder(ctx, req)
 }
 
@@ -30,6 +30,6 @@ func (*OrderServiceImpl) UpdateOrderStatus(ctx context.Context, req *rpc_order.U
 	return orderBll.UpdateOrderStatus(ctx, req)
 }
 
-func (*OrderServiceImpl) AdminListOrder(ctx context.Context, req *rpc_order.ListUserOrderReq) (*rpc_order.ListUserOrderResp, error) {
+func (*OrderServiceImpl) AdminListOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	return orderBll.AdminListOrder(ctx, req)
 }

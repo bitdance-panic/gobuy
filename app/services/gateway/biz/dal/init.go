@@ -8,5 +8,4 @@ import (
 func Init() {
 	tidb.Init()
 	redis.Init()
-	defer redis.Close()
 }

@@ -1,9 +1,10 @@
 package bll
 
 import (
-	"consts"
 	"context"
 	"errors"
+
+	"github.com/bitdance-panic/gobuy/app/consts"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
@@ -109,7 +110,7 @@ func (bll *OrderBLL) UpdateOrderStatus(ctx context.Context, req *rpc_order.Updat
 		Success: true,
 	}, nil
 }
-func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListUserOrderReq) (*rpc_order.ListUserOrderResp, error) {
+func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	orders, err := dao.ListUserOrder(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
@@ -119,12 +120,12 @@ func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListUserO
 		protoOrder := convertOrderToProto(&order)
 		protoOrders = append(protoOrders, protoOrder)
 	}
-	return &rpc_order.ListUserOrderResp{
+	return &rpc_order.ListOrderResp{
 		Orders: protoOrders,
 	}, nil
 }
 
-func (bll *OrderBLL) AdminListOrder(ctx context.Context, req *rpc_order.ListUserOrderReq) (*rpc_order.ListUserOrderResp, error) {
+func (bll *OrderBLL) AdminListOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	orders, err := dao.AdminListOrder(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
@@ -134,7 +135,7 @@ func (bll *OrderBLL) AdminListOrder(ctx context.Context, req *rpc_order.ListUser
 		protoOrder := convertOrderToProto(&order)
 		protoOrders = append(protoOrders, protoOrder)
 	}
-	return &rpc_order.ListUserOrderResp{
+	return &rpc_order.ListOrderResp{
 		Orders: protoOrders,
 	}, nil
 }
