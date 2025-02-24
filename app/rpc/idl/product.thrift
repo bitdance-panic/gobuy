@@ -5,7 +5,7 @@ struct Product {
     2: string name;
     3: double price;
     4: i32 stock;
-    5: string img;
+    5: string image;
     6: string description;
     7: string created_at;
     8: bool is_deleted;
@@ -26,7 +26,7 @@ struct CreateProductReq {
     2: string description;
     3: double price;
     4: i32 stock;
-    5: string img;
+    5: string image;
 }
 
 struct CreateProductResp {
@@ -39,7 +39,7 @@ struct UpdateProductReq {
     3: string description;
     4: double price;
     5: i32 stock;
-    6: string img;
+    6: string image;
 }
 
 struct UpdateProductResp {
@@ -64,6 +64,8 @@ struct GetProductByIDResp {
 
 struct SearchProductsReq {
     1: string query;
+    2: i32 page_num;
+    3: i32 page_size;
 }
 
 struct SearchProductsResp {

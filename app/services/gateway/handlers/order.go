@@ -48,7 +48,7 @@ func HandleGetOrder(ctx context.Context, c *app.RequestContext) {
 }
 
 func HandleListUserOrder(ctx context.Context, c *app.RequestContext) {
-	req := rpc_order.ListUserOrderReq{
+	req := rpc_order.ListOrderReq{
 		UserId:   1,
 		PageNum:  1,
 		PageSize: 1,
@@ -62,10 +62,19 @@ func HandleListUserOrder(ctx context.Context, c *app.RequestContext) {
 }
 
 func HandleAdminListOrder(ctx context.Context, c *app.RequestContext) {
-	req := rpc_order.ListUserOrderReq{
-		UserId:   1,
-		PageNum:  1,
-		PageSize: 1,
+	pageNum, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	pageSize, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	req := rpc_order.ListOrderReq{
+		PageNum:  int32(pageNum),
+		PageSize: int32(pageSize),
 	}
 	resp, err := clients.OrderClient.AdminListOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {

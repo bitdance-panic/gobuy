@@ -5,17 +5,11 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
+	"github.com/bitdance-panic/gobuy/app/services/product/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/dao"
-	"github.com/bitdance-panic/gobuy/app/services/user/biz/dal/tidb"
 )
 
-type ProductBLL struct{}
-
-func NewProductBLL() *ProductBLL {
-	return &ProductBLL{}
-}
-
-func (*ProductBLL) ListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
+func ListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
 	p, err := dao.List(tidb.DB, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
@@ -29,7 +23,7 @@ func (*ProductBLL) ListProduct(ctx context.Context, req *rpc_product.ListProduct
 	}, nil
 }
 
-func (*ProductBLL) AdminListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
+func AdminListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
 	p, err := dao.AdminList(tidb.DB, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
@@ -43,7 +37,7 @@ func (*ProductBLL) AdminListProduct(ctx context.Context, req *rpc_product.ListPr
 	}, nil
 }
 
-func (*ProductBLL) GetProductByID(ctx context.Context, req *rpc_product.GetProductByIDReq) (*rpc_product.GetProductByIDResp, error) {
+func GetProductByID(ctx context.Context, req *rpc_product.GetProductByIDReq) (*rpc_product.GetProductByIDResp, error) {
 	p, err := dao.GetByID(tidb.DB, int(req.Id))
 	if err != nil {
 		return nil, err
@@ -59,13 +53,13 @@ func (*ProductBLL) GetProductByID(ctx context.Context, req *rpc_product.GetProdu
 	}, nil
 }
 
-func (*ProductBLL) CreateProduct(ctx context.Context, req *rpc_product.CreateProductReq) (*rpc_product.CreateProductResp, error) {
+func CreateProduct(ctx context.Context, req *rpc_product.CreateProductReq) (*rpc_product.CreateProductResp, error) {
 	p := models.Product{
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
 		Stock:       int(req.Stock),
-		Image:       req.Img,
+		Image:       req.Image,
 	}
 	if err := dao.Create(tidb.DB, &p); err != nil {
 		return nil, err
@@ -76,7 +70,7 @@ func (*ProductBLL) CreateProduct(ctx context.Context, req *rpc_product.CreatePro
 	}, nil
 }
 
-func (*ProductBLL) UpdateProduct(ctx context.Context, req *rpc_product.UpdateProductReq) (*rpc_product.UpdateProductResp, error) {
+func UpdateProduct(ctx context.Context, req *rpc_product.UpdateProductReq) (*rpc_product.UpdateProductResp, error) {
 	p, err := dao.GetByID(tidb.DB, int(req.Id))
 	if err != nil {
 		return nil, err
@@ -93,8 +87,8 @@ func (*ProductBLL) UpdateProduct(ctx context.Context, req *rpc_product.UpdatePro
 	if req.Stock != 0 {
 		p.Stock = int(req.Stock)
 	}
-	if req.Img != "" {
-		p.Image = req.Img
+	if req.Image != "" {
+		p.Image = req.Image
 	}
 	if err := dao.Update(tidb.DB, p); err != nil {
 		return nil, err
@@ -105,7 +99,7 @@ func (*ProductBLL) UpdateProduct(ctx context.Context, req *rpc_product.UpdatePro
 	}, nil
 }
 
-func (s *ProductBLL) RemoveProduct(ctx context.Context, req *rpc_product.RemoveProductReq) (*rpc_product.RemoveProductResp, error) {
+func RemoveProduct(ctx context.Context, req *rpc_product.RemoveProductReq) (*rpc_product.RemoveProductResp, error) {
 	err := dao.Remove(tidb.DB, int(req.Id))
 	if err != nil {
 		return nil, err
@@ -113,8 +107,8 @@ func (s *ProductBLL) RemoveProduct(ctx context.Context, req *rpc_product.RemoveP
 	return &rpc_product.RemoveProductResp{Success: true}, nil
 }
 
-func (s *ProductBLL) SearchProducts(ctx context.Context, req *rpc_product.SearchProductsReq) (*rpc_product.SearchProductsResp, error) {
-	products, err := dao.Search(tidb.DB, req.Query)
+func SearchProducts(ctx context.Context, req *rpc_product.SearchProductsReq) (*rpc_product.SearchProductsResp, error) {
+	products, err := dao.Search(tidb.DB, req.Query, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +128,7 @@ func convertToProtoProduct(p *models.Product) *rpc_product.Product {
 		Description: p.Description,
 		Price:       p.Price,
 		Stock:       int32(p.Stock),
-		Img:         p.Image,
+		Image:       p.Image,
 		CreatedAt:   p.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
 }

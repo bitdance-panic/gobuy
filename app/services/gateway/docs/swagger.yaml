@@ -29,40 +29,6 @@ paths:
       - application/json
       responses: {}
       summary: 移除黑名单条目
-  /payment:
-    post:
-      consumes:
-      - application/json
-      description: 创建一个新的支付记录并返回相关信息
-      produces:
-      - application/json
-      responses: {}
-      summary: 创建支付记录
-  /payment/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: 删除指定ID的支付记录
-      produces:
-      - application/json
-      responses: {}
-      summary: 删除支付记录
-    get:
-      consumes:
-      - application/json
-      description: 根据支付记录ID获取支付记录详情
-      produces:
-      - application/json
-      responses: {}
-      summary: 获取支付记录
-    put:
-      consumes:
-      - application/json
-      description: 更新指定支付记录的状态或其他信息
-      produces:
-      - application/json
-      responses: {}
-      summary: 更新支付记录
   /product:
     delete:
       consumes:
