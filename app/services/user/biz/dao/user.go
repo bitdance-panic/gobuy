@@ -44,7 +44,7 @@ func AdminListUser(db *gorm.DB, ctx context.Context, page int, pageSize int) ([]
 
 func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, password string) (*User, error) {
 	var userPO User
-	err := db.WithContext(ctx).Model(&User{}).Where(&User{Email: email, PasswordHashed: password}).First(userPO).Error
+	err := db.WithContext(ctx).Model(&User{}).Where(&User{Email: email, PasswordHashed: password}).First(&userPO).Error
 	return &userPO, err
 }
 
@@ -57,7 +57,7 @@ func GetUserByID(db *gorm.DB, ctx context.Context, userID int) (*User, error) {
 	user := &User{}
 	err := db.WithContext(ctx).
 		Where("id = ?", userID).
-		First(user).
+		First(&user).
 		Error
 	return user, err
 }

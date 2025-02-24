@@ -2,7 +2,10 @@ module github.com/bitdance-panic/gobuy/app/services/product
 
 go 1.22.1
 
-replace github.com/bitdance-panic/gobuy/app/consts => ../../consts
+replace (
+	github.com/bitdance-panic/gobuy/app/common => ../../common
+	github.com/bitdance-panic/gobuy/app/consts => ../../consts
+)
 
 require (
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-20250121052001-73b22fa8dc38

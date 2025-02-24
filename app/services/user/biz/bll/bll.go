@@ -30,7 +30,7 @@ func Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.LoginResp, er
 	resp := rpc_user.LoginResp{}
 	// 没查到
 	if err != nil {
-		hlog.Errorf("Login failed for email=%s, error=%v. Invalid email or password", req.Email, err)
+		hlog.Errorf("Login failed for email=%s, error：%v", req.Email, err)
 		resp.Success = false
 	} else {
 		resp.Success = true
