@@ -1,4 +1,4 @@
-module github.com/bitdance-panic/gobuy/common
+module github.com/bitdance-panic/gobuy/app/common
 
 go 1.22.1
 

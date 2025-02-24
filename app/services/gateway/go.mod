@@ -3,22 +3,25 @@ module github.com/bitdance-panic/gobuy/app/services/gateway
 go 1.22.1
 
 replace (
+	github.com/bitdance-panic/gobuy/app/common => ../../common
+	github.com/bitdance-panic/gobuy/app/consts => ../../consts
 	github.com/bitdance-panic/gobuy/app/models => ../../models
 	github.com/bitdance-panic/gobuy/app/rpc => ../../rpc
 	github.com/bitdance-panic/gobuy/app/utils => ../../utils
-	github.com/bitdance-panic/gobuy/app/consts => ../../consts
 )
 
 require (
-	github.com/bitdance-panic/gobuy/app/models v0.0.0-00010101000000-000000000000
-	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-00010101000000-000000000000
+	github.com/bitdance-panic/gobuy/app/consts v0.0.0-00010101000000-000000000000
+	github.com/bitdance-panic/gobuy/app/models v0.0.0-20250221160239-dd16f89c9e3f
+	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-20250223190917-edbfe6726e55
+	github.com/bitdance-panic/gobuy/app/services/cart v0.0.0-20250224000822-d76fdd5900e9
 	github.com/bitdance-panic/gobuy/app/utils v0.0.0-00010101000000-000000000000
 	github.com/casbin/casbin/v2 v2.103.0
 	github.com/casbin/gorm-adapter/v3 v3.32.0
 	github.com/cloudwego/hertz v0.9.5
 	github.com/cloudwego/kitex v0.12.2
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/hertz-contrib/cors v0.1.0
 	github.com/hertz-contrib/jwt v1.0.2
@@ -68,7 +71,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect

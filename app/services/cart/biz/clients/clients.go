@@ -1,9 +1,9 @@
 package clients
 
 import (
+	"github.com/bitdance-panic/gobuy/app/common/clientsuite"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
-	"github.com/bitdance-panic/gobuy/common/clientsuite"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/client"
 )
