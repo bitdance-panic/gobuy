@@ -1,16 +1,12 @@
 namespace go order
 
-struct OrderProductItem{
-    1: i32 product_id;
-    4: i32 quantity;
-}
-
 struct OrderItem{
     1: i32 order_id;
     2: i32 product_id;
     3: string product_name;
     4: i32 quantity;
     5: double price;
+    6: string product_image;
 }
 
 struct Order{
@@ -34,7 +30,7 @@ service OrderService{
 }
 struct CreateOrderReq{
     1: i32 user_id;
-    2: list<OrderProductItem> items;
+    2: list<i32> cartItemIDs;
 }
 struct CreateOrderResp{
     1: Order order;
@@ -54,6 +50,7 @@ struct ListOrderReq{
 }
 struct ListOrderResp{
     1: list<Order> orders;
+    2: i64 total_count
 }
 struct GetOrderReq{
     1: i32 order_id;

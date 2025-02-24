@@ -7,12 +7,14 @@ struct CartItem {
     4: i32 quantity;
     5: string image;
     6: bool valid;
+    7: i32 product_id;
 }
 
 service CartService {
     CreateItemResp createItem(1: CreateItemReq req);
     UpdateQuantityResp updateQuantity(1: UpdateQuantityReq req);
     DeleteItemResp deleteItem(1: DeleteItemReq req);
+    GetItemResp getItem(1: GetItemReq req);
     ListItemResp listItem(1: ListItemReq req);
 }
 
@@ -44,10 +46,18 @@ struct DeleteItemResp {
 
 struct ListItemReq {
     1: i32 user_id;
-    2: i32 page_num;
-    3: i32 page_size;
+    //2: i32 page_num;
+    //3: i32 page_size;
 }
 
 struct ListItemResp {
     1: list<CartItem> items;
+}
+
+struct GetItemReq {
+    1: i32 item_id;
+}
+
+struct GetItemResp {
+    1: CartItem item;
 }

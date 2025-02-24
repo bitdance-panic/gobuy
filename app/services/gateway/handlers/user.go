@@ -78,7 +78,8 @@ func HandleAdminListUser(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	utils.Success(c, utils.H{
-		"users": resp.Users,
+		"users":       resp.Users,
+		"total_count": resp.TotalCount,
 	})
 }
 
@@ -113,7 +114,7 @@ func HandleBlockUser(ctx context.Context, c *app.RequestContext) {
 
 	if err := c.BindAndValidate(&req); err != nil {
 		hlog.Warnf("Block user failed for: %s, validation error: %v", req.Identifier, err)
-		utils.Fail(c, "参数错误: "+err.Error())
+		utils.Fail(c, err.Error())
 		return
 	}
 
@@ -157,7 +158,7 @@ func HandleUnblockUser(ctx context.Context, c *app.RequestContext) {
 
 	if err := c.BindAndValidate(&req); err != nil {
 		hlog.Warnf("Unblock user failed for: %s, validation error: %v", req.Identifier, err)
-		utils.Fail(c, "参数错误: "+err.Error())
+		utils.Fail(c, err.Error())
 		return
 	}
 

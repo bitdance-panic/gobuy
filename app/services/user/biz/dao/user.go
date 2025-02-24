@@ -30,14 +30,16 @@ func RegisterUser(db *gorm.DB, ctx context.Context, username, password, email st
 }
 
 // 查询所有用户信息，并进行分页
-func AdminListUser(db *gorm.DB, ctx context.Context, page int, pageSize int) ([]User, error) {
+func AdminListUser(db *gorm.DB, ctx context.Context, page int, pageSize int) ([]User, int64, error) {
 	var users []User
 	offset := (page - 1) * pageSize
 	err := db.WithContext(ctx).Limit(pageSize).Offset(offset).Find(&users).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return users, nil
+	var count int64
+	db.Model(&User{}).Count(&count)
+	return users, count, nil
 }
 
 func GetUserByEmailAndPass(db *gorm.DB, ctx context.Context, email string, password string) (*User, error) {

@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 
@@ -15,21 +14,24 @@ func Create(db *gorm.DB, product *Product) error {
 	return db.Create(product).Error
 }
 
-func List(db *gorm.DB, pageNum int, pageSize int) (*[]Product, error) {
+func List(db *gorm.DB, pageNum int, pageSize int) (*[]Product, int64, error) {
 	var products []Product
 	if err := db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Where("is_deleted = false").Find(&products).Error; err != nil {
-		fmt.Println("巾这了")
-		return nil, err
+		return nil, 0, err
 	}
-	return &products, nil
+	var count int64
+	db.Model(&Product{}).Where("is_deleted = false").Count(&count)
+	return &products, count, nil
 }
 
-func AdminList(db *gorm.DB, pageNum int, pageSize int) (*[]Product, error) {
+func AdminList(db *gorm.DB, pageNum int, pageSize int) (*[]Product, int64, error) {
 	var products []Product
 	if err := db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&products).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return &products, nil
+	var count int64
+	db.Model(&Product{}).Count(&count)
+	return &products, count, nil
 }
 
 func GetByID(db *gorm.DB, id int) (*Product, error) {
@@ -63,11 +65,13 @@ func Remove(db *gorm.DB, id int) error {
 	return nil
 }
 
-func Search(db *gorm.DB, query string, pageNum int, pageSize int) ([]Product, error) {
+func Search(db *gorm.DB, query string, pageNum int, pageSize int) ([]Product, int64, error) {
 	var products []Product
 	searchQuery := "%" + query + "%"
 	if err := db.Limit(pageSize).Offset((pageNum-1)*pageSize).Where("is_deleted = ? AND (name LIKE ? OR description LIKE ?)", false, searchQuery, searchQuery).Find(&products).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return products, nil
+	var count int64
+	db.Model(&Product{}).Where("is_deleted = ? AND (name LIKE ? OR description LIKE ?)", false, searchQuery, searchQuery).Count(&count)
+	return products, count, nil
 }

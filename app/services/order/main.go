@@ -27,6 +27,7 @@ func kitexInit() (opts []server.Option) {
 	opts = append(opts, server.WithServiceAddr(addr))
 	return
 }
+
 func main() {
 	dal.Init()
 	opts := kitexInit()

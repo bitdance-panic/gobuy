@@ -7,7 +7,7 @@ import (
 
 // Response 是统一的响应结构体
 type Response struct {
-	Message string                 `json:"msg"`
+	Message string                 `json:"message"`
 	Data    map[string]interface{} `json:"data,omitempty"`
 }
 

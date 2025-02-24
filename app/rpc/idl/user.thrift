@@ -49,6 +49,7 @@ struct AdminListUserReq {
 struct AdminListUserResp {
     1: list<User> users
     2: string message
+    3: i64 total_count
 }
 
 struct UpdateUserReq {
