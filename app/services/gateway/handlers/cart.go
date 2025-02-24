@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bitdance-panic/gobuy/app/consts"
+
 	rpc_cart "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/cart"
 	clients "github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
@@ -19,15 +21,15 @@ import (
 // @Produce application/json
 // @Router /product [put]
 func HandleCreateCartItem(ctx context.Context, c *app.RequestContext) {
-	// productID, err := strconv.Atoi(c.Param("id"))
-	var productID int32
-	// if err != nil {
-	// 	utils.Fail(c, "参数错误")
-	// 	return
-	// }
+	productID, err := strconv.Atoi(c.Param("productID"))
+	if err != nil {
+		utils.Fail(c, "参数错误")
+		return
+	}
+	userID := c.GetInt(consts.CONTEXT_UID_KEY)
 	req := rpc_cart.CreateItemReq{
-		UserId:    1,
-		ProductId: productID,
+		UserId:    int32(userID),
+		ProductId: int32(productID),
 	}
 	resp, err := clients.CartClient.CreateItem(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil || !resp.Success {
@@ -45,15 +47,28 @@ func HandleCreateCartItem(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /product [post]
 func HandleListCartItem(ctx context.Context, c *app.RequestContext) {
+	userID := c.GetInt(consts.CONTEXT_UID_KEY)
+	pageNum, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	pageSize, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
 	req := rpc_cart.ListItemReq{
-		UserId: 1,
+		UserId:   int32(userID),
+		PageNum:  int32(pageNum),
+		PageSize: int32(pageSize),
 	}
 	resp, err := clients.CartClient.ListItem(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
-	utils.Success(c, utils.H{"cartItems": resp.Items})
+	utils.Success(c, utils.H{"items": resp.Items})
 }
 
 // handleProductDELETE 这是删除商品
@@ -63,7 +78,7 @@ func HandleListCartItem(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /product [delete]
 func HandleDeleteCartItem(ctx context.Context, c *app.RequestContext) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("itemID"))
 	if err != nil {
 		utils.Fail(c, "参数错误")
 		return
@@ -90,14 +105,19 @@ func HandleDeleteCartItem(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /product [get]
 func HandleUpdateCartItemQuantity(ctx context.Context, c *app.RequestContext) {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("itemID"))
+	if err != nil {
+		utils.Fail(c, "参数错误")
+		return
+	}
+	newQuantity, err := strconv.Atoi(c.Query("quantity"))
 	if err != nil {
 		utils.Fail(c, "参数错误")
 		return
 	}
 	req := rpc_cart.UpdateQuantityReq{
 		ItemId:       int32(id),
-		NewQuantity_: 1,
+		NewQuantity_: int32(newQuantity),
 	}
 	resp, err := clients.CartClient.UpdateQuantity(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {

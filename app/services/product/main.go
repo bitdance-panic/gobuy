@@ -1,16 +1,15 @@
 package main
 
 import (
+	// "common/utils"
 	"log"
 	"net"
 	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
-
-	// "common/utils"
-
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/product/conf"
+
 	"github.com/cloudwego/kitex/server"
 )
 

@@ -14,7 +14,7 @@ type CartItem struct {
 	Name     string  `thrift:"name,2" frugal:"2,default,string" json:"name"`
 	Price    float64 `thrift:"price,3" frugal:"3,default,double" json:"price"`
 	Quantity int32   `thrift:"quantity,4" frugal:"4,default,i32" json:"quantity"`
-	Img      string  `thrift:"img,5" frugal:"5,default,string" json:"img"`
+	Image    string  `thrift:"image,5" frugal:"5,default,string" json:"image"`
 	Valid    bool    `thrift:"valid,6" frugal:"6,default,bool" json:"valid"`
 }
 
@@ -41,8 +41,8 @@ func (p *CartItem) GetQuantity() (v int32) {
 	return p.Quantity
 }
 
-func (p *CartItem) GetImg() (v string) {
-	return p.Img
+func (p *CartItem) GetImage() (v string) {
+	return p.Image
 }
 
 func (p *CartItem) GetValid() (v bool) {
@@ -60,8 +60,8 @@ func (p *CartItem) SetPrice(val float64) {
 func (p *CartItem) SetQuantity(val int32) {
 	p.Quantity = val
 }
-func (p *CartItem) SetImg(val string) {
-	p.Img = val
+func (p *CartItem) SetImage(val string) {
+	p.Image = val
 }
 func (p *CartItem) SetValid(val bool) {
 	p.Valid = val
@@ -72,7 +72,7 @@ var fieldIDToName_CartItem = map[int16]string{
 	2: "name",
 	3: "price",
 	4: "quantity",
-	5: "img",
+	5: "image",
 	6: "valid",
 }
 
@@ -224,7 +224,7 @@ func (p *CartItem) ReadField5(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.Img = _field
+	p.Image = _field
 	return nil
 }
 func (p *CartItem) ReadField6(iprot thrift.TProtocol) error {
@@ -357,10 +357,10 @@ WriteFieldEndError:
 }
 
 func (p *CartItem) writeField5(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("img", thrift.STRING, 5); err != nil {
+	if err = oprot.WriteFieldBegin("image", thrift.STRING, 5); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Img); err != nil {
+	if err := oprot.WriteString(p.Image); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -416,7 +416,7 @@ func (p *CartItem) DeepEqual(ano *CartItem) bool {
 	if !p.Field4DeepEqual(ano.Quantity) {
 		return false
 	}
-	if !p.Field5DeepEqual(ano.Img) {
+	if !p.Field5DeepEqual(ano.Image) {
 		return false
 	}
 	if !p.Field6DeepEqual(ano.Valid) {
@@ -455,7 +455,7 @@ func (p *CartItem) Field4DeepEqual(src int32) bool {
 }
 func (p *CartItem) Field5DeepEqual(src string) bool {
 
-	if strings.Compare(p.Img, src) != 0 {
+	if strings.Compare(p.Image, src) != 0 {
 		return false
 	}
 	return true

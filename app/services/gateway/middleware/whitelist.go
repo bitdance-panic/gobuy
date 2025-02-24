@@ -12,7 +12,7 @@ func WhiteListMiddleware() app.HandlerFunc {
 	whiteList := []string{
 		"/login",
 		"/index/products",
-		"register",
+		"/register",
 	}
 	return func(ctx context.Context, c *app.RequestContext) {
 		path := string(c.URI().Path())

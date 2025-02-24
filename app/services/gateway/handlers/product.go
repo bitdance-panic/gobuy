@@ -50,7 +50,6 @@ func HandleCreateProduct(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, "参数错误")
 		return
 	}
-	// todo 打印日志
 	resp, err := clients.ProductClient.CreateProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
@@ -116,11 +115,61 @@ func HandleGetProduct(ctx context.Context, c *app.RequestContext) {
 // @Produce application/json
 // @Router /product/search [get]
 func HandleSearchProducts(ctx context.Context, c *app.RequestContext) {
-	query := c.Query("query")
+	pageNumStr := c.Query("page")
+	pageSizeStr := c.Query("size")
+	pageNum, err := strconv.Atoi(pageNumStr)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	var body struct {
+		Query string `json:"query"`
+	}
+	err = c.Bind(&body)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
 	req := rpc_product.SearchProductsReq{
-		Query: query,
+		Query:    body.Query,
+		PageNum:  int32(pageNum),
+		PageSize: int32(pageSize),
 	}
 	resp, err := clients.ProductClient.SearchProducts(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	utils.Success(c, utils.H{"products": resp.Products})
+}
+
+// handleProductSearch 这是模糊查询商品
+// @Summary 这是一段Summary
+// @Description 这是一段Description
+// @Accept application/json
+// @Produce application/json
+// @Router /product/search [get]
+func HandleAdminListProduct(ctx context.Context, c *app.RequestContext) {
+	pageNum, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	pageSize, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+	req := rpc_product.ListProductReq{
+		PageNum:  int32(pageNum),
+		PageSize: int32(pageSize),
+	}
+	resp, err := clients.ProductClient.AdminListProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return

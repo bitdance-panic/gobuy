@@ -7,16 +7,14 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"gorm.io/gorm"
+
+	"github.com/bitdance-panic/gobuy/app/consts"
 )
 
-var (
-	ITEM_INITIAL_QUANTITY int = 1
-)
+type CartItem = models.CartItem
 
-type CartItem models.CartItem
-
-func ListItemsByUserID(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]models.CartItem, error) {
-	var items []models.CartItem
+func ListItemsByUserID(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]CartItem, error) {
+	var items []CartItem
 	err := db.Limit(pageSize).Offset((pageNum-1)*pageSize).Where("user_id =?", userID).Find(&items).Error
 	if err != nil {
 		return nil, err
@@ -74,7 +72,7 @@ func Create(db *gorm.DB, userID int, productID int) (bool, error) {
 		return false, nil
 	}
 	// 如果没有找到记录，则创建一个新的购物车项
-	item = &CartItem{UserID: userID, ProductID: productID, Quantity: ITEM_INITIAL_QUANTITY}
+	item = &CartItem{UserID: userID, ProductID: productID, Quantity: consts.ITEM_INITIAL_QUANTITY}
 	if err := db.Create(&item).Error; err != nil {
 		return false, err
 	}

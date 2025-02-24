@@ -23,13 +23,13 @@ type Z = redis.Z
 func Init() {
 	conf_ := conf.GetConf()
 	dsn := fmt.Sprintf(conf_.Redis.DSN, conf_.Redis.Username, conf_.Redis.Password, conf_.Redis.Host, conf_.Redis.Port)
-	fmt.Println(dsn)
 	opt, _ := redis.ParseURL(dsn)
-	RedisClient := redis.NewClient(opt)
+	RedisClient = redis.NewClient(opt)
 	// 测试连接
 	if _, err := RedisClient.Ping(context.Background()).Result(); err != nil {
 		hlog.Fatalf("Redis连接失败: %v", err)
 	}
+	hlog.Info("Redis连接成功")
 }
 
 // Graceful Shutdown

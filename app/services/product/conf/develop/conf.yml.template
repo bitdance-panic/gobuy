@@ -6,7 +6,7 @@ tidb:
     port: 4000
 
 kitex:
-  service: "user"
+  service: "product"
   address: ":8882"
   metrics_port: ":9992"
   log_level: debug
