@@ -9,8 +9,9 @@ import (
 	"github.com/bitdance-panic/gobuy/app/services/product/biz/dao"
 )
 
+// 废弃
 func ListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
-	p, err := dao.List(tidb.DB, int(req.PageNum), int(req.PageSize))
+	p, total, err := dao.List(tidb.DB, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -19,12 +20,13 @@ func ListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_pro
 		protoProducts[i] = convertToProtoProduct(&v)
 	}
 	return &rpc_product.ListProductResp{
-		Products: protoProducts,
+		Products:   protoProducts,
+		TotalCount: total,
 	}, nil
 }
 
 func AdminListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rpc_product.ListProductResp, error) {
-	p, err := dao.AdminList(tidb.DB, int(req.PageNum), int(req.PageSize))
+	p, total, err := dao.AdminList(tidb.DB, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +35,8 @@ func AdminListProduct(ctx context.Context, req *rpc_product.ListProductReq) (*rp
 		protoProducts[i] = convertToProtoProduct(&v)
 	}
 	return &rpc_product.ListProductResp{
-		Products: protoProducts,
+		Products:   protoProducts,
+		TotalCount: total,
 	}, nil
 }
 
@@ -108,7 +111,7 @@ func RemoveProduct(ctx context.Context, req *rpc_product.RemoveProductReq) (*rpc
 }
 
 func SearchProducts(ctx context.Context, req *rpc_product.SearchProductsReq) (*rpc_product.SearchProductsResp, error) {
-	products, err := dao.Search(tidb.DB, req.Query, int(req.PageNum), int(req.PageSize))
+	products, total, err := dao.Search(tidb.DB, req.Query, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +120,8 @@ func SearchProducts(ctx context.Context, req *rpc_product.SearchProductsReq) (*r
 		protoProducts = append(protoProducts, convertToProtoProduct(&p))
 	}
 	return &rpc_product.SearchProductsResp{
-		Products: protoProducts,
+		Products:   protoProducts,
+		TotalCount: total,
 	}, nil
 }
 

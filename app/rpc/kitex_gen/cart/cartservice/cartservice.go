@@ -34,6 +34,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"getItem": kitex.NewMethodInfo(
+		getItemHandler,
+		newCartServiceGetItemArgs,
+		newCartServiceGetItemResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 	"listItem": kitex.NewMethodInfo(
 		listItemHandler,
 		newCartServiceListItemArgs,
@@ -161,6 +168,24 @@ func newCartServiceDeleteItemResult() interface{} {
 	return cart.NewCartServiceDeleteItemResult()
 }
 
+func getItemHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*cart.CartServiceGetItemArgs)
+	realResult := result.(*cart.CartServiceGetItemResult)
+	success, err := handler.(cart.CartService).GetItem(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newCartServiceGetItemArgs() interface{} {
+	return cart.NewCartServiceGetItemArgs()
+}
+
+func newCartServiceGetItemResult() interface{} {
+	return cart.NewCartServiceGetItemResult()
+}
+
 func listItemHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*cart.CartServiceListItemArgs)
 	realResult := result.(*cart.CartServiceListItemResult)
@@ -214,6 +239,16 @@ func (p *kClient) DeleteItem(ctx context.Context, req *cart.DeleteItemReq) (r *c
 	_args.Req = req
 	var _result cart.CartServiceDeleteItemResult
 	if err = p.c.Call(ctx, "deleteItem", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetItem(ctx context.Context, req *cart.GetItemReq) (r *cart.GetItemResp, err error) {
+	var _args cart.CartServiceGetItemArgs
+	_args.Req = req
+	var _result cart.CartServiceGetItemResult
+	if err = p.c.Call(ctx, "getItem", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -13,9 +13,10 @@ import (
 
 type CartItem = models.CartItem
 
-func ListItemsByUserID(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]CartItem, error) {
+func ListItemsByUserID(db *gorm.DB, userID int) (*[]CartItem, error) {
 	var items []CartItem
-	err := db.Limit(pageSize).Offset((pageNum-1)*pageSize).Where("user_id =?", userID).Find(&items).Error
+	err := db.Preload("Product").Where("user_id =?", userID).Find(&items).Error
+	// .Limit(pageSize).Offset((pageNum-1)*pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func Delete(db *gorm.DB, itemID int) error {
 
 func GetItemByID(db *gorm.DB, itemID int) (*CartItem, error) {
 	var item CartItem
-	if err := db.First(&item, itemID).Error; err != nil {
+	if err := db.Preload("Product").First(&item, itemID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("cartItem not found")
 		}
@@ -43,7 +44,7 @@ func GetItemByID(db *gorm.DB, itemID int) (*CartItem, error) {
 
 func GetItemByUserID(db *gorm.DB, userID int, productID int) (*CartItem, error) {
 	var item CartItem
-	if err := db.Where("user_id = ? AND product_id = ? ", userID, productID).First(&item).Error; err != nil {
+	if err := db.Preload("Product").Where("user_id = ? AND product_id = ? ", userID, productID).First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 没找到没关系
 			return nil, nil

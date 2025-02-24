@@ -97,18 +97,18 @@ func TODOHandler(ctx context.Context, c *app.RequestContext) {}
 func registerRoutes(h *server.Hertz) {
 	noAuthGroup := h.Group("")
 	{
-		//TODO 登陆
+		// TODO 登陆
 		noAuthGroup.POST("/login", middleware.AuthMiddleware.LoginHandler)
 		// 注册
 		noAuthGroup.POST("/register", handlers.HandleRegister)
 		// 未登录时获取首页商品
-		noAuthGroup.GET("/index/products", handlers.HandleListIndexProduct)
+		noAuthGroup.GET("/product/search", handlers.HandleSearchProducts)
 		// 让前端移除token就行，这里废弃
 		// noAuthGroup.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
 	}
 	authGroup := h.Group("/auth")
 	{
-		//TODO 刷新token
+		// TODO 刷新token
 		authGroup.POST("/refresh", middleware.AuthMiddleware.RefreshHandler)
 	}
 	userGroup := h.Group("/user")
@@ -120,8 +120,6 @@ func registerRoutes(h *server.Hertz) {
 	}
 	productGroup := h.Group("/product")
 	{
-		// 搜索商品
-		productGroup.GET("/search", handlers.HandleSearchProducts)
 		// 获取单个商品详情
 		productGroup.GET("/:id", handlers.HandleGetProduct)
 	}
@@ -137,23 +135,20 @@ func registerRoutes(h *server.Hertz) {
 	}
 	orderGroup := h.Group("/order")
 	{
-		//TODO 创建订单
 		orderGroup.POST("", handlers.HandleCreateOrder)
-		//TODO 获取单个订单详情
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
-		//TODO 获取用户的所有订单
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
 	}
 	paymentGroup := h.Group("/payment")
 	{
-		//TODO 只需要处理支付操作，应该是个回调的接口
+		// TODO 只需要处理支付操作，应该是个回调的接口
 		paymentGroup.POST("/:orderID", TODOHandler)
 	}
 	agentGroup := h.Group("/agent")
 	{
-		//TODO 根据用户输入获取对应商品
+		// TODO 根据用户输入获取对应商品
 		agentGroup.POST("/product/search", TODOHandler)
-		//TODO 根据用户输入获取对应订单
+		// TODO 根据用户输入获取对应订单
 		agentGroup.POST("/order/search", TODOHandler)
 	}
 	adminGroup := h.Group("/admin")
@@ -173,16 +168,16 @@ func registerRoutes(h *server.Hertz) {
 		{
 			// 获取所有的用户信息
 			adminUserGroup.GET("/list", handlers.HandleAdminListUser)
-			//TODO 封禁用户
+			// TODO 封禁用户
 			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
-			//TODO 解封
+			// TODO 解封
 			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
 			// 移除用户
 			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
 		}
 		adminOrderGroup := adminGroup.Group("/order")
 		{
-			//TODO 获取所有的订单(分页)（订单包括支付信息）
+			// TODO 获取所有的订单(分页)（订单包括支付信息）
 			adminOrderGroup.GET("/list", handlers.HandleAdminListOrder)
 		}
 	}

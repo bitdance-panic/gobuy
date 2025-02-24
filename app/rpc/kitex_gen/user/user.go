@@ -2030,8 +2030,9 @@ func (p *AdminListUserReq) Field2DeepEqual(src int32) bool {
 }
 
 type AdminListUserResp struct {
-	Users   []*User `thrift:"users,1" frugal:"1,default,list<User>" json:"users"`
-	Message string  `thrift:"message,2" frugal:"2,default,string" json:"message"`
+	Users      []*User `thrift:"users,1" frugal:"1,default,list<User>" json:"users"`
+	Message    string  `thrift:"message,2" frugal:"2,default,string" json:"message"`
+	TotalCount int64   `thrift:"total_count,3" frugal:"3,default,i64" json:"total_count"`
 }
 
 func NewAdminListUserResp() *AdminListUserResp {
@@ -2048,16 +2049,24 @@ func (p *AdminListUserResp) GetUsers() (v []*User) {
 func (p *AdminListUserResp) GetMessage() (v string) {
 	return p.Message
 }
+
+func (p *AdminListUserResp) GetTotalCount() (v int64) {
+	return p.TotalCount
+}
 func (p *AdminListUserResp) SetUsers(val []*User) {
 	p.Users = val
 }
 func (p *AdminListUserResp) SetMessage(val string) {
 	p.Message = val
 }
+func (p *AdminListUserResp) SetTotalCount(val int64) {
+	p.TotalCount = val
+}
 
 var fieldIDToName_AdminListUserResp = map[int16]string{
 	1: "users",
 	2: "message",
+	3: "total_count",
 }
 
 func (p *AdminListUserResp) Read(iprot thrift.TProtocol) (err error) {
@@ -2090,6 +2099,14 @@ func (p *AdminListUserResp) Read(iprot thrift.TProtocol) (err error) {
 		case 2:
 			if fieldTypeId == thrift.STRING {
 				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		case 3:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
@@ -2158,6 +2175,17 @@ func (p *AdminListUserResp) ReadField2(iprot thrift.TProtocol) error {
 	p.Message = _field
 	return nil
 }
+func (p *AdminListUserResp) ReadField3(iprot thrift.TProtocol) error {
+
+	var _field int64
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		_field = v
+	}
+	p.TotalCount = _field
+	return nil
+}
 
 func (p *AdminListUserResp) Write(oprot thrift.TProtocol) (err error) {
 
@@ -2172,6 +2200,10 @@ func (p *AdminListUserResp) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
 			goto WriteFieldError
 		}
 	}
@@ -2234,6 +2266,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
+func (p *AdminListUserResp) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("total_count", thrift.I64, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.TotalCount); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
 func (p *AdminListUserResp) String() string {
 	if p == nil {
 		return "<nil>"
@@ -2252,6 +2301,9 @@ func (p *AdminListUserResp) DeepEqual(ano *AdminListUserResp) bool {
 		return false
 	}
 	if !p.Field2DeepEqual(ano.Message) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.TotalCount) {
 		return false
 	}
 	return true
@@ -2273,6 +2325,13 @@ func (p *AdminListUserResp) Field1DeepEqual(src []*User) bool {
 func (p *AdminListUserResp) Field2DeepEqual(src string) bool {
 
 	if strings.Compare(p.Message, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *AdminListUserResp) Field3DeepEqual(src int64) bool {
+
+	if p.TotalCount != src {
 		return false
 	}
 	return true

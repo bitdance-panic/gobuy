@@ -41,6 +41,15 @@ func DeleteItem(ctx context.Context, req *rpc_cart.DeleteItemReq) (*rpc_cart.Del
 	return &cart.DeleteItemResp{Success: true}, nil
 }
 
+func GetItem(ctx context.Context, req *rpc_cart.GetItemReq) (*rpc_cart.GetItemResp, error) {
+	item, err := dao.GetItemByID(tidb.DB, int(req.ItemId))
+	if err != nil {
+		return nil, err
+	}
+	protoItem := convertToProtoCartItem(item)
+	return &cart.GetItemResp{Item: protoItem}, nil
+}
+
 func UpdateQuantity(ctx context.Context, req *rpc_cart.UpdateQuantityReq) (*rpc_cart.UpdateQuantityResp, error) {
 	item, err := dao.GetItemByID(tidb.DB, int(req.ItemId))
 	if err != nil {
@@ -55,31 +64,23 @@ func UpdateQuantity(ctx context.Context, req *rpc_cart.UpdateQuantityReq) (*rpc_
 		return nil, errors.New("product not found")
 	}
 	// 否则直接改，在订单结算时再考虑
-	dao.UpdateQuantity(tidb.DB, item, int(req.NewQuantity_))
+	err = dao.UpdateQuantity(tidb.DB, item, int(req.NewQuantity_))
+	if err != nil {
+		return nil, err
+	}
 	return &rpc_cart.UpdateQuantityResp{
 		Success: true,
 	}, nil
 }
 
 func ListItem(ctx context.Context, req *rpc_cart.ListItemReq) (*rpc_cart.ListItemResp, error) {
-	items, err := dao.ListItemsByUserID(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
+	items, err := dao.ListItemsByUserID(tidb.DB, int(req.UserId))
 	if err != nil {
 		return nil, err
 	}
 	protoItems := make([]*rpc_cart.CartItem, 0, len(*items))
 	for _, item := range *items {
-		getProductResp, err := clients.ProductClient.GetProductByID(ctx, &rpc_product.GetProductByIDReq{Id: int32(item.ProductID)})
-		if err != nil {
-			return nil, err
-		}
-		var protoItem *rpc_cart.CartItem
-		if getProductResp.Product == nil {
-			protoItem = &rpc_cart.CartItem{
-				Valid: false,
-			}
-		} else {
-			protoItem = convertToProtoCartItem(&item, getProductResp.Product)
-		}
+		protoItem := convertToProtoCartItem(&item)
 		protoItems = append(protoItems, protoItem)
 	}
 	return &rpc_cart.ListItemResp{
@@ -87,13 +88,15 @@ func ListItem(ctx context.Context, req *rpc_cart.ListItemReq) (*rpc_cart.ListIte
 	}, nil
 }
 
-func convertToProtoCartItem(item *models.CartItem, p *rpc_product.Product) *rpc_cart.CartItem {
+func convertToProtoCartItem(item *models.CartItem) *rpc_cart.CartItem {
+	valid := item.Product.IsDeleted
 	return &rpc_cart.CartItem{
-		Id:       int32(item.ID),
-		Name:     p.Name,
-		Price:    p.Price,
-		Quantity: int32(item.Quantity),
-		Image:    p.Image,
-		Valid:    true,
+		Id:        int32(item.ID),
+		Name:      item.Product.Name,
+		Price:     item.Product.Price,
+		Quantity:  int32(item.Quantity),
+		Image:     item.Product.Image,
+		Valid:     valid,
+		ProductId: int32(item.ProductID),
 	}
 }

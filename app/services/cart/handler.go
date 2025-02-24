@@ -25,3 +25,7 @@ func (*CartServiceImpl) UpdateQuantity(ctx context.Context, req *rpc_cart.Update
 func (*CartServiceImpl) ListItem(ctx context.Context, req *rpc_cart.ListItemReq) (resp *rpc_cart.ListItemResp, err error) {
 	return bll.ListItem(ctx, req)
 }
+
+func (*CartServiceImpl) GetItem(ctx context.Context, req *rpc_cart.GetItemReq) (resp *rpc_cart.GetItemResp, err error) {
+	return bll.GetItem(ctx, req)
+}

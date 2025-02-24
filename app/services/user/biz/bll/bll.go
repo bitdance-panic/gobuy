@@ -42,7 +42,7 @@ func Login(ctx context.Context, req *rpc_user.LoginReq) (*rpc_user.LoginResp, er
 // GetUsers 获取所有用户信息
 func AdminListUser(ctx context.Context, req *rpc_user.AdminListUserReq) (*rpc_user.AdminListUserResp, error) {
 	// 查询数据库中的所有用户信息，假设分页处理
-	users, err := dao.AdminListUser(tidb.DB, ctx, int(req.PageNum), int(req.PageSize))
+	users, total, err := dao.AdminListUser(tidb.DB, ctx, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return &rpc_user.AdminListUserResp{
 			Users:   nil,
@@ -60,8 +60,9 @@ func AdminListUser(ctx context.Context, req *rpc_user.AdminListUserReq) (*rpc_us
 	}
 	// 返回响应
 	return &rpc_user.AdminListUserResp{
-		Users:   userList,
-		Message: "Users retrieved successfully",
+		Users:      userList,
+		Message:    "Users retrieved successfully",
+		TotalCount: total,
 	}, nil
 }
 

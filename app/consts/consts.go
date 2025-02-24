@@ -4,9 +4,9 @@ package consts
 type OrderStatus int
 
 const (
-	OrderStatusPending   OrderStatus = 1 // 待支付
-	OrderStatusPaid      OrderStatus = 2 // 已支付
-	OrderStatusCancelled OrderStatus = 3 // 已取消
+	OrderStatusPending   OrderStatus = 0 // 待支付
+	OrderStatusPaid      OrderStatus = 1 // 已支付
+	OrderStatusCancelled OrderStatus = 2 // 已取消
 )
 
 const (
