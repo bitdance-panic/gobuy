@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bitdance-panic/gobuy/app/consts"
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
 	clients "github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
@@ -13,19 +14,21 @@ import (
 )
 
 func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		utils.Fail(c, "参数错误")
+	userID := c.GetInt(consts.CONTEXT_UID_KEY)
+	var body struct {
+		ItemIDs []int `json:"itemIDs"`
+	}
+	if err := c.Bind(&body); err != nil {
+		utils.Fail(c, err.Error())
 		return
 	}
+	itemIDs := make([]int32, len(body.ItemIDs))
+	for i, itemID := range body.ItemIDs {
+		itemIDs[i] = int32(itemID)
+	}
 	req := rpc_order.CreateOrderReq{
-		UserId: 1,
-		Items: []*rpc_order.OrderProductItem{
-			{
-				ProductId: int32(id),
-				Quantity:  1,
-			},
-		},
+		UserId:      int32(userID),
+		CartItemIDs: itemIDs,
 	}
 	resp, err := clients.OrderClient.CreateOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
@@ -36,8 +39,13 @@ func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 }
 
 func HandleGetOrder(ctx context.Context, c *app.RequestContext) {
+	orderID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
 	req := rpc_order.GetOrderReq{
-		OrderId: 1,
+		OrderId: int32(orderID),
 	}
 	resp, err := clients.OrderClient.GetOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
@@ -48,8 +56,9 @@ func HandleGetOrder(ctx context.Context, c *app.RequestContext) {
 }
 
 func HandleListUserOrder(ctx context.Context, c *app.RequestContext) {
+	userID := c.GetInt(consts.CONTEXT_UID_KEY)
 	req := rpc_order.ListOrderReq{
-		UserId:   1,
+		UserId:   int32(userID),
 		PageNum:  1,
 		PageSize: 1,
 	}
@@ -81,5 +90,5 @@ func HandleAdminListOrder(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-	utils.Success(c, utils.H{"orders": resp.Orders})
+	utils.Success(c, utils.H{"orders": resp.Orders, "total_count": resp.TotalCount})
 }

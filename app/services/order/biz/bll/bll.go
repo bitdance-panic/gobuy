@@ -7,13 +7,15 @@ import (
 	"github.com/bitdance-panic/gobuy/app/consts"
 
 	"github.com/bitdance-panic/gobuy/app/models"
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/dal/tidb"
+	"github.com/bitdance-panic/gobuy/app/services/order/biz/clients"
+	"github.com/bitdance-panic/gobuy/app/services/order/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/order/biz/dao"
 	"github.com/bitdance-panic/gobuy/app/utils"
 
+	rpc_cart "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/cart"
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
-	rpc_product "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product"
+
+	"github.com/shopspring/decimal"
 )
 
 type OrderBLL struct{}
@@ -29,52 +31,61 @@ func (bll *OrderBLL) CreateOrder(ctx context.Context, req *rpc_order.CreateOrder
 	if err != nil {
 		return nil, err
 	}
-	orderItems := make([]models.OrderItem, len(req.Items))
+	orderItems := make([]models.OrderItem, len(req.CartItemIDs))
 	totalPrice := 0.0
-	// 获取订单项完整信息
-	for _, productItem := range req.Items {
-		resp, err := clients.ProductClient.GetProductByID(
+	for i, cartItemID := range req.CartItemIDs {
+		resp, err := clients.CartClient.GetItem(
 			ctx,
-			&rpc_product.GetProductByIDReq{
-				Id: productItem.ProductId,
-			},
+			&rpc_cart.GetItemReq{ItemId: cartItemID},
 		)
 		if err != nil {
 			return nil, err
 		}
-		p := resp.Product
-		if p == nil {
-			return nil, errors.New("product not found")
-		}
-		// 创建订单项
+		cartItem := resp.Item
 		orderItem := models.OrderItem{
-			ProductID:   int(productItem.ProductId),
-			ProductName: p.Name,
-			Price:       p.Price,
-			Quantity:    int(productItem.Quantity),
+			ProductID:    int(cartItem.ProductId),
+			ProductName:  cartItem.Name,
+			ProductImage: cartItem.Image,
+			Price:        cartItem.Price,
+			Quantity:     int(cartItem.Quantity),
 		}
-		// 保存订单项到数据库
-		itemWithID, err := dao.CreateOrderItem(tidb.DB, &orderItem)
-		if err != nil {
-			return nil, err
-		}
-		orderItems = append(orderItems, *itemWithID)
-		totalPrice += p.Price * float64(productItem.Quantity)
+		// 避免外键报错
+		orderItem.Product.ID = int(orderItem.ProductID)
+		// itemWithID, err := dao.CreateOrderItem(tidb.DB, &orderItem)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		orderItems[i] = orderItem
+		p, _ := decimal.NewFromFloat(orderItem.Price).Mul(decimal.NewFromInt(int64(orderItem.Quantity))).Float64()
+		// if !exact {
+		// 	return nil, errors.New("handle decimal is not exact")
+		// }
+		totalPrice += p
 	}
-
-	// 再保存订单
+	// 先保存下订单
 	order := models.Order{
 		UserID:     int(req.UserId),
 		Number:     orderNumber,
 		TotalPrice: totalPrice,
 		Status:     int(consts.OrderStatusPending),
-		Items:      orderItems,
+		PayTime:    nil,
 	}
-	orderWithID, err := dao.CreateOrder(tidb.DB, &order)
+
+	err = dao.CreateOrder(tidb.DB, &order)
 	if err != nil {
 		return nil, err
 	}
-	protoOrder := convertOrderToProto(orderWithID)
+	// 再存订单项
+	for i := range len(orderItems) {
+		orderItems[i].OrderID = order.ID
+	}
+	order.Items = orderItems
+	//TODO 事务
+	err = dao.SaveOrder(tidb.DB, &order)
+	if err != nil {
+		return nil, err
+	}
+	protoOrder := convertOrderToProto(&order)
 	return &rpc_order.CreateOrderResp{
 		Order: protoOrder,
 	}, err
@@ -115,10 +126,10 @@ func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListOrder
 	if err != nil {
 		return nil, err
 	}
-	protoOrders := make([]*rpc_order.Order, 0, len(*orders))
-	for _, order := range *orders {
+	protoOrders := make([]*rpc_order.Order, len(*orders))
+	for i, order := range *orders {
 		protoOrder := convertOrderToProto(&order)
-		protoOrders = append(protoOrders, protoOrder)
+		protoOrders[i] = protoOrder
 	}
 	return &rpc_order.ListOrderResp{
 		Orders: protoOrders,
@@ -126,7 +137,7 @@ func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListOrder
 }
 
 func (bll *OrderBLL) AdminListOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
-	orders, err := dao.AdminListOrder(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
+	orders, total, err := dao.AdminListOrder(tidb.DB, int(req.PageNum), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
@@ -136,35 +147,38 @@ func (bll *OrderBLL) AdminListOrder(ctx context.Context, req *rpc_order.ListOrde
 		protoOrders = append(protoOrders, protoOrder)
 	}
 	return &rpc_order.ListOrderResp{
-		Orders: protoOrders,
+		Orders:     protoOrders,
+		TotalCount: total,
 	}, nil
 }
 
 func convertItemFromProto(items rpc_order.OrderItem) *models.OrderItem {
 	return &models.OrderItem{
-		OrderID:     int(items.OrderId),
-		ProductID:   int(items.ProductId),
-		Quantity:    int(items.Quantity),
-		Price:       items.Price,
-		ProductName: items.ProductName,
+		OrderID:      int(items.OrderId),
+		ProductID:    int(items.ProductId),
+		Quantity:     int(items.Quantity),
+		Price:        items.Price,
+		ProductName:  items.ProductName,
+		ProductImage: items.ProductImage,
 	}
 }
 
 func convertItemToProto(items models.OrderItem) *rpc_order.OrderItem {
 	return &rpc_order.OrderItem{
-		OrderId:     int32(items.OrderID),
-		ProductId:   int32(items.ProductID),
-		Quantity:    int32(items.Quantity),
-		Price:       items.Price,
-		ProductName: items.ProductName,
+		OrderId:      int32(items.OrderID),
+		ProductId:    int32(items.ProductID),
+		Quantity:     int32(items.Quantity),
+		Price:        items.Price,
+		ProductName:  items.ProductName,
+		ProductImage: items.ProductImage,
 	}
 }
 
 func convertOrderToProto(order *models.Order) *rpc_order.Order {
 	protoItems := make([]*rpc_order.OrderItem, len(order.Items))
-	for _, item := range order.Items {
+	for i, item := range order.Items {
 		orderItem := convertItemToProto(item)
-		protoItems = append(protoItems, orderItem)
+		protoItems[i] = orderItem
 	}
 	return &rpc_order.Order{
 		Id:         int32(order.ID),
@@ -173,5 +187,6 @@ func convertOrderToProto(order *models.Order) *rpc_order.Order {
 		TotalPrice: order.TotalPrice,
 		Status:     int32(order.Status),
 		Items:      protoItems,
+		CreatedAt:  utils.FormatTime(order.CreatedAt),
 	}
 }

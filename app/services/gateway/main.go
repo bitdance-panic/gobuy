@@ -114,7 +114,7 @@ func registerRoutes(h *server.Hertz) {
 		// 注册
 		noAuthGroup.POST("/register", handlers.HandleRegister)
 		// 未登录时获取首页商品
-		noAuthGroup.GET("/index/products", handlers.HandleListIndexProduct)
+		noAuthGroup.GET("/product/search", handlers.HandleSearchProducts)
 		// 让前端移除token就行，这里废弃
 		// noAuthGroup.POST("/logout", middleware.AuthMiddleware.LogoutHandler)
 	}
@@ -132,8 +132,6 @@ func registerRoutes(h *server.Hertz) {
 	}
 	productGroup := h.Group("/product")
 	{
-		// 搜索商品
-		productGroup.GET("/search", handlers.HandleSearchProducts)
 		// 获取单个商品详情
 		productGroup.GET("/:id", handlers.HandleGetProduct)
 	}
@@ -149,11 +147,8 @@ func registerRoutes(h *server.Hertz) {
 	}
 	orderGroup := h.Group("/order")
 	{
-		// TODO 创建订单
 		orderGroup.POST("", handlers.HandleCreateOrder)
-		// TODO 获取单个订单详情
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
-		// TODO 获取用户的所有订单
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
 	}
 	paymentGroup := h.Group("/payment")

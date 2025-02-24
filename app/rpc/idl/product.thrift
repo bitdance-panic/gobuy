@@ -70,6 +70,7 @@ struct SearchProductsReq {
 
 struct SearchProductsResp {
     1: list<Product> products;
+    2: i64 total_count;
 }
 
 struct ListProductReq {
@@ -80,4 +81,5 @@ struct ListProductReq {
 struct ListProductResp {
     1: list<Product> products;
     2: bool success;
+    3: i64 total_count;
 }
