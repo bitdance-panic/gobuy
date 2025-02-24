@@ -2,12 +2,14 @@ module github.com/bitdance-panic/gobuy/app/services/product
 
 go 1.22.1
 
-replace github.com/bitdance-panic/gobuy/app/consts => ../../consts
+replace (
+	github.com/bitdance-panic/gobuy/app/common => ../../common
+	github.com/bitdance-panic/gobuy/app/consts => ../../consts
+)
 
 require (
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-20250121052001-73b22fa8dc38
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-20250121052001-73b22fa8dc38
-	github.com/bitdance-panic/gobuy/app/services/user v0.0.0-20250221160239-dd16f89c9e3f
 	github.com/cloudwego/kitex v0.12.1
 	github.com/go-sql-driver/mysql v1.8.1
 	gopkg.in/validator.v2 v2.0.1
@@ -37,6 +39,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/jhump/protoreflect v1.8.2 // indirect
@@ -49,6 +52,7 @@ require (
 	github.com/modern-go/gls v0.0.0-20220109145502-612d0167dce5 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tidwall/gjson v1.17.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
