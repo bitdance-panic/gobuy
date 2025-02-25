@@ -150,6 +150,10 @@ func registerRoutes(h *server.Hertz) {
 		orderGroup.POST("", handlers.HandleCreateOrder)
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
+		orderGroup.POST("/address", handlers.HandleCreateOrderAddress)
+		orderGroup.GET("/address", handlers.HandleGetOrderAddress)
+		orderGroup.PUT("/address", handlers.HandleUpdateOrderAddress)
+		orderGroup.DELETE("/address", handlers.HandleDeleteOrderAddress)
 	}
 	paymentGroup := h.Group("/payment")
 	{

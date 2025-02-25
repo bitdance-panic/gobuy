@@ -91,6 +91,14 @@ type OrderItem struct {
 	ProductImage string
 }
 
+type OrderAddress struct {
+	Base
+	UserID       int
+	Phone        string
+	OrderID      int `gorm:"not null"` // 订单 ID
+	OrderAddress string
+}
+
 // 黑名单条目模型
 type Blacklist struct {
 	Base
@@ -147,6 +155,8 @@ func (Blacklist) TableName() string {
 	return "blacklist"
 }
 
+func (OrderAddress) TableName() string { return "order_address" }
+
 // 调用这个来自动调整表结构
 func AutoMigrate(db *gorm.DB) {
 	if os.Getenv("GO_ENV") != "production" {
@@ -163,6 +173,7 @@ func AutoMigrate(db *gorm.DB) {
 			&OrderItem{},
 			&Product{},
 			&Blacklist{},
+			&OrderAddress{},
 		)
 	}
 }

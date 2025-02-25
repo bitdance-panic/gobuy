@@ -190,3 +190,70 @@ func convertOrderToProto(order *models.Order) *rpc_order.Order {
 		CreatedAt:  utils.FormatTime(order.CreatedAt),
 	}
 }
+
+// 创建订单地址
+func (bll *OrderBLL) CreateOrderAddress(ctx context.Context, req *rpc_order.CreateOrderAddressReq) (*rpc_order.CreateOrderAddressResp, error) {
+	orderAddress := models.OrderAddress{
+		UserID:       int(req.UserId),
+		Phone:        req.Phone,
+		OrderID:      int(req.OrderId),
+		OrderAddress: req.OrderAddress,
+	}
+
+	// 调用 DAO 层创建订单地址
+	err := dao.CreateOrderAddress(tidb.DB, &orderAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rpc_order.CreateOrderAddressResp{
+		OrderId: int32(orderAddress.OrderID),
+		Success: true,
+	}, nil
+}
+
+// 删除订单地址
+func (bll *OrderBLL) DeleteOrderAddress(ctx context.Context, req *rpc_order.DeleteOrderAddressReq) (*rpc_order.DeleteOrderAddressResp, error) {
+	// 调用 DAO 层删除订单地址
+	err := dao.DeleteOrderAddress(tidb.DB, req.OrderId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rpc_order.DeleteOrderAddressResp{
+		OrderId: req.OrderId,
+		Success: true,
+	}, nil
+}
+
+// 更新订单地址
+func (bll *OrderBLL) UpdateOrderAddress(ctx context.Context, req *rpc_order.UpdateOrderAddressReq) (*rpc_order.UpdateOrderAddressResp, error) {
+	// 调用 DAO 层更新订单地址
+	err := dao.UpdateOrderAddress(tidb.DB, req.OrderId, req.OrderAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rpc_order.UpdateOrderAddressResp{
+		OrderAddress: req.OrderAddress,
+		Success:      true,
+	}, nil
+}
+
+// 获取订单地址
+func (bll *OrderBLL) GetOrderAddress(ctx context.Context, req *rpc_order.GetOrderAddressReq) (*rpc_order.GetOrderAddressResp, error) {
+	// 调用 DAO 层获取订单地址
+	orderAddress, err := dao.GetOrderAddress(tidb.DB, req.OrderId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rpc_order.GetOrderAddressResp{
+		OrderAddress: &rpc_order.OrderAddress{
+			UserId:       int32(orderAddress.UserID),
+			Phone:        orderAddress.Phone,
+			OrderId:      int32(orderAddress.OrderID),
+			OrderAddress: orderAddress.OrderAddress,
+		},
+	}, nil
+}

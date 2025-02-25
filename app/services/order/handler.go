@@ -33,3 +33,17 @@ func (*OrderServiceImpl) UpdateOrderStatus(ctx context.Context, req *rpc_order.U
 func (*OrderServiceImpl) AdminListOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	return orderBll.AdminListOrder(ctx, req)
 }
+
+func (*OrderServiceImpl) CreateOrderAddress(ctx context.Context, req *rpc_order.CreateOrderAddressReq) (*rpc_order.CreateOrderAddressResp, error) {
+	return orderBll.CreateOrderAddress(ctx, req)
+}
+
+func (*OrderServiceImpl) DeleteOrderAddress(ctx context.Context, req *rpc_order.DeleteOrderAddressReq) (*rpc_order.DeleteOrderAddressResp, error) {
+	return orderBll.DeleteOrderAddress(ctx, req)
+}
+func (*OrderServiceImpl) UpdateOrderAddress(ctx context.Context, req *rpc_order.UpdateOrderAddressReq) (*rpc_order.UpdateOrderAddressResp, error) {
+	return orderBll.UpdateOrderAddress(ctx, req)
+}
+func (*OrderServiceImpl) GetOrderAddress(ctx context.Context, req *rpc_order.GetOrderAddressReq) (*rpc_order.GetOrderAddressResp, error) {
+	return orderBll.GetOrderAddress(ctx, req)
+}
