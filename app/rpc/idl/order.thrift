@@ -21,13 +21,67 @@ struct Order{
     8: string pay_time;
 }
 
+struct OrderAddress{
+    1: i32 id;
+    2: i32 user_id;
+    3: string phone;
+    // 订单号
+    4: i32 order_id;
+    5: string order_address;
+}
+
+struct CreateOrderAddressReq{
+    1: i32 user_id;
+    2: string phone;
+    3: i32 order_id;
+    4: string order_address;
+}
+
+struct CreateOrderAddressResp{
+    1: i32 order_id;
+    2: bool success;
+}
+
+struct DeleteOrderAddressReq{
+    1: i32 order_id;
+}
+
+struct DeleteOrderAddressResp{
+    1: i32 order_id;
+    2: bool success;
+}
+
+struct UpdateOrderAddressReq{
+    1: i32 order_id;
+    2: string order_address;
+}
+
+struct UpdateOrderAddressResp{
+    1: string order_address;
+    2: bool success;
+}
+
+struct GetOrderAddressReq{
+    1: i32 order_id;
+}
+
+struct GetOrderAddressResp{
+    1: OrderAddress order_address;
+}
+
 service OrderService{
     CreateOrderResp createOrder(1: CreateOrderReq req);
     UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
     GetOrderResp getOrder(1: GetOrderReq req);
     ListOrderResp listUserOrder(1: ListOrderReq req);
     ListOrderResp adminListOrder(1: ListOrderReq req);
+    CreateOrderAddressResp createOrderAddress(1: CreateOrderAddressReq req);
+    DeleteOrderAddressResp deleteOrderAddress(1: DeleteOrderAddressReq req);
+    UpdateOrderAddressResp updateOrderAddress(1: UpdateOrderAddressReq req);
+    GetOrderAddressResp getOrderAddress(1: GetOrderAddressReq req);
 }
+
+
 struct CreateOrderReq{
     1: i32 user_id;
     2: list<i32> cartItemIDs;
