@@ -24,7 +24,7 @@ func (s CommonServerSuite) Options() []server.Option {
 		// 使用 Kitex Prometheus 监控
 		server.WithTracer(prometheus.NewServerTracer("",
 			"",
-			// prometheus.WithDisableServer(true),
+			prometheus.WithDisableServer(true),
 			prometheus.WithRegistry(mtl.Registry)),
 		),
 	}

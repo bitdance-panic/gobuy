@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/common/mtl"
+	"github.com/bitdance-panic/gobuy/app/common/serversuite"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/bitdance-panic/gobuy/app/services/user/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
-
-	"github.com/bitdance-panic/gobuy/app/common/serversuite"
+	"github.com/bitdance-panic/gobuy/app/utils"
 
 	"github.com/cloudwego/kitex/server"
 )
@@ -25,8 +25,8 @@ func kitexInit() (opts []server.Option) {
 	// address
 	address := conf.GetConf().Kitex.Address
 	if strings.HasPrefix(address, ":") {
-		// localIp := utils.MustGetLocalIPv4()
-		localIp := "0.0.0.0"
+		localIp := utils.MustGetLocalIPv4()
+		// localIp := "0.0.0.0"
 		address = localIp + address
 	}
 	addr, err := net.ResolveTCPAddr("tcp", address)
@@ -53,6 +53,6 @@ func main() {
 
 	err := svr.Run()
 	if err != nil {
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 	}
 }
