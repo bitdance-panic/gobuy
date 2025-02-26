@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
+	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
@@ -12,35 +15,20 @@ import (
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/handlers"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
+	"github.com/bitdance-panic/gobuy/app/utils"
+	"github.com/hertz-contrib/registry/consul"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/cors"
-	"github.com/hertz-contrib/jwt"
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
 
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
+	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
+	consulapi "github.com/hashicorp/consul/api"
 )
-
-func addUidMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
-			c.Next(ctx) // 白名单跳过认证
-			return
-		}
-
-		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
-			fmt.Println("设置UID")
-			userID := claims[middleware.IdentityKey]
-			c.Set("uid", int(userID.(float64)))
-		}
-		// fmt.Println("设置UID")
-		// c.Set("uid", 450002)
-		c.Next(ctx)
-	}
-}
 
 // @title userservice
 // @version 1.0
@@ -55,6 +43,56 @@ func addUidMiddleware() app.HandlerFunc {
 // @host localhost:8888
 // @BasePath /
 // @schemes http
+
+var (
+	address string
+	h       *server.Hertz
+)
+
+func registerToConsul() {
+	// build a consul client
+	config := consulapi.DefaultConfig()
+	config.Address = conf.GetConf().Registry.RegistryAddress[0] // "localhost:8500"
+	consulclient, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatalf("failed to build a consul client: %v", err)
+		return
+	}
+	// build a consul register with the consul client
+	r := consul.NewConsulRegister(consulclient)
+
+	// 解析服务的 IP 和端口
+	address = conf.GetConf().Hertz.Address
+	if strings.HasPrefix(address, ":") {
+		localIp := utils.MustGetLocalIPv4()
+		address = localIp + address
+	}
+	addr, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		panic(err)
+	}
+
+	// // 生成唯一服务 ID（例如使用 IP:Port）
+	// parts := strings.Split(address, ":")
+	// if len(parts) != 2 {
+	// 	log.Fatalf("地址格式错误: %s", address)
+	// }
+	// ip := parts[0]
+	// port, _ := strconv.Atoi(parts[1])
+	// serviceID := fmt.Sprintf("gateway-%s-%d", ip, port)
+
+	// run Hertz with the consul register
+	h = server.Default(
+		server.WithHostPorts(address),
+		server.WithRegistry(r, &registry.Info{
+			ServiceName: "gateway",
+			Addr:        addr,
+			Weight:      10,
+			Tags:        nil,
+		}),
+	)
+}
+
 func main() {
 	// 初始化数据库
 	dal.Init()
@@ -65,6 +103,7 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
+	// 初始化 user 的client
 	clients.Init()
 
 	// 同步黑名单到Redis
@@ -74,9 +113,7 @@ func main() {
 	middleware.StartRedisCleanupTask()
 
 	// 创建Hertz实例
-	address := conf.GetConf().Hertz.Address
-	s := fmt.Sprintf("localhost%s", address)
-	h := server.New(server.WithHostPorts(s))
+	registerToConsul()
 
 	// 中间件链
 	h.Use(
@@ -89,8 +126,8 @@ func main() {
 		}),
 		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
-		conditionalAuthMiddleware(),
-		addUidMiddleware(),
+		middleware.ConditionalAuthMiddleware(),
+		middleware.AddUidMiddleware(),
 		// 黑名单检查
 		middleware.BlacklistMiddleware(),
 		// 用户权限检查
@@ -99,7 +136,7 @@ func main() {
 	// 注册路由
 	registerRoutes(h)
 	// 注册Swagger
-	registerSwagger(h, s)
+	registerSwagger(h, address)
 	h.Spin()
 }
 
@@ -192,16 +229,6 @@ func registerRoutes(h *server.Hertz) {
 			// TODO 获取所有的订单(分页)（订单包括支付信息）
 			adminOrderGroup.GET("/list", handlers.HandleAdminListOrder)
 		}
-	}
-}
-
-func conditionalAuthMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
-			c.Next(ctx) // 跳过认证
-			return
-		}
-		middleware.AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
 	}
 }
 

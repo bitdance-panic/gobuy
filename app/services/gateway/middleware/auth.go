@@ -10,10 +10,10 @@ import (
 
 	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
+	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -163,4 +163,14 @@ func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
 func unauthorizedHandler(ctx context.Context, c *app.RequestContext, code int, message string) {
 	utils.FailFull(c, code, message, nil)
 	c.Abort()
+}
+
+func ConditionalAuthMiddleware() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
+			c.Next(ctx) // 跳过认证
+			return
+		}
+		AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
+	}
 }

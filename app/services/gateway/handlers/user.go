@@ -8,8 +8,8 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/consts"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
+	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
