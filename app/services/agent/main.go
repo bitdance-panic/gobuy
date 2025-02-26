@@ -18,9 +18,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var (
-	agent compose.Runnable[map[string]any, []*schema.Message]
-)
+var agent compose.Runnable[map[string]any, []*schema.Message]
 
 func setup() {
 	ctx := context.Background()
@@ -36,8 +34,8 @@ func setup() {
 		},
 	)
 	tools := []tool.BaseTool{
-		tools.NewSearchProductsTool(),
-		tools.NewSearchOrdersTool(),
+		// tools.NewSearchProductsTool(),
+		// tools.NewSearchOrdersTool(),
 	}
 	temp := float32(0.7)
 	err := godotenv.Load()
