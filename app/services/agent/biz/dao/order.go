@@ -1,18 +1,23 @@
 package dao
 
 import (
-	"fmt"
-
 	"gorm.io/gorm"
 )
 
 func GetColumns(db *gorm.DB) ([]string, error) {
-	// 执行原生 SQL 查询获取列名
-	var columns []string
-	db.Raw("SHOW COLUMNS FROM `order`").Pluck("Field", &columns)
-	// 打印列名
-	for _, column := range columns {
-		fmt.Println(column)
+	// 定义结构体接收列信息
+	type ColumnInfo struct {
+		Field string `gorm:"column:Field"`
+	}
+	var columnInfos []ColumnInfo
+	// 执行原生查询并扫描到结构体切片
+	if err := db.Raw("SHOW COLUMNS FROM `order`").Scan(&columnInfos).Error; err != nil {
+		return nil, err
+	}
+	// 提取列名到字符串切片
+	columns := make([]string, len(columnInfos))
+	for i, info := range columnInfos {
+		columns[i] = info.Field
 	}
 	return columns, nil
 }

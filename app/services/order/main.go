@@ -5,6 +5,8 @@ import (
 	"net"
 	"strings"
 
+	"github.com/bitdance-panic/gobuy/app/common/mtl"
+	"github.com/bitdance-panic/gobuy/app/common/serversuite"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order/orderservice"
 	"github.com/bitdance-panic/gobuy/app/services/order/biz/crontask"
 	"github.com/bitdance-panic/gobuy/app/services/order/biz/dal"
@@ -12,6 +14,11 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/cloudwego/kitex/server"
+)
+
+var (
+	ServiceName  = conf.GetConf().Kitex.Service
+	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
 )
 
 func kitexInit() (opts []server.Option) {
@@ -24,11 +31,17 @@ func kitexInit() (opts []server.Option) {
 	if err != nil {
 		panic(err)
 	}
-	opts = append(opts, server.WithServiceAddr(addr))
+	// opts = append(opts, server.WithServiceAddr(addr))
+	opts = append(opts, server.WithServiceAddr(addr), server.WithSuite(serversuite.CommonServerSuite{
+		CurrentServiceName: ServiceName,
+		RegistryAddr:       RegistryAddr,
+	}))
 	return
 }
 
 func main() {
+	// 初始化指标监控
+	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr)
 	dal.Init()
 	opts := kitexInit()
 
