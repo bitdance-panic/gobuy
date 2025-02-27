@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/models"
-	"github.com/bitdance-panic/gobuy/app/services/agent/biz/conf"
 	"github.com/bitdance-panic/gobuy/app/services/agent/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/agent/biz/dao"
+	"github.com/bitdance-panic/gobuy/app/services/agent/conf"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/prompt"
 	"github.com/cloudwego/eino/components/tool"
@@ -48,9 +48,12 @@ func newSearchProductsTool() tool.BaseTool {
 	return searchProductsTool
 }
 
-func init() {
+func InitSearchProductsAgent() {
 	ctx := context.Background()
 	columns, err := dao.GetColumns(tidb.DB)
+	if err != nil {
+		log.Fatal(err)
+	}
 	columnsString := strings.Join(columns, ", ")
 	template := prompt.FromMessages(schema.FString,
 		&schema.Message{
