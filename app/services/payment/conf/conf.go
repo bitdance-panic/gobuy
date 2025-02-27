@@ -20,9 +20,11 @@ type Config struct {
 	Env      string
 	Kitex    Kitex    `yaml:"kitex"`
 	Tidb     Tidb     `yaml:"tidb"`
+	Alipay   Alipay   `yaml:"alipay"`
 	Postgres Postgres `yaml:"postgres"`
 	Redis    Redis    `yaml:"redis"`
 	Registry Registry `yaml:"registry"`
+	Hertz    Hertz    `yaml:"hertz"`
 }
 
 type Tidb struct {
@@ -31,6 +33,12 @@ type Tidb struct {
 	Password string `yaml:"password"`
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
+}
+
+type Alipay struct {
+	APPID        string `yaml:"app_id"`
+	PrivateKey   string `yaml:"private_key"`
+	ServerDomain string `yaml:"server_domain"`
 }
 
 type Postgres struct {
