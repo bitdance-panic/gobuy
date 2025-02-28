@@ -8,8 +8,8 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/consts"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
-	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -152,14 +152,10 @@ func HandleBlockUser(ctx context.Context, c *app.RequestContext) {
 // @Description 解除封禁
 // @Accept json
 // @Produce json
-// @Router /admin/unblock_user [delete]
+// @Router /admin/unblock [delete]
 func HandleUnblockUser(ctx context.Context, c *app.RequestContext) {
-	req := rpc_user.UnblockUserReq{}
-
-	if err := c.BindAndValidate(&req); err != nil {
-		hlog.Warnf("Unblock user failed for: %s, validation error: %v", req.Identifier, err)
-		utils.Fail(c, err.Error())
-		return
+	req := rpc_user.UnblockUserReq{
+		Identifier: c.Param("identifier"),
 	}
 
 	resp, err := clients.UserClient.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
