@@ -4,16 +4,17 @@ import (
 	"context"
 	"time"
 
+	appConsts "github.com/bitdance-panic/gobuy/app/consts"
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
-	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -23,7 +24,7 @@ import (
 
 type User = models.User
 
-var IdentityKey = "uid"
+var IdentityKey = appConsts.CONTEXT_UID_KEY
 
 var secret = "panic-bitdance"
 
@@ -103,14 +104,14 @@ func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, erro
 // 登录响应
 func loginResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
 	// 生成RefreshToken
-	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt(appConsts.CONTEXT_UID_KEY))
 	if err != nil {
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 保存refreshToken
-	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt(appConsts.CONTEXT_UID_KEY), refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
 		return
@@ -133,16 +134,16 @@ func loginResponse(ctx context.Context, c *app.RequestContext, code int, token s
 // refreshResponse 刷新Token响应
 func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
 	// 生成新的RefreshToken
-	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt(appConsts.CONTEXT_UID_KEY))
 	if err != nil {
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 更新数据库中的RefreshToken
-	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt(appConsts.CONTEXT_UID_KEY), refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
-		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken, error: "+err.Error(), nil)
 		return
 	}
 
@@ -156,7 +157,7 @@ func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token
 // 身份处理
 func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
 	claims := jwt.ExtractClaims(ctx, c)
-	return claims["uid"]
+	return claims[appConsts.CONTEXT_UID_KEY]
 }
 
 // 统一错误处理
