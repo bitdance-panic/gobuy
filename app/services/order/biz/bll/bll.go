@@ -80,7 +80,7 @@ func (bll *OrderBLL) CreateOrder(ctx context.Context, req *rpc_order.CreateOrder
 		orderItems[i].OrderID = order.ID
 	}
 	order.Items = orderItems
-	//TODO 事务
+	// TODO 事务
 	err = dao.SaveOrder(tidb.DB, &order)
 	if err != nil {
 		return nil, err
@@ -121,6 +121,7 @@ func (bll *OrderBLL) UpdateOrderStatus(ctx context.Context, req *rpc_order.Updat
 		Success: true,
 	}, nil
 }
+
 func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	orders, err := dao.ListUserOrder(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
 	if err != nil {
