@@ -24,3 +24,7 @@ hertz:
   log_max_age: 3
   log_max_backups: 50
   registry_addr: "localhost:8500"
+
+registry:
+  registry_address: ["localhost:8500"]  
+  service_id: "my-service" 
