@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
@@ -26,7 +27,6 @@ import (
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
 
-	"github.com/bitdance-panic/gobuy/app/services/user/biz/clients"
 	consulapi "github.com/hashicorp/consul/api"
 )
 
@@ -103,8 +103,7 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	// 初始化 user 的client
-	clients.Init()
+	clients.NewClients()
 
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
@@ -218,9 +217,9 @@ func registerRoutes(h *server.Hertz) {
 			// 获取所有的用户信息
 			adminUserGroup.GET("/list", handlers.HandleAdminListUser)
 			// TODO 封禁用户
-			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
+			adminUserGroup.POST("/block", handlers.HandleBlockUser)
 			// TODO 解封
-			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
+			adminUserGroup.DELETE("/unblock/:identifier", handlers.HandleUnblockUser)
 			// 移除用户
 			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
 		}

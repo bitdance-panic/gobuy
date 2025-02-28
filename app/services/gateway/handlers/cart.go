@@ -8,7 +8,7 @@ import (
 	"github.com/bitdance-panic/gobuy/app/consts"
 
 	rpc_cart "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/cart"
-	clients "github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/client/callopt"

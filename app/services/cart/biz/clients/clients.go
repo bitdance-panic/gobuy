@@ -1,42 +1,38 @@
 package clients
 
 import (
+	"log"
+
 	"github.com/bitdance-panic/gobuy/app/common/clientsuite"
+	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/cart/cartservice"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
-	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/bitdance-panic/gobuy/app/services/cart/conf"
+	pclient "github.com/bitdance-panic/gobuy/app/services/product/biz/clients"
 	"github.com/cloudwego/kitex/client"
 )
 
-var (
-	UserClient    userservice.Client
-	ProductClient productservice.Client
-)
+var ProductClient productservice.Client
 
-func Init() {
+func NewClients() {
+	ProductClient = pclient.Init()
+}
+
+func Init() (CartClient cartservice.Client) {
 	var err error
 
 	opts := []client.Option{
 		client.WithSuite(clientsuite.CommonClientSuite{
-			CurrentServiceName: "user", // 要在conf.yml配置
-			RegistryAddr:       "localhost:8500",
+			CurrentServiceName: "cart",
+			RegistryAddr:       conf.GetConf().Registry.RegistryAddress[0],
 		}),
 	}
-	UserClient, err = userservice.NewClient(
-		"user",
+	CartClient, err = cartservice.NewClient(
+		"cart",
 		opts..., // 注入监控配置
 	)
 	if err != nil {
-		panic(err)
+		log.Fatalf("faild to new cart client: %v", err)
 	}
 
-	// UserClient, err = userservice.NewClient("user", client.WithHostPorts("0.0.0.0:8881"))
-	// if err != nil {
-	// 	hlog.Fatal(err)
-	// }
-
-	ProductClient, err = productservice.NewClient("product", client.WithHostPorts("0.0.0.0:8882"))
-	if err != nil {
-		hlog.Fatal(err)
-	}
+	return CartClient
 }
