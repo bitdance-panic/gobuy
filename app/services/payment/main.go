@@ -30,9 +30,9 @@ func handleGetUrl(ctx context.Context, c *app.RequestContext) {
 	// 从请求中获取系统订单ID
 	orderID := c.Query("order_id")
 	// 生成支付宝交易号
-	var tradeNo = fmt.Sprintf("alipay_%d", xid.Next())
+	tradeNo := fmt.Sprintf("alipay_%d", xid.Next())
 	// TODO 根据ID查询订单详情
-	var p = alipay.TradePagePay{}
+	p := alipay.TradePagePay{}
 	p.NotifyURL = notifyURL
 	p.ReturnURL = callbackURL
 	// TODO 和订单一致
@@ -49,7 +49,7 @@ func handleGetUrl(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, "创建支付链接失败")
 		return
 	}
-	var payURL = url.String()
+	payURL := url.String()
 	log.Printf("创建支付链接成功, 系统订单ID: %s, 支付宝交易号: %s", orderID, tradeNo)
 	fmt.Println(payURL)
 	// 重定向到支付页面
@@ -83,7 +83,7 @@ func handleCallback(ctx context.Context, c *app.RequestContext) {
 	log.Println("回调验证签名通过")
 
 	// 查询订单状态
-	var p = alipay.TradeQuery{}
+	p := alipay.TradeQuery{}
 	p.OutTradeNo = req.OutTradeNo
 
 	rsp, err := client.Client.TradeQuery(ctx, p)
@@ -104,6 +104,7 @@ func handleCallback(ctx context.Context, c *app.RequestContext) {
 }
 
 func main() {
+	client.NewClients()
 
 	h := configServer()
 	{
