@@ -9,6 +9,7 @@ import (
 	rpc_agent "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/agent"
 	chat_models "github.com/bitdance-panic/gobuy/app/services/agent/models"
 	"github.com/bitdance-panic/gobuy/app/services/agent/tools"
+	"github.com/bitdance-panic/gobuy/app/services/agent/utils"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/prompt"
 	"github.com/cloudwego/eino/components/tool"
@@ -24,7 +25,7 @@ var respHelperTemplate *prompt.DefaultChatTemplate
 func initAgent() {
 	ctx := context.Background()
 	tools := []tool.BaseTool{
-		// tools.NewSearchProductsTool(),
+		tools.NewSearchProductsTool(),
 		tools.NewSearchOrdersTool(),
 	}
 	utilSelector, template, err := chat_models.NewUtilSelectorModel(ctx, &tools)
@@ -59,7 +60,7 @@ func initHelper() {
 	}
 }
 
-func init() {
+func Init() {
 	initAgent()
 	initHelper()
 }
@@ -94,6 +95,7 @@ func Ask(ctx context.Context, req *rpc_agent.AskReq) (resp *rpc_agent.AskResp, e
 	if err != nil {
 		return nil, err
 	}
+	msgs.Content = utils.CleanBlock(msgs.Content)
 	fmt.Println("大模型生成的结果:", msgs.Content)
 	return &rpc_agent.AskResp{
 		Content: msgs.Content,

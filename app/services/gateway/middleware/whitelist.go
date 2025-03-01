@@ -11,12 +11,11 @@ import (
 func WhiteListMiddleware() app.HandlerFunc {
 	whiteList := []string{
 		"/login",
-		"/index/products",
+		"/product/search",
 		"/register",
 	}
 	return func(ctx context.Context, c *app.RequestContext) {
 		path := string(c.URI().Path())
-
 		for _, p := range whiteList {
 			if matchPath(p, path) {
 				c.Set("skip_auth", true)
@@ -24,6 +23,11 @@ func WhiteListMiddleware() app.HandlerFunc {
 				return
 			}
 		}
+		// c.Request.Header.VisitAll(func(key, value []byte) {
+		// 	if string(key) == "Authorization" {
+		// 		fmt.Println(string(key), string(value))
+		// 	}
+		// })
 		c.Next(ctx)
 	}
 }

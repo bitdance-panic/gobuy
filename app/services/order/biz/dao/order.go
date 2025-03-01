@@ -46,7 +46,8 @@ func UpdateOrderStatus(db *gorm.DB, order *Order, newStatus consts.OrderStatus) 
 
 func ListUserOrder(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]Order, error) {
 	var orders []Order
-	err := db.Preload("Items").Limit(pageSize).Offset((pageNum-1)*pageSize).Where("user_id = ?", userID).Find(&orders).Error
+	err := db.Preload("Items").Where("user_id = ?", userID).Find(&orders).Error
+	// .Limit(pageSize).Offset((pageNum-1)*pageSize).
 	if err != nil {
 		return nil, err
 	}

@@ -18,8 +18,8 @@ import (
 	"github.com/cloudwego/eino/components/tool/utils"
 )
 
-var template *prompt.DefaultChatTemplate
-var sqlGenerator *openai.ChatModel
+var orderTemplate *prompt.DefaultChatTemplate
+var orderSqlGenerator *openai.ChatModel
 
 func NewSearchOrdersTool() tool.BaseTool {
 	InitSearchOrders()
@@ -35,14 +35,13 @@ type SearchOrdersParams struct {
 }
 
 func searchOrdersFunc(ctx context.Context, params *SearchOrdersParams) (*ToolResponse, error) {
-	log.Printf("大模型调用这个工具，prompt为: %+v", params.Prompt)
-	messages, err := template.Format(context.Background(), map[string]any{
+	messages, err := orderTemplate.Format(context.Background(), map[string]any{
 		"task": params.Prompt,
 	})
 	if err != nil {
 		return nil, err
 	}
-	sqlResult, err := sqlGenerator.Generate(ctx, messages)
+	sqlResult, err := orderSqlGenerator.Generate(ctx, messages)
 	// 一般是没找到工具就进这里
 	if err != nil {
 		log.Fatalf("Error occurred: %v", err)
@@ -68,18 +67,18 @@ func searchOrdersFunc(ctx context.Context, params *SearchOrdersParams) (*ToolRes
 	return &ToolResponse{
 		Data:            idsString.String(),
 		DataDescription: "获取的为各个订单ID,用逗号分隔",
-		ShowWay:         "将各个订单ID改为超链接,格式为 http://localhost:8080/order/:id",
+		ShowWay:         "将各个订单ID改为<a>的超链接,href格式为 http://localhost:3000/orders/:id",
 	}, nil
 }
 
 func InitSearchOrders() {
-	columns, err := dao.GetColumns(tidb.DB)
+	columns, err := dao.GetOrderColumns(tidb.DB)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	columnsString := strings.Join(columns, ", ")
 	log.Printf("order表字段为: %+v", columnsString)
-	sqlGenerator, template, err = chat_models.NewSearchOrderSQLGenerator(context.Background(), columnsString)
+	orderSqlGenerator, orderTemplate, err = chat_models.NewSearchOrderSQLGenerator(context.Background(), columnsString)
 	if err != nil {
 		log.Panic(err.Error())
 	}

@@ -7,7 +7,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
@@ -103,8 +102,6 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	clients.NewClients()
-
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
 
@@ -126,11 +123,11 @@ func main() {
 		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
 		middleware.ConditionalAuthMiddleware(),
-		middleware.AddUidMiddleware(),
 		// 黑名单检查
 		middleware.BlacklistMiddleware(),
 		// 用户权限检查
-		middleware.CasbinMiddleware(),
+		// middleware.CasbinMiddleware(),
+		middleware.AddUidMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)
@@ -189,15 +186,11 @@ func registerRoutes(h *server.Hertz) {
 	}
 	paymentGroup := h.Group("/payment")
 	{
-		// TODO 只需要处理支付操作，应该是个回调的接口
-		paymentGroup.POST("/:orderID", TODOHandler)
+		paymentGroup.GET("/:orderID", handlers.HandleGetPayUrl)
 	}
 	agentGroup := h.Group("/agent")
 	{
-		// TODO 根据用户输入获取对应商品
-		agentGroup.POST("/product/search", TODOHandler)
-		// TODO 根据用户输入获取对应订单
-		agentGroup.POST("/order/search", TODOHandler)
+		agentGroup.POST("/ask", handlers.HandleAskAgent)
 	}
 	adminGroup := h.Group("/admin")
 	{

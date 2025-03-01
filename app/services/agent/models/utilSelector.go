@@ -42,7 +42,7 @@ func NewUtilSelectorModel(ctx context.Context, tools *[]tool.BaseTool) (*openai.
 		},
 		&schema.Message{
 			Role:    schema.User,
-			Content: "{task}。",
+			Content: "{task}。当前请求用户的id为{userID}",
 		},
 	)
 	return chatModel, template, nil
