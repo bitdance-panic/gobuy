@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	ServiceName  = "product" // conf.GetConf().Kitex.Service
+	ServiceName  = conf.GetConf().Kitex.Service
 	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
 )
 

@@ -1,8 +1,9 @@
 namespace go agent
 
 service AgentService {
-    AskResp ask(1: AskReq resp);
+    AskResp ask(1: AskReq req);
 }
+
 
 struct AskReq {
     1: string user_prompt;

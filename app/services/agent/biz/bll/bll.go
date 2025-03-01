@@ -24,7 +24,7 @@ var respHelperTemplate *prompt.DefaultChatTemplate
 func initAgent() {
 	ctx := context.Background()
 	tools := []tool.BaseTool{
-		// tools.NewSearchProductsTool(),
+		tools.NewSearchProductsTool(),
 		tools.NewSearchOrdersTool(),
 	}
 	utilSelector, template, err := chat_models.NewUtilSelectorModel(ctx, &tools)
@@ -59,7 +59,7 @@ func initHelper() {
 	}
 }
 
-func init() {
+func Init() {
 	initAgent()
 	initHelper()
 }

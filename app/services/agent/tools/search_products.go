@@ -2,141 +2,86 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/bitdance-panic/gobuy/app/services/agent/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/agent/biz/dao"
-	"github.com/bitdance-panic/gobuy/app/services/agent/conf"
+	chat_models "github.com/bitdance-panic/gobuy/app/services/agent/models"
+	agentutils "github.com/bitdance-panic/gobuy/app/services/agent/utils"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/prompt"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/components/tool/utils"
-	"github.com/cloudwego/eino/compose"
-	"github.com/cloudwego/eino/schema"
 )
 
-var searchProductsAgent compose.Runnable[map[string]any, *schema.Message]
+var productTemplate *prompt.DefaultChatTemplate
+var productSqlGenerator *openai.ChatModel
 
-type searchProductsParams struct {
-	SQL string `json:"sql" jsonschema:"description=SQL for searching products."`
+func NewSearchProductsTool() tool.BaseTool {
+	InitSearchProducts()
+	searchProductsTool, err := utils.InferTool("outer_search_products", "Search for products based on user requirements.", searchProductsFunc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return searchProductsTool
 }
 
-type OuterSearchProductsParams struct {
+type SearchProductsParams struct {
 	Prompt string `json:"sql" jsonschema:"description=User prompt"`
 }
 
-type SearchProductsResponse struct {
-	Success  bool             `json:"success"`
-	Products []models.Product `json:"products"`
-}
-
-func NewOuterSearchProductsTool() tool.BaseTool {
-	searchProductsTool, err := utils.InferTool("outer_search_products", "Search for products based on user requirements.", searchOuterProductsFunc)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return searchProductsTool
-}
-
-func newSearchProductsTool() tool.BaseTool {
-	searchProductsTool, err := utils.InferTool("search_products", "Search for products based on user requirements.", searchProductsFunc)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return searchProductsTool
-}
-
-func InitSearchProductsAgent() {
-	ctx := context.Background()
-	columns, err := dao.GetColumns(tidb.DB)
-	if err != nil {
-		log.Fatal(err)
-	}
-	columnsString := strings.Join(columns, ", ")
-	template := prompt.FromMessages(schema.FString,
-		&schema.Message{
-			Role:    schema.System,
-			Content: "你是一个SQL专家。现在有一个MySQL的product表,列名为：" + columnsString,
-		},
-		&schema.Message{
-			Role:    schema.User,
-			Content: "{task}。",
-		},
-	)
-	tools := []tool.BaseTool{
-		newSearchProductsTool(),
-	}
-	temp := float32(0.7)
-	llmConf := conf.GetConf().LLM
-	chatModel, err := openai.NewChatModel(ctx, &openai.ChatModelConfig{
-		BaseURL:     llmConf.BaseURL,
-		Model:       llmConf.ModelName,
-		APIKey:      llmConf.ApiKey,
-		Temperature: &temp,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	toolInfos := make([]*schema.ToolInfo, 0, len(tools))
-	for _, tool := range tools {
-		info, err := tool.Info(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-		toolInfos = append(toolInfos, info)
-	}
-	err = chatModel.BindTools(toolInfos)
-	if err != nil {
-		log.Fatal(err)
-	}
-	toolsNode, err := compose.NewToolNode(context.Background(), &compose.ToolsNodeConfig{
-		Tools: tools,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	chain := compose.NewChain[map[string]any, *schema.Message]()
-	chain.
-		AppendChatTemplate(template).
-		AppendChatModel(chatModel).
-		AppendToolsNode(toolsNode).
-		AppendLambda(compose.InvokableLambda(func(_ context.Context, results []*schema.Message) (*schema.Message, error) {
-			return results[0], nil
-		}))
-	searchProductsAgent, err = chain.Compile(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func searchOuterProductsFunc(ctx context.Context, params *OuterSearchProductsParams) (string, error) {
+func searchProductsFunc(ctx context.Context, params *SearchProductsParams) (*ToolResponse, error) {
 	log.Printf("大模型调用这个工具，prompt为: %+v", params.Prompt)
-	variables := map[string]any{
+	messages, err := productTemplate.Format(context.Background(), map[string]any{
 		"task": params.Prompt,
+	})
+	if err != nil {
+		return nil, err
 	}
-	// 调用大模型
-	resp, err := searchProductsAgent.Invoke(ctx, variables)
+	sqlResult, err := productSqlGenerator.Generate(ctx, messages)
 	// 一般是没找到工具就进这里
 	if err != nil {
 		log.Fatalf("Error occurred: %v", err)
+		return nil, errors.New("Tools not found")
 	}
-	// 就是response的字符串
-	return resp.Content, nil
+	log.Println("大模型生成的SQL:", sqlResult.Content)
+	sql := agentutils.CleanBlock(sqlResult.Content)
+	log.Println("clean后的SQL:", sql)
+	products := make([]models.Product, 0)
+	// 具体的调用逻辑
+	result := tidb.DB.Raw(sql).Scan(&products)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var idsString strings.Builder
+	// 多次追加字符串
+	for i, product := range products {
+		if i != 0 {
+			idsString.WriteString(", ")
+		}
+		idsString.WriteString(strconv.Itoa(product.ID))
+	}
+	return &ToolResponse{
+		Data:            idsString.String(),
+		DataDescription: "获取的为各个商品ID,用逗号分隔",
+		ShowWay:         "将各个商品ID改为超链接,格式为 http://localhost:8080/product/:id",
+	}, nil
 }
 
-func searchProductsFunc(_ context.Context, params *searchProductsParams) (SearchProductsResponse, error) {
-	log.Printf("已生成sql,传入SearchProductFunc并准备与数据库交互: %+v", *params)
-	var products []models.Product
-	// 具体的调用逻辑
-	result := tidb.DB.Raw(params.SQL).Scan(&products)
-	if result.Error != nil {
-		return SearchProductsResponse{}, result.Error
+func InitSearchProducts() {
+	columns, err := dao.GetColumns(tidb.DB)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
-	resp := SearchProductsResponse{
-		Success:  true,
-		Products: products,
+	columnsString := strings.Join(columns, ", ")
+	log.Printf("product表字段为: %+v", columnsString)
+	productSqlGenerator, productTemplate, err = chat_models.NewSearchProductSQLGenerator(context.Background(), columnsString)
+	if err != nil {
+		log.Panic(err.Error())
 	}
-	return resp, nil
+
 }

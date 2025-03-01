@@ -21,11 +21,4 @@ kitex:
   log_max_backups: 50
 
 registry:
-  registry_address: ["localhost:8500"]  
-  service_id: "my-service"  
-
-# postgres: 
-#     dsn: "postgres://%s:%s@%s/gobuy?timezone=Asia/Shanghai"
-#     user: <user>
-#     password: <password>
-#     host: <host>
+  registry_address: ["localhost:8500"]

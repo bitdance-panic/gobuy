@@ -7,6 +7,7 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/bitdance-panic/gobuy/app/common/serversuite"
+	"github.com/bitdance-panic/gobuy/app/services/agent/biz/bll"
 	"github.com/bitdance-panic/gobuy/app/services/agent/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/agent/conf"
 	"github.com/bitdance-panic/gobuy/app/utils"
@@ -43,6 +44,7 @@ func main() {
 	// 初始化指标监控
 	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr)
 	dal.Init()
+	bll.Init()
 
 	opts := kitexInit()
 	svr := agentservice.NewServer(new(AgentServiceImpl), opts...)

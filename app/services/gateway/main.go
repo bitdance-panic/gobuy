@@ -7,7 +7,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
@@ -103,8 +102,6 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	clients.NewClients()
-
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
 
@@ -194,10 +191,7 @@ func registerRoutes(h *server.Hertz) {
 	}
 	agentGroup := h.Group("/agent")
 	{
-		// TODO 根据用户输入获取对应商品
-		agentGroup.POST("/product/search", TODOHandler)
-		// TODO 根据用户输入获取对应订单
-		agentGroup.POST("/order/search", TODOHandler)
+		agentGroup.POST("/ask", handlers.HandleAskAgent)
 	}
 	adminGroup := h.Group("/admin")
 	{

@@ -56,7 +56,7 @@ kitex -module=github.com/bitdance-panic/gobuy/app/rpc idl/user.thrift
 4. 启动hertz, 访问`http://<ip>:<port>/swagger/index.html`
 
 # 热重载
-air: go install github.com/air-verse/air@v1.52.3
+air: `go install github.com/air-verse/air@v1.52.3`
 
 
 

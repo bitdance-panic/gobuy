@@ -397,11 +397,11 @@ func (p *AskResp) Field1DeepEqual(src string) bool {
 }
 
 type AgentService interface {
-	Ask(ctx context.Context, resp *AskReq) (r *AskResp, err error)
+	Ask(ctx context.Context, req *AskReq) (r *AskResp, err error)
 }
 
 type AgentServiceAskArgs struct {
-	Resp *AskReq `thrift:"resp,1" frugal:"1,default,AskReq" json:"resp"`
+	Req *AskReq `thrift:"req,1" frugal:"1,default,AskReq" json:"req"`
 }
 
 func NewAgentServiceAskArgs() *AgentServiceAskArgs {
@@ -411,24 +411,24 @@ func NewAgentServiceAskArgs() *AgentServiceAskArgs {
 func (p *AgentServiceAskArgs) InitDefault() {
 }
 
-var AgentServiceAskArgs_Resp_DEFAULT *AskReq
+var AgentServiceAskArgs_Req_DEFAULT *AskReq
 
-func (p *AgentServiceAskArgs) GetResp() (v *AskReq) {
-	if !p.IsSetResp() {
-		return AgentServiceAskArgs_Resp_DEFAULT
+func (p *AgentServiceAskArgs) GetReq() (v *AskReq) {
+	if !p.IsSetReq() {
+		return AgentServiceAskArgs_Req_DEFAULT
 	}
-	return p.Resp
+	return p.Req
 }
-func (p *AgentServiceAskArgs) SetResp(val *AskReq) {
-	p.Resp = val
+func (p *AgentServiceAskArgs) SetReq(val *AskReq) {
+	p.Req = val
 }
 
 var fieldIDToName_AgentServiceAskArgs = map[int16]string{
-	1: "resp",
+	1: "req",
 }
 
-func (p *AgentServiceAskArgs) IsSetResp() bool {
-	return p.Resp != nil
+func (p *AgentServiceAskArgs) IsSetReq() bool {
+	return p.Req != nil
 }
 
 func (p *AgentServiceAskArgs) Read(iprot thrift.TProtocol) (err error) {
@@ -492,7 +492,7 @@ func (p *AgentServiceAskArgs) ReadField1(iprot thrift.TProtocol) error {
 	if err := _field.Read(iprot); err != nil {
 		return err
 	}
-	p.Resp = _field
+	p.Req = _field
 	return nil
 }
 
@@ -526,10 +526,10 @@ WriteStructEndError:
 }
 
 func (p *AgentServiceAskArgs) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("resp", thrift.STRUCT, 1); err != nil {
+	if err = oprot.WriteFieldBegin("req", thrift.STRUCT, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := p.Resp.Write(oprot); err != nil {
+	if err := p.Req.Write(oprot); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -556,7 +556,7 @@ func (p *AgentServiceAskArgs) DeepEqual(ano *AgentServiceAskArgs) bool {
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.Resp) {
+	if !p.Field1DeepEqual(ano.Req) {
 		return false
 	}
 	return true
@@ -564,7 +564,7 @@ func (p *AgentServiceAskArgs) DeepEqual(ano *AgentServiceAskArgs) bool {
 
 func (p *AgentServiceAskArgs) Field1DeepEqual(src *AskReq) bool {
 
-	if !p.Resp.DeepEqual(src) {
+	if !p.Req.DeepEqual(src) {
 		return false
 	}
 	return true
