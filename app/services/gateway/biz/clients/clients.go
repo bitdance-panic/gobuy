@@ -8,6 +8,7 @@ import (
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
+	"github.com/smartwalle/alipay/v3"
 	// payclient "github.com/bitdance-panic/gobuy/app/services/payment/biz/clients"
 )
 
@@ -15,9 +16,10 @@ var (
 	UserClient    userservice.Client
 	ProductClient productservice.Client
 	// PaymentClient paymentservice.Client  // 暂未完成
-	OrderClient orderservice.Client
-	CartClient  cartservice.Client
-	AgentClient agentservice.Client
+	OrderClient  orderservice.Client
+	CartClient   cartservice.Client
+	AgentClient  agentservice.Client
+	AlipayClient *alipay.Client
 )
 
 func init() {
@@ -28,4 +30,6 @@ func init() {
 	CartClient = clients.NewCartClient(addr)
 	UserClient = clients.NewUserClient(addr)
 	AgentClient = clients.NewAgentClient(addr)
+	payConf := conf.GetConf().Alipay
+	AlipayClient = clients.NewAlipayClient(payConf.APPID, payConf.PrivateKey)
 }

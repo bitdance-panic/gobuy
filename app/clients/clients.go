@@ -10,6 +10,7 @@ import (
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/product/productservice"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user/userservice"
 	"github.com/cloudwego/kitex/client"
+	"github.com/smartwalle/alipay/v3"
 )
 
 func NewUserClient(registryAddress string) userservice.Client {
@@ -93,6 +94,31 @@ func NewProductClient(registryAddress string) productservice.Client {
 	)
 	if err != nil {
 		log.Fatalf("faild to new product client: %v", err)
+	}
+	return client
+}
+
+func NewAlipayClient(appID string, privateKey string) *alipay.Client {
+	var client *alipay.Client
+	var err error
+	// 支付宝提供了用于开发时测试的 sandbox 环境，对接的时候需要注意相关的 app id 和密钥是 sandbox 环境还是 production 环境的。如果是 sandbox 环境，本参数应该传 false，否则为 true。
+	if client, err = alipay.New(appID, privateKey, false); err != nil {
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	// 加载证书
+	// 加载应用公钥证书
+	if err = client.LoadAppCertPublicKeyFromFile("conf/appPublicCert.crt"); err != nil {
+		log.Panic(err)
+	}
+	// 加载支付宝根证书
+	if err = client.LoadAliPayRootCertFromFile("conf/alipayRootCert.crt"); err != nil {
+		log.Panic(err)
+	}
+	// 加载支付宝公钥证书
+	if err = client.LoadAlipayCertPublicKeyFromFile("conf/alipayPublicCert.crt"); err != nil {
+		log.Panic(err)
 	}
 	return client
 }

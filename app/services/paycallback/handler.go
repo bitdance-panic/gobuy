@@ -9,41 +9,10 @@ import (
 
 	"github.com/bitdance-panic/gobuy/app/consts"
 	rpc_order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
-	"github.com/bitdance-panic/gobuy/app/services/payment/clients"
+	"github.com/bitdance-panic/gobuy/app/services/paycallback/biz/clients"
 	"github.com/gin-gonic/gin"
 	"github.com/smartwalle/alipay/v3"
-	"github.com/smartwalle/xid"
 )
-
-// pay 方法接收系统订单ID作为参数
-func handlePayURL(c *gin.Context) {
-	// 从请求中获取系统订单ID
-	systemOrderID := c.Query("order_id")
-	// 生成支付宝交易号
-	var tradeNo = fmt.Sprintf("alipay_%d", xid.Next())
-	var p = alipay.TradePagePay{}
-	p.NotifyURL = notifyURL
-	p.ReturnURL = callbackURL
-	p.Subject = "支付测试:" + tradeNo
-	p.OutTradeNo = tradeNo
-	p.TotalAmount = "20.00"
-	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
-	// 使用 PassbackParams 传递系统订单ID
-	// 需要进行URL编码，因为这个参数会通过URL传递
-	p.PassbackParams = url.QueryEscape(systemOrderID)
-	url, err := clients.AliPayClient.TradePagePay(p)
-	if err != nil {
-		log.Println("创建支付链接失败:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "创建支付链接失败"})
-		return
-	}
-
-	var payURL = url.String()
-	log.Printf("创建支付链接成功，系统订单ID: %s, 支付宝交易号: %s", systemOrderID, tradeNo)
-
-	// 重定向到支付页面
-	c.Redirect(http.StatusFound, payURL)
-}
 
 // 与用户响应同步
 func handleCallback(c *gin.Context) {
@@ -66,7 +35,7 @@ func handleCallback(c *gin.Context) {
 	}
 
 	// 验证签名
-	if err := clients.AliPayClient.VerifySign(c.Request.Form); err != nil {
+	if err := clients.AlipayClient.VerifySign(c.Request.Form); err != nil {
 		log.Println("回调验证签名发生错误", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "回调验证签名发生错误"})
 		return
@@ -75,7 +44,7 @@ func handleCallback(c *gin.Context) {
 	var p = alipay.TradeQuery{}
 	p.OutTradeNo = outTradeNo
 
-	rsp, err := clients.AliPayClient.TradeQuery(c, p)
+	rsp, err := clients.AlipayClient.TradeQuery(c, p)
 	if err != nil {
 		log.Printf("验证订单 %s 信息发生错误: %s", outTradeNo, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("验证订单 %s 信息发生错误: %s", outTradeNo, err.Error())})
@@ -88,11 +57,12 @@ func handleCallback(c *gin.Context) {
 		return
 	}
 
-	// 在这里处理系统订单状态更新
 	if systemOrderID != "" {
 		log.Printf("系统订单 %s 支付成功，支付宝交易号: %s", systemOrderID, outTradeNo)
 	}
-	c.Redirect(http.StatusFound, "http://localhost:3000/orders")
+	redirectUrl := "http://localhost:3000/"
+	fmt.Println("重定向到", redirectUrl)
+	c.Redirect(http.StatusFound, redirectUrl)
 }
 
 // 只在服务端
@@ -104,7 +74,7 @@ func handleNotify(c *gin.Context) {
 		return
 	}
 	// 解析异步通知
-	notification, err := clients.AliPayClient.DecodeNotification(c.Request.Form)
+	notification, err := clients.AlipayClient.DecodeNotification(c.Request.Form)
 	if err != nil {
 		log.Println("解析异步通知发生错误", err)
 		c.String(http.StatusBadRequest, "fail")
@@ -123,7 +93,7 @@ func handleNotify(c *gin.Context) {
 	p.AddBizField("out_trade_no", notification.OutTradeNo)
 
 	var rsp *alipay.TradeQueryRsp
-	if err := clients.AliPayClient.Request(c, p, &rsp); err != nil {
+	if err := clients.AlipayClient.Request(c, p, &rsp); err != nil {
 		log.Printf("异步通知验证订单 %s 信息发生错误: %s", notification.OutTradeNo, err.Error())
 		c.String(http.StatusBadRequest, "fail")
 		return
@@ -150,12 +120,13 @@ func handleNotify(c *gin.Context) {
 		if err != nil {
 			log.Panicln(err.Error())
 		}
+		log.Println("订单状态修改成功")
 	} else {
 		log.Printf("【异步通知】支付成功，支付宝交易号: %s，但未获取到系统订单ID", notification.OutTradeNo)
 	}
 
 	// 返回成功结果给支付宝
-	clients.AliPayClient.ACKNotification(c.Writer)
+	clients.AlipayClient.ACKNotification(c.Writer)
 }
 
 // func configServer() *server.Hertz {

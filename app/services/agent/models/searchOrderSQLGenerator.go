@@ -29,7 +29,7 @@ func NewSearchOrderSQLGenerator(ctx context.Context, columnsString string) (*ope
 		},
 		&schema.Message{
 			Role:    schema.User,
-			Content: "{task}。只获取user_id为{userID}的订单",
+			Content: "{task}。只获取当前请求用户的订单",
 		},
 	)
 	return chatModel, template, nil

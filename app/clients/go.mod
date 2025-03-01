@@ -14,6 +14,7 @@ require (
 	github.com/bitdance-panic/gobuy/app/common v0.0.0-00010101000000-000000000000
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-00010101000000-000000000000
 	github.com/cloudwego/kitex v0.12.3
+	github.com/smartwalle/alipay/v3 v3.2.25
 )
 
 require (
@@ -58,6 +59,9 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.0.9 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/tidwall/gjson v1.17.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

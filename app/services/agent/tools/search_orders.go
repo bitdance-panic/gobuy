@@ -35,7 +35,6 @@ type SearchOrdersParams struct {
 }
 
 func searchOrdersFunc(ctx context.Context, params *SearchOrdersParams) (*ToolResponse, error) {
-	log.Printf("大模型调用这个工具，prompt为: %+v", params.Prompt)
 	messages, err := orderTemplate.Format(context.Background(), map[string]any{
 		"task": params.Prompt,
 	})
@@ -68,12 +67,12 @@ func searchOrdersFunc(ctx context.Context, params *SearchOrdersParams) (*ToolRes
 	return &ToolResponse{
 		Data:            idsString.String(),
 		DataDescription: "获取的为各个订单ID,用逗号分隔",
-		ShowWay:         "将各个订单ID改为超链接,格式为 http://localhost:8080/order/:id",
+		ShowWay:         "将各个订单ID改为<a>的超链接,href格式为 http://localhost:3000/orders/:id",
 	}, nil
 }
 
 func InitSearchOrders() {
-	columns, err := dao.GetColumns(tidb.DB)
+	columns, err := dao.GetOrderColumns(tidb.DB)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

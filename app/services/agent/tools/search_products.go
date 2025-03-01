@@ -3,8 +3,8 @@ package tools
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/bitdance-panic/gobuy/app/models"
@@ -63,17 +63,18 @@ func searchProductsFunc(ctx context.Context, params *SearchProductsParams) (*Too
 		if i != 0 {
 			idsString.WriteString(", ")
 		}
-		idsString.WriteString(strconv.Itoa(product.ID))
+		productStr := fmt.Sprintf("{id:%d,name:%s}", product.ID, product.Name)
+		idsString.WriteString(productStr)
 	}
 	return &ToolResponse{
 		Data:            idsString.String(),
-		DataDescription: "获取的为各个商品ID,用逗号分隔",
-		ShowWay:         "将各个商品ID改为超链接,格式为 http://localhost:8080/product/:id",
+		DataDescription: "获取的为多个商品的ID和名称,用逗号分隔",
+		ShowWay:         "将各个商品按项排列为多个<a>的超链接,基于商品ID，超链接的href为 http://localhost:3000/product/:id 。超链接的文本为商品名称。超链接点击为打开新标签页",
 	}, nil
 }
 
 func InitSearchProducts() {
-	columns, err := dao.GetColumns(tidb.DB)
+	columns, err := dao.GetProductColumns(tidb.DB)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

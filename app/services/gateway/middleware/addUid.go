@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 
+	app_consts "github.com/bitdance-panic/gobuy/app/consts"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/hertz-contrib/jwt"
 )
@@ -16,7 +17,7 @@ func AddUidMiddleware() app.HandlerFunc {
 
 		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
 			userID := claims[IdentityKey]
-			c.Set("uid", int(userID.(float64)))
+			c.Set(app_consts.CONTEXT_UID_KEY, int(userID.(float64)))
 		}
 		c.Next(ctx)
 	}

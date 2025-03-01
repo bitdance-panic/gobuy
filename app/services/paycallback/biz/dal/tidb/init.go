@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/bitdance-panic/gobuy/app/services/payment/conf"
+	"github.com/bitdance-panic/gobuy/app/services/paycallback/conf"
 	driver "github.com/go-sql-driver/mysql"
 
 	"gorm.io/driver/mysql"

@@ -123,11 +123,11 @@ func main() {
 		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
 		middleware.ConditionalAuthMiddleware(),
-		middleware.AddUidMiddleware(),
 		// 黑名单检查
 		middleware.BlacklistMiddleware(),
 		// 用户权限检查
-		middleware.CasbinMiddleware(),
+		// middleware.CasbinMiddleware(),
+		middleware.AddUidMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)
@@ -186,8 +186,7 @@ func registerRoutes(h *server.Hertz) {
 	}
 	paymentGroup := h.Group("/payment")
 	{
-		// TODO 只需要处理支付操作，应该是个回调的接口
-		paymentGroup.POST("/:orderID", TODOHandler)
+		paymentGroup.GET("/:orderID", handlers.HandleGetPayUrl)
 	}
 	agentGroup := h.Group("/agent")
 	{

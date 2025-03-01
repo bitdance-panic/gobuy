@@ -26,7 +26,7 @@ func HandleAskAgent(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req.UserId = int32(userID)
-	resp, err := clients.AgentClient.Ask(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.AgentClient.Ask(context.Background(), &req, callopt.WithRPCTimeout(30*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return

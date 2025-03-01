@@ -1,4 +1,4 @@
-module github.com/bitdance-panic/gobuy/app/services/payment
+module github.com/bitdance-panic/gobuy/app/services/paycallback
 
 go 1.22.1
 
@@ -19,7 +19,6 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/smartwalle/alipay/v3 v3.2.25
-	github.com/smartwalle/xid v1.0.7
 	gopkg.in/validator.v2 v2.0.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.7
