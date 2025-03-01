@@ -9,7 +9,6 @@ import (
 	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/bitdance-panic/gobuy/app/common/serversuite"
 	"github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/cart/cartservice"
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/cart/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/cart/conf"
 	"github.com/bitdance-panic/gobuy/app/utils"
@@ -18,7 +17,7 @@ import (
 )
 
 var (
-	ServiceName  = "cart" // conf.GetConf().Kitex.Service
+	ServiceName  = conf.GetConf().Kitex.Service
 	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
 )
 
@@ -45,8 +44,6 @@ func main() {
 	// 初始化指标监控
 	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr)
 	dal.Init()
-
-	clients.NewClients()
 
 	opts := kitexInit()
 	svr := cartservice.NewServer(new(CartServiceImpl), opts...)

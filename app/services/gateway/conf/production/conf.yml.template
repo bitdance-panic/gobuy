@@ -18,6 +18,9 @@ tidb:
   host: <host>
   port: <port>
 
+registry:
+  registry_address: ["localhost:8500"]  
+
 redis:
   dsn: "rediss://%s:%s@%s:%s"
   username: default

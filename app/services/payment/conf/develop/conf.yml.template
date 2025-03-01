@@ -8,9 +8,8 @@ tidb:
 
 alipay:
   app_id: <app_id>
-  private_key: <private_key>
+  private_key: "<private_key>"
   server_domain: <server_domain>
-
 
 hertz:
   address: ":8280"
@@ -27,4 +26,3 @@ hertz:
 
 registry:
   registry_address: ["localhost:8500"]  
-  service_id: "my-service" 

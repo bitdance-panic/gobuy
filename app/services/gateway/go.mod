@@ -3,6 +3,7 @@ module github.com/bitdance-panic/gobuy/app/services/gateway
 go 1.22.1
 
 replace (
+	github.com/bitdance-panic/gobuy/app/clients => ../../clients
 	github.com/bitdance-panic/gobuy/app/common => ../../common
 	github.com/bitdance-panic/gobuy/app/consts => ../../consts
 	github.com/bitdance-panic/gobuy/app/models => ../../models
@@ -14,6 +15,9 @@ require (
 	github.com/bitdance-panic/gobuy/app/consts v0.0.0-00010101000000-000000000000
 	github.com/bitdance-panic/gobuy/app/models v0.0.0-20250221160239-dd16f89c9e3f
 	github.com/bitdance-panic/gobuy/app/rpc v0.0.0-20250223190917-edbfe6726e55
+	github.com/bitdance-panic/gobuy/app/services/cart v0.0.0-20250228104551-f223b37f91c0
+	github.com/bitdance-panic/gobuy/app/services/order v0.0.0-20250228104551-f223b37f91c0
+	github.com/bitdance-panic/gobuy/app/services/product v0.0.0-20250228104551-f223b37f91c0
 	github.com/bitdance-panic/gobuy/app/services/user v0.0.0-20250226124935-ca39b23adcc5
 	github.com/bitdance-panic/gobuy/app/utils v0.0.0-20250226124935-ca39b23adcc5
 	github.com/casbin/casbin/v2 v2.103.0
@@ -94,7 +98,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kitex-contrib/registry-consul v0.1.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
@@ -111,7 +115,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
-	golang.org/x/arch v0.2.0 // indirect
+	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect

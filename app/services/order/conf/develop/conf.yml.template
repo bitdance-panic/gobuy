@@ -17,4 +17,3 @@ kitex:
 
 registry:
   registry_address: ["localhost:8500"]  
-  service_id: "my-service" 

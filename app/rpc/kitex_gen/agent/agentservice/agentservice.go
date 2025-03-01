@@ -89,7 +89,7 @@ func newServiceInfo(hasStreaming bool, keepStreamingMethods bool, keepNonStreami
 func askHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*agent.AgentServiceAskArgs)
 	realResult := result.(*agent.AgentServiceAskResult)
-	success, err := handler.(agent.AgentService).Ask(ctx, realArg.Resp)
+	success, err := handler.(agent.AgentService).Ask(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
@@ -114,9 +114,9 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Ask(ctx context.Context, resp *agent.AskReq) (r *agent.AskResp, err error) {
+func (p *kClient) Ask(ctx context.Context, req *agent.AskReq) (r *agent.AskResp, err error) {
 	var _args agent.AgentServiceAskArgs
-	_args.Resp = resp
+	_args.Req = req
 	var _result agent.AgentServiceAskResult
 	if err = p.c.Call(ctx, "ask", &_args, &_result); err != nil {
 		return

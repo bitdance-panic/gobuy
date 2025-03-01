@@ -319,7 +319,7 @@ func (p *AgentServiceAskArgs) FastReadField1(buf []byte) (int, error) {
 	} else {
 		offset += l
 	}
-	p.Resp = _field
+	p.Req = _field
 	return offset, nil
 }
 
@@ -348,14 +348,14 @@ func (p *AgentServiceAskArgs) BLength() int {
 func (p *AgentServiceAskArgs) fastWriteField1(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRUCT, 1)
-	offset += p.Resp.FastWriteNocopy(buf[offset:], w)
+	offset += p.Req.FastWriteNocopy(buf[offset:], w)
 	return offset
 }
 
 func (p *AgentServiceAskArgs) field1Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
-	l += p.Resp.BLength()
+	l += p.Req.BLength()
 	return l
 }
 
@@ -461,7 +461,7 @@ func (p *AgentServiceAskResult) field0Length() int {
 }
 
 func (p *AgentServiceAskArgs) GetFirstArgument() interface{} {
-	return p.Resp
+	return p.Req
 }
 
 func (p *AgentServiceAskResult) GetResult() interface{} {

@@ -20,7 +20,7 @@ paths:
       - application/json
       responses: {}
       summary: 添加黑名单条目
-  /admin/unblock_user:
+  /admin/unblock:
     delete:
       consumes:
       - application/json

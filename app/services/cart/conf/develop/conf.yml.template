@@ -7,8 +7,8 @@ tidb:
 
 kitex:
   service: "cart"
-  address: ":8885"
-  metrics_port: ":9995"
+  address: ":8883"
+  metrics_port: ":9993"
   log_level: debug
   log_file_name: "log/kitex.log"
   log_max_size: 10
@@ -17,4 +17,3 @@ kitex:
 
 registry:
   registry_address: ["localhost:8500"]  
-  service_id: "my-service" 

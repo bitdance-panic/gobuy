@@ -19,3 +19,6 @@ kitex:
   log_max_size: 10
   log_max_age: 3
   log_max_backups: 50
+
+registry:
+  registry_address: ["localhost:8500"]
