@@ -23,7 +23,7 @@ func CheckAndUpdateExpiredOrders() {
 	for _, order := range *orders {
 		if isOrderExpired(order) {
 			// 更新订单状态为"已取消"
-			err := dao.UpdateOrderStatus(tidb.DB, &order, consts.OrderStatusCancelled)
+			err := dao.UpdateOrderStatus(tidb.DB, int32(order.ID), consts.OrderStatusCancelled)
 			if err != nil {
 				log.Println("Failed to update order:%v", err)
 				continue

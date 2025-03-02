@@ -2748,7 +2748,7 @@ func (p *UpdateOrderAddressResp) FastReadField1(buf []byte) (int, error) {
 		offset += l
 		_field = v
 	}
-	p.NewAddress_ = _field
+	p.OrderAddress = _field
 	return offset, nil
 }
 
@@ -2793,7 +2793,7 @@ func (p *UpdateOrderAddressResp) BLength() int {
 func (p *UpdateOrderAddressResp) fastWriteField1(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.STRING, 1)
-	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.NewAddress_)
+	offset += thrift.Binary.WriteStringNocopy(buf[offset:], w, p.OrderAddress)
 	return offset
 }
 
@@ -2807,7 +2807,7 @@ func (p *UpdateOrderAddressResp) fastWriteField2(buf []byte, w thrift.NocopyWrit
 func (p *UpdateOrderAddressResp) field1Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
-	l += thrift.Binary.StringLengthNocopy(p.NewAddress_)
+	l += thrift.Binary.StringLengthNocopy(p.OrderAddress)
 	return l
 }
 
@@ -3034,7 +3034,7 @@ func (p *UpdateOrderStatusResp) FastReadField1(buf []byte) (int, error) {
 		offset += l
 		_field = v
 	}
-	p.NewStatus_ = _field
+	p.Status = _field
 	return offset, nil
 }
 
@@ -3079,7 +3079,7 @@ func (p *UpdateOrderStatusResp) BLength() int {
 func (p *UpdateOrderStatusResp) fastWriteField1(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.I32, 1)
-	offset += thrift.Binary.WriteI32(buf[offset:], p.NewStatus_)
+	offset += thrift.Binary.WriteI32(buf[offset:], p.Status)
 	return offset
 }
 

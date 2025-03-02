@@ -69,19 +69,6 @@ struct GetUserAddressResp{
     1: UserAddress user_address;
 }
 
-service OrderService{
-    CreateOrderResp createOrder(1: CreateOrderReq req);
-    UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
-    GetOrderResp getOrder(1: GetOrderReq req);
-    ListOrderResp listUserOrder(1: ListOrderReq req);
-    ListOrderResp adminListOrder(1: ListOrderReq req);
-    CreateUserAddressResp createUserAddress(1: CreateUserAddressReq req);
-    DeleteUserAddressResp deleteUserAddress(1: DeleteUserAddressReq req);
-    UpdateUserAddressResp updateUserAddress(1: UpdateUserAddressReq req);
-    GetUserAddressResp getUserAddress(1: GetUserAddressReq req);
-    UpdateOrderAddressResp UpdateOrderAddress(1:UpdateOrderAddressReq req);
-}
-
 
 struct CreateOrderReq{
     1: i32 user_id;
@@ -98,7 +85,7 @@ struct UpdateOrderAddressReq{
     2: string order_address;
 }
 struct UpdateOrderAddressResp{
-    1: string new_address;
+    1: string order_address;
     2: bool success;
 }
 
@@ -107,7 +94,7 @@ struct UpdateOrderStatusReq{
     2: i32 status;
 }
 struct UpdateOrderStatusResp{
-    1: i32 new_status;
+    1: i32 status;
     2: bool success;
 }
 struct ListOrderReq{
@@ -124,4 +111,18 @@ struct GetOrderReq{
 }
 struct GetOrderResp{
     1: Order order;
+}
+
+service OrderService{
+    CreateOrderResp createOrder(1: CreateOrderReq req);
+    UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
+    GetOrderResp getOrder(1: GetOrderReq req);
+    ListOrderResp listUserOrder(1: ListOrderReq req);
+    ListOrderResp adminListOrder(1: ListOrderReq req);
+    CreateUserAddressResp createUserAddress(1: CreateUserAddressReq req);
+    DeleteUserAddressResp deleteUserAddress(1: DeleteUserAddressReq req);
+    UpdateUserAddressResp updateUserAddress(1: UpdateUserAddressReq req);
+    GetUserAddressResp getUserAddress(1: GetUserAddressReq req);
+    UpdateOrderAddressResp updateOrderAddress(1:UpdateOrderAddressReq req);
+//    UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
 }

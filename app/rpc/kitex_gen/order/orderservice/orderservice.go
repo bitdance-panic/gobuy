@@ -76,7 +76,7 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
-	"UpdateOrderAddress": kitex.NewMethodInfo(
+	"updateOrderAddress": kitex.NewMethodInfo(
 		updateOrderAddressHandler,
 		newOrderServiceUpdateOrderAddressArgs,
 		newOrderServiceUpdateOrderAddressResult,
@@ -433,7 +433,7 @@ func (p *kClient) UpdateOrderAddress(ctx context.Context, req *order.UpdateOrder
 	var _args order.OrderServiceUpdateOrderAddressArgs
 	_args.Req = req
 	var _result order.OrderServiceUpdateOrderAddressResult
-	if err = p.c.Call(ctx, "UpdateOrderAddress", &_args, &_result); err != nil {
+	if err = p.c.Call(ctx, "updateOrderAddress", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

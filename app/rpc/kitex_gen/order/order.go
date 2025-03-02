@@ -4022,8 +4022,8 @@ func (p *UpdateOrderAddressReq) Field2DeepEqual(src string) bool {
 }
 
 type UpdateOrderAddressResp struct {
-	NewAddress_ string `thrift:"new_address,1" frugal:"1,default,string" json:"new_address"`
-	Success     bool   `thrift:"success,2" frugal:"2,default,bool" json:"success"`
+	OrderAddress string `thrift:"order_address,1" frugal:"1,default,string" json:"order_address"`
+	Success      bool   `thrift:"success,2" frugal:"2,default,bool" json:"success"`
 }
 
 func NewUpdateOrderAddressResp() *UpdateOrderAddressResp {
@@ -4033,22 +4033,22 @@ func NewUpdateOrderAddressResp() *UpdateOrderAddressResp {
 func (p *UpdateOrderAddressResp) InitDefault() {
 }
 
-func (p *UpdateOrderAddressResp) GetNewAddress_() (v string) {
-	return p.NewAddress_
+func (p *UpdateOrderAddressResp) GetOrderAddress() (v string) {
+	return p.OrderAddress
 }
 
 func (p *UpdateOrderAddressResp) GetSuccess() (v bool) {
 	return p.Success
 }
-func (p *UpdateOrderAddressResp) SetNewAddress_(val string) {
-	p.NewAddress_ = val
+func (p *UpdateOrderAddressResp) SetOrderAddress(val string) {
+	p.OrderAddress = val
 }
 func (p *UpdateOrderAddressResp) SetSuccess(val bool) {
 	p.Success = val
 }
 
 var fieldIDToName_UpdateOrderAddressResp = map[int16]string{
-	1: "new_address",
+	1: "order_address",
 	2: "success",
 }
 
@@ -4124,7 +4124,7 @@ func (p *UpdateOrderAddressResp) ReadField1(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.NewAddress_ = _field
+	p.OrderAddress = _field
 	return nil
 }
 func (p *UpdateOrderAddressResp) ReadField2(iprot thrift.TProtocol) error {
@@ -4173,10 +4173,10 @@ WriteStructEndError:
 }
 
 func (p *UpdateOrderAddressResp) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("new_address", thrift.STRING, 1); err != nil {
+	if err = oprot.WriteFieldBegin("order_address", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.NewAddress_); err != nil {
+	if err := oprot.WriteString(p.OrderAddress); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -4220,7 +4220,7 @@ func (p *UpdateOrderAddressResp) DeepEqual(ano *UpdateOrderAddressResp) bool {
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.NewAddress_) {
+	if !p.Field1DeepEqual(ano.OrderAddress) {
 		return false
 	}
 	if !p.Field2DeepEqual(ano.Success) {
@@ -4231,7 +4231,7 @@ func (p *UpdateOrderAddressResp) DeepEqual(ano *UpdateOrderAddressResp) bool {
 
 func (p *UpdateOrderAddressResp) Field1DeepEqual(src string) bool {
 
-	if strings.Compare(p.NewAddress_, src) != 0 {
+	if strings.Compare(p.OrderAddress, src) != 0 {
 		return false
 	}
 	return true
@@ -4468,8 +4468,8 @@ func (p *UpdateOrderStatusReq) Field2DeepEqual(src int32) bool {
 }
 
 type UpdateOrderStatusResp struct {
-	NewStatus_ int32 `thrift:"new_status,1" frugal:"1,default,i32" json:"new_status"`
-	Success    bool  `thrift:"success,2" frugal:"2,default,bool" json:"success"`
+	Status  int32 `thrift:"status,1" frugal:"1,default,i32" json:"status"`
+	Success bool  `thrift:"success,2" frugal:"2,default,bool" json:"success"`
 }
 
 func NewUpdateOrderStatusResp() *UpdateOrderStatusResp {
@@ -4479,22 +4479,22 @@ func NewUpdateOrderStatusResp() *UpdateOrderStatusResp {
 func (p *UpdateOrderStatusResp) InitDefault() {
 }
 
-func (p *UpdateOrderStatusResp) GetNewStatus_() (v int32) {
-	return p.NewStatus_
+func (p *UpdateOrderStatusResp) GetStatus() (v int32) {
+	return p.Status
 }
 
 func (p *UpdateOrderStatusResp) GetSuccess() (v bool) {
 	return p.Success
 }
-func (p *UpdateOrderStatusResp) SetNewStatus_(val int32) {
-	p.NewStatus_ = val
+func (p *UpdateOrderStatusResp) SetStatus(val int32) {
+	p.Status = val
 }
 func (p *UpdateOrderStatusResp) SetSuccess(val bool) {
 	p.Success = val
 }
 
 var fieldIDToName_UpdateOrderStatusResp = map[int16]string{
-	1: "new_status",
+	1: "status",
 	2: "success",
 }
 
@@ -4570,7 +4570,7 @@ func (p *UpdateOrderStatusResp) ReadField1(iprot thrift.TProtocol) error {
 	} else {
 		_field = v
 	}
-	p.NewStatus_ = _field
+	p.Status = _field
 	return nil
 }
 func (p *UpdateOrderStatusResp) ReadField2(iprot thrift.TProtocol) error {
@@ -4619,10 +4619,10 @@ WriteStructEndError:
 }
 
 func (p *UpdateOrderStatusResp) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("new_status", thrift.I32, 1); err != nil {
+	if err = oprot.WriteFieldBegin("status", thrift.I32, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI32(p.NewStatus_); err != nil {
+	if err := oprot.WriteI32(p.Status); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -4666,7 +4666,7 @@ func (p *UpdateOrderStatusResp) DeepEqual(ano *UpdateOrderStatusResp) bool {
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.NewStatus_) {
+	if !p.Field1DeepEqual(ano.Status) {
 		return false
 	}
 	if !p.Field2DeepEqual(ano.Success) {
@@ -4677,7 +4677,7 @@ func (p *UpdateOrderStatusResp) DeepEqual(ano *UpdateOrderStatusResp) bool {
 
 func (p *UpdateOrderStatusResp) Field1DeepEqual(src int32) bool {
 
-	if p.NewStatus_ != src {
+	if p.Status != src {
 		return false
 	}
 	return true
@@ -8754,7 +8754,7 @@ func (p *OrderServiceUpdateOrderAddressArgs) ReadField1(iprot thrift.TProtocol) 
 func (p *OrderServiceUpdateOrderAddressArgs) Write(oprot thrift.TProtocol) (err error) {
 
 	var fieldId int16
-	if err = oprot.WriteStructBegin("UpdateOrderAddress_args"); err != nil {
+	if err = oprot.WriteStructBegin("updateOrderAddress_args"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {
@@ -8924,7 +8924,7 @@ func (p *OrderServiceUpdateOrderAddressResult) ReadField0(iprot thrift.TProtocol
 func (p *OrderServiceUpdateOrderAddressResult) Write(oprot thrift.TProtocol) (err error) {
 
 	var fieldId int16
-	if err = oprot.WriteStructBegin("UpdateOrderAddress_result"); err != nil {
+	if err = oprot.WriteStructBegin("updateOrderAddress_result"); err != nil {
 		goto WriteStructBeginError
 	}
 	if p != nil {

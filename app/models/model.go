@@ -91,6 +91,8 @@ type OrderItem struct {
 	Order        Order   `gorm:"foreignKey:OrderID"`   // 关联订单
 	ProductName  string
 	ProductImage string
+	Phone        string
+	UserAddress  string
 }
 
 type UserAddress struct {

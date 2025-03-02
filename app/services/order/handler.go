@@ -38,8 +38,8 @@ func (*OrderServiceImpl) CreateUserAddress(ctx context.Context, req *rpc_order.C
 	return orderBll.CreateUserAddress(ctx, req)
 }
 
-func (*OrderServiceImpl) DeleteOrderAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
-	return orderBll.DeleteOrderAddress(ctx, req)
+func (*OrderServiceImpl) DeleteUserAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
+	return orderBll.DeleteUserAddress(ctx, req)
 }
 func (*OrderServiceImpl) UpdateUserAddress(ctx context.Context, req *rpc_order.UpdateUserAddressReq) (*rpc_order.UpdateUserAddressResp, error) {
 	return orderBll.UpdateUserAddress(ctx, req)

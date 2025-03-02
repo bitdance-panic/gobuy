@@ -87,14 +87,14 @@ func main() {
 			ExposeHeaders:    []string{"*"}, // 暴露所有头信息
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
-		// 白名单放行接口
-		middleware.WhiteListMiddleware(),
-		conditionalAuthMiddleware(),
-		addUidMiddleware(),
-		// 黑名单检查
-		middleware.BlacklistMiddleware(),
-		// 用户权限检查
-		middleware.CasbinMiddleware(),
+		//// 白名单放行接口
+		//middleware.WhiteListMiddleware(),
+		//conditionalAuthMiddleware(),
+		//addUidMiddleware(),
+		//// 黑名单检查
+		//middleware.BlacklistMiddleware(),
+		//// 用户权限检查
+		//middleware.CasbinMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)

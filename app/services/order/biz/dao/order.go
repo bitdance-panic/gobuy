@@ -3,7 +3,6 @@ package dao
 import (
 	"github.com/bitdance-panic/gobuy/app/consts"
 	"github.com/bitdance-panic/gobuy/app/models"
-	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -36,20 +35,32 @@ func GetOrderByID(db *gorm.DB, orderID int) (*Order, error) {
 	return &order, nil
 }
 
-func UpdateOrderAddress(db *gorm.DB, order *Order, newAddress string) error {
-	if order == nil {
-		return errors.New("order is nil")
+// 更新订单地址
+func UpdateOrderAddress(db *gorm.DB, orderID int32, newAddress string) error {
+	var order Order
+	if err := db.Where("order_id = ?", orderID).First(&order).Error; err != nil {
+		return err
 	}
-	order.OrderAddress = newAddress
-	return db.Save(order).Error
+
+	if err := db.Model(&order).Update("address", newAddress).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func UpdateOrderStatus(db *gorm.DB, order *Order, newStatus consts.OrderStatus) error {
-	if order == nil {
-		return errors.New("order is nil")
+// 更新订单状态
+func UpdateOrderStatus(db *gorm.DB, orderID int32, newStatus consts.OrderStatus) error {
+	var order Order
+	if err := db.Where("order_id = ?", orderID).First(&order).Error; err != nil {
+		return err
 	}
-	order.Status = int(newStatus)
-	return db.Save(order).Error
+
+	if err := db.Model(&order).Update("status", int(newStatus)).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ListUserOrder(db *gorm.DB, userID int, pageNum int, pageSize int) (*[]Order, error) {

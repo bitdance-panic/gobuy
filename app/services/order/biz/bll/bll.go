@@ -115,10 +115,13 @@ func (bll *OrderBLL) UpdateOrderAddress(ctx context.Context, req *rpc_order.Upda
 	if order == nil {
 		return nil, errors.New("order not found")
 	}
-	err = dao.UpdateOrderAddress(tidb.DB, order, req.OrderAddress)
+
+	// 这里改为传 order.ID，而不是传递整个 order 结构体
+	err = dao.UpdateOrderAddress(tidb.DB, int32(order.ID), req.OrderAddress)
 	if err != nil {
 		return nil, err
 	}
+
 	return &rpc_order.UpdateOrderAddressResp{
 		Success: true,
 	}, nil
@@ -132,10 +135,13 @@ func (bll *OrderBLL) UpdateOrderStatus(ctx context.Context, req *rpc_order.Updat
 	if order == nil {
 		return nil, errors.New("order not found")
 	}
-	err = dao.UpdateOrderStatus(tidb.DB, order, consts.OrderStatus(req.Status))
+
+	// 这里改为传 order.ID，而不是传递整个 order 结构体
+	err = dao.UpdateOrderStatus(tidb.DB, int32(order.ID), consts.OrderStatus(req.Status))
 	if err != nil {
 		return nil, err
 	}
+
 	return &rpc_order.UpdateOrderStatusResp{
 		Success: true,
 	}, nil
@@ -234,7 +240,7 @@ func (bll *OrderBLL) CreateUserAddress(ctx context.Context, req *rpc_order.Creat
 }
 
 // 删除订单地址
-func (bll *OrderBLL) DeleteOrderAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
+func (bll *OrderBLL) DeleteUserAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
 	// 调用 DAO 层删除订单地址
 	err := dao.DeleteUserAddress(tidb.DB, req.UserId)
 	if err != nil {
