@@ -51,7 +51,6 @@ func main() {
 	opts := kitexInit()
 
 	svr := orderservice.NewServer(new(OrderServiceImpl), opts...)
-
 	err := svr.Run()
 	if err != nil {
 		log.Println(err.Error())

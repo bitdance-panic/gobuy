@@ -74,9 +74,11 @@ type Order struct {
 	Number     string  `gorm:"unique;not null"`
 	TotalPrice float64 `gorm:"not null"`
 	// OrderStatus
-	Status  int `gorm:"type:varchar(20);not null"`
-	Items   []OrderItem
-	PayTime *time.Time
+	Status       int `gorm:"type:varchar(20);not null"`
+	Items        []OrderItem
+	PayTime      *time.Time
+	Phone        string
+	OrderAddress string
 }
 
 type OrderItem struct {
@@ -89,6 +91,15 @@ type OrderItem struct {
 	Order        Order   `gorm:"foreignKey:OrderID"`   // 关联订单
 	ProductName  string
 	ProductImage string
+	Phone        string
+	UserAddress  string
+}
+
+type UserAddress struct {
+	Base
+	UserID      int
+	Phone       string
+	UserAddress string
 }
 
 // 黑名单条目模型
@@ -147,6 +158,8 @@ func (Blacklist) TableName() string {
 	return "blacklist"
 }
 
+func (UserAddress) TableName() string { return "user_address" }
+
 // 调用这个来自动调整表结构
 func AutoMigrate(db *gorm.DB) {
 	if os.Getenv("GO_ENV") != "production" {
@@ -163,6 +176,7 @@ func AutoMigrate(db *gorm.DB) {
 			&OrderItem{},
 			&Product{},
 			&Blacklist{},
+			&UserAddress{},
 		)
 	}
 }
