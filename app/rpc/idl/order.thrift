@@ -19,54 +19,54 @@ struct Order{
     6: list<OrderItem> items;
     7: string created_at;
     8: string pay_time;
+    9: string phone;
+    10: string order_address;
 }
 
-struct OrderAddress{
+struct UserAddress{
     1: i32 id;
     2: i32 user_id;
     3: string phone;
-    // 订单号
-    4: i32 order_id;
-    5: string order_address;
+    4: string user_address;
 }
 
-struct CreateOrderAddressReq{
+struct CreateUserAddressReq{
     1: i32 user_id;
     2: string phone;
-    3: i32 order_id;
-    4: string order_address;
+    3: string user_address;
 }
 
-struct CreateOrderAddressResp{
-    1: i32 order_id;
+struct CreateUserAddressResp{
+    1: i32 user_id;
+    2: string user_address;
+    3: bool success;
+}
+
+struct DeleteUserAddressReq{
+    1: i32 user_id;
+}
+
+struct DeleteUserAddressResp{
+    1: i32 user_id;
     2: bool success;
 }
 
-struct DeleteOrderAddressReq{
-    1: i32 order_id;
+struct UpdateUserAddressReq{
+    1: i32 user_id;
+    2: string user_address;
 }
 
-struct DeleteOrderAddressResp{
-    1: i32 order_id;
+struct UpdateUserAddressResp{
+    1: string user_address;
     2: bool success;
 }
 
-struct UpdateOrderAddressReq{
-    1: i32 order_id;
-    2: string order_address;
+struct GetUserAddressReq{
+    1: i32 user_id;
 }
 
-struct UpdateOrderAddressResp{
-    1: string order_address;
-    2: bool success;
-}
-
-struct GetOrderAddressReq{
-    1: i32 order_id;
-}
-
-struct GetOrderAddressResp{
-    1: OrderAddress order_address;
+struct GetUserAddressResp{
+    1: UserAddress user_address;
 }
 
 service OrderService{
@@ -75,20 +75,33 @@ service OrderService{
     GetOrderResp getOrder(1: GetOrderReq req);
     ListOrderResp listUserOrder(1: ListOrderReq req);
     ListOrderResp adminListOrder(1: ListOrderReq req);
-    CreateOrderAddressResp createOrderAddress(1: CreateOrderAddressReq req);
-    DeleteOrderAddressResp deleteOrderAddress(1: DeleteOrderAddressReq req);
-    UpdateOrderAddressResp updateOrderAddress(1: UpdateOrderAddressReq req);
-    GetOrderAddressResp getOrderAddress(1: GetOrderAddressReq req);
+    CreateUserAddressResp createUserAddress(1: CreateUserAddressReq req);
+    DeleteUserAddressResp deleteUserAddress(1: DeleteUserAddressReq req);
+    UpdateUserAddressResp updateUserAddress(1: UpdateUserAddressReq req);
+    GetUserAddressResp getUserAddress(1: GetUserAddressReq req);
+    UpdateOrderAddressResp UpdateOrderAddress(1:UpdateOrderAddressReq req);
 }
 
 
 struct CreateOrderReq{
     1: i32 user_id;
     2: list<i32> cartItemIDs;
+    3: string phone;
+    4: string order_address;
 }
 struct CreateOrderResp{
     1: Order order;
 }
+
+struct UpdateOrderAddressReq{
+    1: i32 order_id;
+    2: string order_address;
+}
+struct UpdateOrderAddressResp{
+    1: string new_address;
+    2: bool success;
+}
+
 struct UpdateOrderStatusReq{
     1: i32 order_id;
     2: i32 status;

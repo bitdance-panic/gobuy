@@ -85,3 +85,27 @@ func (s *OrderServiceImpl) GetOrderAddress(ctx context.Context, req *order.GetOr
 	// TODO: Your code here...
 	return
 }
+
+// CreateUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) CreateUserAddress(ctx context.Context, req *order.CreateUserAddressReq) (resp *order.CreateUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// DeleteUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) DeleteUserAddress(ctx context.Context, req *order.DeleteUserAddressReq) (resp *order.DeleteUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UpdateUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) UpdateUserAddress(ctx context.Context, req *order.UpdateUserAddressReq) (resp *order.UpdateUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// GetUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) GetUserAddress(ctx context.Context, req *order.GetUserAddressReq) (resp *order.GetUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}

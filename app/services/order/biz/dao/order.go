@@ -8,7 +8,7 @@ import (
 )
 
 type Order = models.Order
-type OrderAddress = models.OrderAddress
+type UserAddress = models.UserAddress
 
 func CreateOrder(db *gorm.DB, order *Order) error {
 	if err := db.Create(order).Error; err != nil {
@@ -34,6 +34,14 @@ func GetOrderByID(db *gorm.DB, orderID int) (*Order, error) {
 		return nil, nil
 	}
 	return &order, nil
+}
+
+func UpdateOrderAddress(db *gorm.DB, order *Order, newAddress string) error {
+	if order == nil {
+		return errors.New("order is nil")
+	}
+	order.OrderAddress = newAddress
+	return db.Save(order).Error
 }
 
 func UpdateOrderStatus(db *gorm.DB, order *Order, newStatus consts.OrderStatus) error {
@@ -74,35 +82,35 @@ func ListPendingOrder(db *gorm.DB) (*[]Order, error) {
 }
 
 // 创建订单地址
-func CreateOrderAddress(db *gorm.DB, orderAddress *OrderAddress) error {
-	if err := db.Create(orderAddress).Error; err != nil {
+func CreateUserAddress(db *gorm.DB, userAddress *UserAddress) error {
+	if err := db.Create(userAddress).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteOrderAddress(db *gorm.DB, orderID int32) error {
-	var orderAddress *OrderAddress
-	if err := db.Where("order_id = ?", orderID).Delete(&orderAddress).Error; err != nil {
+func DeleteUserAddress(db *gorm.DB, userID int32) error {
+	var userAddress *UserAddress
+	if err := db.Where("user_id = ?", userID).Delete(&userAddress).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // 更新订单地址
-func UpdateOrderAddress(db *gorm.DB, orderID int32, orderAddress string) error {
-	var address *OrderAddress
-	if err := db.Model(&address).Where("order_id = ?", orderID).Update("order_address", orderAddress).Error; err != nil {
+func UpdateUserAddress(db *gorm.DB, userID int32, userAddress string) error {
+	var address *UserAddress
+	if err := db.Model(&address).Where("user_id = ?", userID).Update("user_address", userAddress).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // 获取订单地址
-func GetOrderAddress(db *gorm.DB, orderID int32) (*OrderAddress, error) {
-	var orderAddress *OrderAddress
-	if err := db.Where("order_id = ?", orderID).First(&orderAddress).Error; err != nil {
+func GetUserAddress(db *gorm.DB, userID int32) (*UserAddress, error) {
+	var userAddress *UserAddress
+	if err := db.Where("user_id = ?", userID).First(&userAddress).Error; err != nil {
 		return nil, err
 	}
-	return orderAddress, nil
+	return userAddress, nil
 }

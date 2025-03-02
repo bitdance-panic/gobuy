@@ -16,10 +16,11 @@ type Client interface {
 	GetOrder(ctx context.Context, req *order.GetOrderReq, callOptions ...callopt.Option) (r *order.GetOrderResp, err error)
 	ListUserOrder(ctx context.Context, req *order.ListOrderReq, callOptions ...callopt.Option) (r *order.ListOrderResp, err error)
 	AdminListOrder(ctx context.Context, req *order.ListOrderReq, callOptions ...callopt.Option) (r *order.ListOrderResp, err error)
-	CreateOrderAddress(ctx context.Context, req *order.CreateOrderAddressReq, callOptions ...callopt.Option) (r *order.CreateOrderAddressResp, err error)
-	DeleteOrderAddress(ctx context.Context, req *order.DeleteOrderAddressReq, callOptions ...callopt.Option) (r *order.DeleteOrderAddressResp, err error)
+	CreateUserAddress(ctx context.Context, req *order.CreateUserAddressReq, callOptions ...callopt.Option) (r *order.CreateUserAddressResp, err error)
+	DeleteUserAddress(ctx context.Context, req *order.DeleteUserAddressReq, callOptions ...callopt.Option) (r *order.DeleteUserAddressResp, err error)
+	UpdateUserAddress(ctx context.Context, req *order.UpdateUserAddressReq, callOptions ...callopt.Option) (r *order.UpdateUserAddressResp, err error)
+	GetUserAddress(ctx context.Context, req *order.GetUserAddressReq, callOptions ...callopt.Option) (r *order.GetUserAddressResp, err error)
 	UpdateOrderAddress(ctx context.Context, req *order.UpdateOrderAddressReq, callOptions ...callopt.Option) (r *order.UpdateOrderAddressResp, err error)
-	GetOrderAddress(ctx context.Context, req *order.GetOrderAddressReq, callOptions ...callopt.Option) (r *order.GetOrderAddressResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -76,22 +77,27 @@ func (p *kOrderServiceClient) AdminListOrder(ctx context.Context, req *order.Lis
 	return p.kClient.AdminListOrder(ctx, req)
 }
 
-func (p *kOrderServiceClient) CreateOrderAddress(ctx context.Context, req *order.CreateOrderAddressReq, callOptions ...callopt.Option) (r *order.CreateOrderAddressResp, err error) {
+func (p *kOrderServiceClient) CreateUserAddress(ctx context.Context, req *order.CreateUserAddressReq, callOptions ...callopt.Option) (r *order.CreateUserAddressResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.CreateOrderAddress(ctx, req)
+	return p.kClient.CreateUserAddress(ctx, req)
 }
 
-func (p *kOrderServiceClient) DeleteOrderAddress(ctx context.Context, req *order.DeleteOrderAddressReq, callOptions ...callopt.Option) (r *order.DeleteOrderAddressResp, err error) {
+func (p *kOrderServiceClient) DeleteUserAddress(ctx context.Context, req *order.DeleteUserAddressReq, callOptions ...callopt.Option) (r *order.DeleteUserAddressResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.DeleteOrderAddress(ctx, req)
+	return p.kClient.DeleteUserAddress(ctx, req)
+}
+
+func (p *kOrderServiceClient) UpdateUserAddress(ctx context.Context, req *order.UpdateUserAddressReq, callOptions ...callopt.Option) (r *order.UpdateUserAddressResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UpdateUserAddress(ctx, req)
+}
+
+func (p *kOrderServiceClient) GetUserAddress(ctx context.Context, req *order.GetUserAddressReq, callOptions ...callopt.Option) (r *order.GetUserAddressResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetUserAddress(ctx, req)
 }
 
 func (p *kOrderServiceClient) UpdateOrderAddress(ctx context.Context, req *order.UpdateOrderAddressReq, callOptions ...callopt.Option) (r *order.UpdateOrderAddressResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UpdateOrderAddress(ctx, req)
-}
-
-func (p *kOrderServiceClient) GetOrderAddress(ctx context.Context, req *order.GetOrderAddressReq, callOptions ...callopt.Option) (r *order.GetOrderAddressResp, err error) {
-	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.GetOrderAddress(ctx, req)
 }
