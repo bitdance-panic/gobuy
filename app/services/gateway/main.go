@@ -155,6 +155,7 @@ func registerRoutes(h *server.Hertz) {
 		orderGroup.PUT("/address", handlers.HandleUpdateUserAddress)
 		orderGroup.DELETE("/address", handlers.HandleDeleteUserAddress)
 		orderGroup.PUT("/orderAddress", handlers.HandleUpdateOrderAddress)
+		//orderGroup.PUT("/orderStatus", handlers.HandleUpdateOrdeStatusr)
 	}
 	paymentGroup := h.Group("/payment")
 	{

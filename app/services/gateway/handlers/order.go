@@ -18,7 +18,7 @@ func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 	var body struct {
 		ItemIDs      []int  `json:"itemIDs"`
 		Phone        string `json:"phone"`
-		OrderAddress string `json:"order_address"`
+		OrderAddress string `json:"orderAddress"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())

@@ -120,7 +120,7 @@ func UpdateUserAddress(db *gorm.DB, userID int32, userAddress string) error {
 // 获取订单地址
 func GetUserAddress(db *gorm.DB, userID int32) (*UserAddress, error) {
 	var userAddress *UserAddress
-	if err := db.Where("user_id = ?", userID).First(&userAddress).Error; err != nil {
+	if err := db.Where("id = ?", userID).First(&userAddress).Error; err != nil {
 		return nil, err
 	}
 	return userAddress, nil
