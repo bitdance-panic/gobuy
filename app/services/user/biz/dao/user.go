@@ -102,7 +102,7 @@ func UnblockUser(db *gorm.DB, ctx context.Context, identifier string) error {
 	return db.WithContext(ctx).
 		Model(&models.Blacklist{}).
 		Where("identifier = ?", identifier).
-		Update("is_deleted", 1).Error
+		Update("is_deleted", true).Error
 
 	// 删除记录
 	// if err := db.Where("identifier = ?", identifier).Delete(&models.Blacklist{}).Error; err != nil {

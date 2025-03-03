@@ -11,3 +11,6 @@ conf.y*ml
 *.pem
 
 tmp
+
+
+*.crt

@@ -16,7 +16,7 @@ func CheckAndUpdateExpiredOrders() {
 	// 获取所有状态为“待支付”的订单
 	orders, err := dao.ListPendingOrder(tidb.DB)
 	if err != nil {
-		log.Println("Failed to get pending orders:%v", err)
+		log.Printf("Failed to get pending orders:%v", err)
 		return
 	}
 	// 遍历订单，检查是否过期
@@ -25,10 +25,10 @@ func CheckAndUpdateExpiredOrders() {
 			// 更新订单状态为"已取消"
 			err := dao.UpdateOrderStatus(tidb.DB, &order, consts.OrderStatusCancelled)
 			if err != nil {
-				log.Println("Failed to update order:%v", err)
+				log.Printf("Failed to update order:%v", err)
 				continue
 			}
-			log.Println("Order %d has been cancelled due to expiration", order.ID)
+			log.Printf("Order %d has been cancelled due to expiration", order.ID)
 		}
 	}
 }

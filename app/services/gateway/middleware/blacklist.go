@@ -28,11 +28,12 @@ func BlacklistMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		// 获取用户标识（示例：优先取用户ID，未登录则取IP）
 		var identifier string
-		if userID, exists := c.Get("uid"); exists {
-			identifier = fmt.Sprintf("user:%d", userID.(int))
-		} else {
-			identifier = fmt.Sprintf("ip:%s", c.ClientIP())
-		}
+		// if userID, exists := c.Get(app_consts.CONTEXT_UID_KEY); exists {
+		// 	fmt.Println("tokenaa", userID)
+		// 	identifier = fmt.Sprintf("user:%d", userID.(int))
+		// } else {
+		identifier = fmt.Sprintf("ip:%s", c.ClientIP())
+		// }
 		// 检查Redis黑名单
 		if isBlocked, err := CheckBlockedInRedis(identifier); err != nil {
 			hlog.Errorf("Redis查询失败: %v", err)

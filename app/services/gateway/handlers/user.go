@@ -152,14 +152,10 @@ func HandleBlockUser(ctx context.Context, c *app.RequestContext) {
 // @Description 解除封禁
 // @Accept json
 // @Produce json
-// @Router /admin/unblock_user [delete]
+// @Router /admin/unblock [delete]
 func HandleUnblockUser(ctx context.Context, c *app.RequestContext) {
-	req := rpc_user.UnblockUserReq{}
-
-	if err := c.BindAndValidate(&req); err != nil {
-		hlog.Warnf("Unblock user failed for: %s, validation error: %v", req.Identifier, err)
-		utils.Fail(c, err.Error())
-		return
+	req := rpc_user.UnblockUserReq{
+		Identifier: c.Param("identifier"),
 	}
 
 	resp, err := clients.UserClient.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))

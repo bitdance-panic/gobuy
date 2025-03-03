@@ -4,7 +4,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 
+	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/cloudwego/kitex/pkg/registry"
 	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
@@ -25,17 +27,26 @@ func InitMetric(serviceName, metricsPort, registryAddr string) {
 
 	// 注册到 Consul
 	r, _ := consul.NewConsulRegister(registryAddr)
+
+	if strings.HasPrefix(metricsPort, ":") {
+		localIp := utils.MustGetLocalIPv4()
+		// localIp := "0.0.0.0"
+		metricsPort = localIp + metricsPort
+	}
 	addr, _ := net.ResolveTCPAddr("tcp", metricsPort)
 	registryInfo := &registry.Info{
-		ServiceName: serviceName,
+		ServiceName: "prometheus",
 		Addr:        addr,
 		Weight:      1,
-		Tags:        map[string]string{"metrics": "prometheus"},
+		Tags:        map[string]string{"service": serviceName},
 	}
 
 	_ = r.Register(registryInfo)
+
 	server.RegisterShutdownHook(func() {
-		r.Deregister(registryInfo)
+		if err := r.Deregister(registryInfo); err != nil {
+			panic(err)
+		}
 	})
 
 	// 暴露指标端点

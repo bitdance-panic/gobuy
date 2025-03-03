@@ -7,6 +7,7 @@ import (
 	"github.com/bitdance-panic/gobuy/app/services/user/conf"
 	driver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
+	"gorm.io/plugin/opentelemetry/tracing"
 
 	"gorm.io/gorm"
 )
@@ -33,8 +34,8 @@ func Init() {
 		panic(err)
 	}
 
-	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
-	// 	panic(err)
-	// }
+	if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
+	}
 	// models.AutoMigrate(DB);第一次连接后就关闭
 }

@@ -15,8 +15,5 @@ kitex:
   log_max_age: 3
   log_max_backups: 50
 
-# postgres: 
-#     dsn: "postgres://%s:%s@%s/gobuy?timezone=Asia/Shanghai"
-#     user: <user>
-#     password: <password>
-#     host: <host>
+registry:
+  registry_address: ["localhost:8500"]  
