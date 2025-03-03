@@ -9,6 +9,7 @@ import (
 	driver "github.com/go-sql-driver/mysql"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/plugin/opentelemetry/tracing"
 	// "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	// "gorm.io/plugin/opentelemetry/tracing"
@@ -37,8 +38,8 @@ func Init() {
 		panic(err)
 	}
 	log.Println("数据库连接成功")
-	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
-	// 	panic(err)
-	// }
+	if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
+	}
 	// models.AutoMigrate(DB) // 第一次连接后就关闭
 }

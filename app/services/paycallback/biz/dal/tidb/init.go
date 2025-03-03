@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 var DB *gorm.DB
@@ -37,6 +38,9 @@ func Init() {
 	})
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+	}
+	if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
 	}
 
 	// Models.AutoMigrate(DB) // Uncomment this line to automatically migrate models if needed
