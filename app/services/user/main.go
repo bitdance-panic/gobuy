@@ -2,6 +2,7 @@ package main
 
 import (
 	// "common/utils"
+	"context"
 	"log"
 	"net"
 	"strings"
@@ -45,6 +46,8 @@ func kitexInit() (opts []server.Option) {
 func main() {
 	// 初始化指标监控
 	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr) // 在dal和rpc前面初始化
+	p := mtl.InitTracing(ServiceName)
+	defer p.Shutdown(context.Background())
 
 	dal.Init()
 

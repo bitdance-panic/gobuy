@@ -6,7 +6,9 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 
+	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
@@ -17,12 +19,17 @@ import (
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
 	"github.com/bitdance-panic/gobuy/app/utils"
 	"github.com/hertz-contrib/registry/consul"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/cors"
+	hertzlogrus "github.com/hertz-contrib/logger/logrus"
+	hertzobslogrus "github.com/hertz-contrib/obs-opentelemetry/logging/logrus"
+	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
 
@@ -44,8 +51,9 @@ import (
 // @schemes http
 
 var (
-	address string
-	h       *server.Hertz
+	ServiceName = "gateway"
+	address     string
+	h           *server.Hertz
 )
 
 func registerToConsul() {
@@ -80,6 +88,8 @@ func registerToConsul() {
 	// port, _ := strconv.Atoi(parts[1])
 	// serviceID := fmt.Sprintf("gateway-%s-%d", ip, port)
 
+	tracer, cfg := hertztracing.NewServerTracer()
+
 	// run Hertz with the consul register
 	h = server.Default(
 		server.WithHostPorts(address),
@@ -89,10 +99,15 @@ func registerToConsul() {
 			Weight:      10,
 			Tags:        nil,
 		}),
+		tracer,
 	)
+	h.Use(hertztracing.ServerMiddleware(cfg))
 }
 
 func main() {
+	p := mtl.InitTracing(ServiceName)
+	defer p.Shutdown(context.Background())
+
 	// 初始化数据库
 	dal.Init()
 
@@ -123,12 +138,37 @@ func main() {
 		// 白名单放行接口
 		middleware.WhiteListMiddleware(),
 		middleware.ConditionalAuthMiddleware(),
+		middleware.AddUidMiddleware(),
 		// 黑名单检查
 		middleware.BlacklistMiddleware(),
 		// 用户权限检查
-		// middleware.CasbinMiddleware(),
-		middleware.AddUidMiddleware(),
+		middleware.CasbinMiddleware(),
 	)
+
+	logger := hertzobslogrus.NewLogger(hertzobslogrus.WithLogger(hertzlogrus.NewLogger().Logger()))
+	hlog.SetLogger(logger)
+	hlog.SetLevel(hlog.LevelInfo) //(conf.LogLevel())
+	var flushInterval time.Duration
+	flushInterval = time.Second
+	// if os.Getenv("Go_ENV") == "online" {
+	// 	flushInterval = time.Minute
+	// } else {
+	// 	flushInterval = time.Second
+	// }
+	asyncWriter := &zapcore.BufferedWriteSyncer{
+		WS: zapcore.AddSync(&lumberjack.Logger{
+			Filename:   conf.GetConf().Hertz.LogFileName,
+			MaxSize:    conf.GetConf().Hertz.LogMaxSize,
+			MaxBackups: conf.GetConf().Hertz.LogMaxBackups,
+			MaxAge:     conf.GetConf().Hertz.LogMaxAge,
+		}),
+		FlushInterval: flushInterval,
+	}
+	hlog.SetOutput(asyncWriter)
+	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {
+		asyncWriter.Sync()
+	})
+
 	// 注册路由
 	registerRoutes(h)
 	// 注册Swagger

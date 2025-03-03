@@ -10,6 +10,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 	// "gorm.io/plugin/opentelemetry/tracing"
 )
 
@@ -36,7 +37,7 @@ func Init() {
 		panic(err)
 	}
 	log.Println("DB已连接")
-	// if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics(), tracing.WithTracerProvider(mtl.TracerProvider))); err != nil {
-	// 	panic(err)
-	// }
+	if err := DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
+	}
 }
