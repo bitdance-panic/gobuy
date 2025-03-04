@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+
 	order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
-	user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 )
 
 // OrderServiceImpl implements the last service interface defined in the IDL.
@@ -39,98 +39,14 @@ func (s *OrderServiceImpl) AdminListOrder(ctx context.Context, req *order.ListOr
 	return
 }
 
-// CreateOrderAddressResp implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) CreateOrderAddressResp(ctx context.Context, req *order.CreateOrderAddressReq) (resp *order.CreateOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// DeleteOrderAddressResp implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) DeleteOrderAddressResp(ctx context.Context, req *order.DeleteOrderAddressReq) (resp *order.DeleteOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
 // UpdateOrderAddressResp implements the OrderServiceImpl interface.
 func (s *OrderServiceImpl) UpdateOrderAddressResp(ctx context.Context, req *order.UpdateOrderAddressReq) (resp *order.UpdateOrderAddressResp, err error) {
 	// TODO: Your code here...
 	return
 }
 
-// GetOrderAddressResp implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) GetOrderAddressResp(ctx context.Context, req *order.GetOrderAddressReq) (resp *order.GetOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// CreateOrderAddress implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) CreateOrderAddress(ctx context.Context, req *order.CreateOrderAddressReq) (resp *order.CreateOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// DeleteOrderAddress implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) DeleteOrderAddress(ctx context.Context, req *order.DeleteOrderAddressReq) (resp *order.DeleteOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
 // UpdateOrderAddress implements the OrderServiceImpl interface.
 func (s *OrderServiceImpl) UpdateOrderAddress(ctx context.Context, req *order.UpdateOrderAddressReq) (resp *order.UpdateOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// GetOrderAddress implements the OrderServiceImpl interface.
-func (s *OrderServiceImpl) GetOrderAddress(ctx context.Context, req *order.GetOrderAddressReq) (resp *order.GetOrderAddressResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// Register implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// Login implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *user.LoginResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// GetUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) GetUser(ctx context.Context, req *user.GetUserReq) (resp *user.GetUserResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// UpdateUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) UpdateUser(ctx context.Context, req *user.UpdateUserReq) (resp *user.UpdateUserResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// RemoveUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) RemoveUser(ctx context.Context, req *user.RemoveUserReq) (resp *user.RemoveUserResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// BlockUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) BlockUser(ctx context.Context, req *user.BlockUserReq) (resp *user.BlockUserResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// UnblockUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) UnblockUser(ctx context.Context, req *user.UnblockUserReq) (resp *user.UnblockUserResp, err error) {
-	// TODO: Your code here...
-	return
-}
-
-// AdminListUser implements the UserServiceImpl interface.
-func (s *UserServiceImpl) AdminListUser(ctx context.Context, req *user.AdminListUserReq) (resp *user.AdminListUserResp, err error) {
 	// TODO: Your code here...
 	return
 }

@@ -1,5 +1,5 @@
 tidb: 
-    dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4"
+    dsn: "%s:%s@tcp(%s:%s)/gobuy?tls=tidb&charset=utf8mb4&parseTime=True&loc=Local"
     user: <user>
     password: <password>
     host: <host>
