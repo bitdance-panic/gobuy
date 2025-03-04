@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	order "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/order"
+	user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 )
 
 // OrderServiceImpl implements the last service interface defined in the IDL.
@@ -82,6 +83,78 @@ func (s *OrderServiceImpl) UpdateOrderAddress(ctx context.Context, req *order.Up
 
 // GetOrderAddress implements the OrderServiceImpl interface.
 func (s *OrderServiceImpl) GetOrderAddress(ctx context.Context, req *order.GetOrderAddressReq) (resp *order.GetOrderAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Register implements the UserServiceImpl interface.
+func (s *UserServiceImpl) Register(ctx context.Context, req *user.RegisterReq) (resp *user.RegisterResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// Login implements the UserServiceImpl interface.
+func (s *UserServiceImpl) Login(ctx context.Context, req *user.LoginReq) (resp *user.LoginResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// GetUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) GetUser(ctx context.Context, req *user.GetUserReq) (resp *user.GetUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UpdateUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UpdateUser(ctx context.Context, req *user.UpdateUserReq) (resp *user.UpdateUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// RemoveUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) RemoveUser(ctx context.Context, req *user.RemoveUserReq) (resp *user.RemoveUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// BlockUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) BlockUser(ctx context.Context, req *user.BlockUserReq) (resp *user.BlockUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UnblockUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UnblockUser(ctx context.Context, req *user.UnblockUserReq) (resp *user.UnblockUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// AdminListUser implements the UserServiceImpl interface.
+func (s *UserServiceImpl) AdminListUser(ctx context.Context, req *user.AdminListUserReq) (resp *user.AdminListUserResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// CreateUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) CreateUserAddress(ctx context.Context, req *order.CreateUserAddressReq) (resp *order.CreateUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// DeleteUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) DeleteUserAddress(ctx context.Context, req *order.DeleteUserAddressReq) (resp *order.DeleteUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UpdateUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) UpdateUserAddress(ctx context.Context, req *order.UpdateUserAddressReq) (resp *order.UpdateUserAddressResp, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// GetUserAddress implements the OrderServiceImpl interface.
+func (s *OrderServiceImpl) GetUserAddress(ctx context.Context, req *order.GetUserAddressReq) (resp *order.GetUserAddressResp, err error) {
 	// TODO: Your code here...
 	return
 }
