@@ -30,7 +30,7 @@ func HandleUpdateProduct(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	req.Id = int32(id)
-	resp, err := clients.ProductClient.UpdateProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.UpdateProduct(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -50,7 +50,7 @@ func HandleCreateProduct(ctx context.Context, c *app.RequestContext) {
 		utils.Fail(c, err.Error())
 		return
 	}
-	resp, err := clients.ProductClient.CreateProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.CreateProduct(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -73,7 +73,7 @@ func HandleRemoveProduct(ctx context.Context, c *app.RequestContext) {
 	req := rpc_product.RemoveProductReq{
 		Id: int32(id),
 	}
-	resp, err := clients.ProductClient.RemoveProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.RemoveProduct(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -100,7 +100,7 @@ func HandleGetProduct(ctx context.Context, c *app.RequestContext) {
 	req := rpc_product.GetProductByIDReq{
 		Id: int32(id),
 	}
-	resp, err := clients.ProductClient.GetProductByID(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.GetProductByID(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -141,7 +141,7 @@ func HandleSearchProducts(ctx context.Context, c *app.RequestContext) {
 		PageNum:  int32(pageNum),
 		PageSize: int32(pageSize),
 	}
-	resp, err := clients.ProductClient.SearchProducts(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.SearchProducts(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -170,7 +170,7 @@ func HandleAdminListProduct(ctx context.Context, c *app.RequestContext) {
 		PageNum:  int32(pageNum),
 		PageSize: int32(pageSize),
 	}
-	resp, err := clients.ProductClient.AdminListProduct(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.ProductClient.AdminListProduct(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return

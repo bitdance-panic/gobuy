@@ -34,7 +34,7 @@ func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 		Phone:        body.Phone,
 		OrderAddress: body.OrderAddress,
 	}
-	resp, err := clients.OrderClient.CreateOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.CreateOrder(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -73,7 +73,7 @@ func HandleUpdateOrderStatus(ctx context.Context, c *app.RequestContext) {
 	resp, err := clients.OrderClient.UpdateOrderStatus(
 		context.Background(),
 		&req,
-		callopt.WithRPCTimeout(3*time.Second),
+		callopt.WithRPCTimeout(5*time.Second),
 	)
 	if err != nil {
 		utils.Fail(c, err.Error())
@@ -119,7 +119,7 @@ func HandleUpdateOrderAddress(ctx context.Context, c *app.RequestContext) {
 	resp, err := clients.OrderClient.UpdateOrderAddress(
 		context.Background(),
 		&req,
-		callopt.WithRPCTimeout(3*time.Second),
+		callopt.WithRPCTimeout(5*time.Second),
 	)
 	if err != nil {
 		utils.Fail(c, err.Error())
@@ -142,7 +142,7 @@ func HandleGetOrder(ctx context.Context, c *app.RequestContext) {
 	req := rpc_order.GetOrderReq{
 		OrderId: int32(orderID),
 	}
-	resp, err := clients.OrderClient.GetOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.GetOrder(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -157,7 +157,7 @@ func HandleListUserOrder(ctx context.Context, c *app.RequestContext) {
 		PageNum:  1,
 		PageSize: 1,
 	}
-	resp, err := clients.OrderClient.ListUserOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.ListUserOrder(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -180,7 +180,7 @@ func HandleAdminListOrder(ctx context.Context, c *app.RequestContext) {
 		PageNum:  int32(pageNum),
 		PageSize: int32(pageSize),
 	}
-	resp, err := clients.OrderClient.AdminListOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.AdminListOrder(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -189,7 +189,7 @@ func HandleAdminListOrder(ctx context.Context, c *app.RequestContext) {
 }
 
 func HandleCreateUserAddress(ctx context.Context, c *app.RequestContext) {
-	//UserID := c.GetInt(consts.CONTEXT_UID_KEY)
+	userID := c.GetInt(consts.CONTEXT_UID_KEY)
 	var body struct {
 		UserID      int32  `json:"user_id"`
 		Phone       string `json:"phone"`
@@ -201,13 +201,13 @@ func HandleCreateUserAddress(ctx context.Context, c *app.RequestContext) {
 	}
 
 	req := rpc_order.CreateUserAddressReq{
-		UserId:      body.UserID,
+		UserId:      int32(userID),
 		Phone:       body.Phone,
 		UserAddress: body.UserAddress,
 	}
 
 	// 调用 OrderClient 的 CreateOrderAddress 方法
-	resp, err := clients.OrderClient.CreateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.CreateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -230,7 +230,7 @@ func HandleDeleteUserAddress(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 OrderClient 的 DeleteOrderAddress 方法
-	resp, err := clients.OrderClient.DeleteUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.DeleteUserAddress(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -255,7 +255,7 @@ func HandleUpdateUserAddress(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 OrderClient 的 UpdateOrderAddress 方法
-	resp, err := clients.OrderClient.UpdateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.UpdateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -278,7 +278,7 @@ func HandleGetUserAddress(ctx context.Context, c *app.RequestContext) {
 	}
 
 	// 调用 OrderClient 的 GetOrderAddress 方法
-	resp, err := clients.OrderClient.GetUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.GetUserAddress(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return

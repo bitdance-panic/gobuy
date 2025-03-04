@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/plugin/opentelemetry/tracing"
+
 	// "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	// "gorm.io/plugin/opentelemetry/tracing"
@@ -42,4 +43,22 @@ func Init() {
 
 	// models.AutoMigrate(DB)
 	// 第一次连接后就关闭
+
+	// type TimeZoneInfo struct {
+	// 	GlobalTimeZone  string `gorm:"column:global_time_zone"`
+	// 	SessionTimeZone string `gorm:"column:session_time_zone"`
+	// 	SystemTimeZone  string `gorm:"column:system_time_zone"`
+	// 	Noww            string `gorm:"column:now"`
+	// }
+	// var timeZoneInfo TimeZoneInfo
+	// err = DB.Raw("SELECT Now() as now,  @@global.time_zone AS global_time_zone, @@session.time_zone AS session_time_zone, @@global.system_time_zone AS system_time_zone").Scan(&timeZoneInfo).Error
+	// if err != nil {
+	// 	panic("failed to execute query")
+	// }
+
+	// // 打印查询结果
+	// fmt.Println(timeZoneInfo.Noww)
+	// fmt.Printf("Global Time Zone: %s\n", timeZoneInfo.GlobalTimeZone)
+	// fmt.Printf("Session Time Zone: %s\n", timeZoneInfo.SessionTimeZone)
+	// fmt.Printf("System Time Zone: %s\n", timeZoneInfo.SystemTimeZone)
 }

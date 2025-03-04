@@ -31,7 +31,7 @@ func HandleCreateCartItem(ctx context.Context, c *app.RequestContext) {
 		UserId:    int32(userID),
 		ProductId: int32(productID),
 	}
-	_, err = clients.CartClient.CreateItem(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	_, err = clients.CartClient.CreateItem(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -63,7 +63,7 @@ func HandleListCartItem(ctx context.Context, c *app.RequestContext) {
 		// PageNum:  int32(pageNum),
 		// PageSize: int32(pageSize),
 	}
-	resp, err := clients.CartClient.ListItem(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.CartClient.ListItem(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -86,7 +86,7 @@ func HandleDeleteCartItem(ctx context.Context, c *app.RequestContext) {
 	req := rpc_cart.DeleteItemReq{
 		ItemId: int32(id),
 	}
-	resp, err := clients.CartClient.DeleteItem(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.CartClient.DeleteItem(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -119,7 +119,7 @@ func HandleUpdateCartItemQuantity(ctx context.Context, c *app.RequestContext) {
 		ItemId:       int32(id),
 		NewQuantity_: int32(newQuantity),
 	}
-	resp, err := clients.CartClient.UpdateQuantity(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.CartClient.UpdateQuantity(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return

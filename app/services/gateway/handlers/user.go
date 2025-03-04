@@ -20,7 +20,7 @@ import (
 func HandleGetUser(ctx context.Context, c *app.RequestContext) {
 	userID := c.GetInt(consts.CONTEXT_UID_KEY)
 	req := rpc_user.GetUserReq{UserId: int32(userID)}
-	resp, err := clients.UserClient.GetUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.GetUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -72,7 +72,7 @@ func HandleAdminListUser(ctx context.Context, c *app.RequestContext) {
 		PageNum:  int32(pageNum),
 		PageSize: int32(pageSize),
 	}
-	resp, err := clients.UserClient.AdminListUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.AdminListUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -93,7 +93,7 @@ func HandleRemoveUser(ctx context.Context, c *app.RequestContext) {
 	req := rpc_user.RemoveUserReq{
 		UserId: int32(userID),
 	}
-	resp, err := clients.UserClient.RemoveUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.RemoveUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
@@ -118,7 +118,7 @@ func HandleBlockUser(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := clients.UserClient.BlockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.BlockUser(context.Background(), &req, callopt.WithRPCTimeout(310*time.Second))
 
 	if err != nil || !resp.Success {
 		utils.Fail(c, "封禁失败: "+err.Error())
@@ -158,7 +158,7 @@ func HandleUnblockUser(ctx context.Context, c *app.RequestContext) {
 		Identifier: c.Param("identifier"),
 	}
 
-	resp, err := clients.UserClient.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.UnblockUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
 
 	if err != nil || !resp.Success {
 		utils.Fail(c, "解禁失败: "+err.Error())

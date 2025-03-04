@@ -23,7 +23,7 @@ func HandleRegister(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := clients.UserClient.Register(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.UserClient.Register(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil || !resp.Success {
 		utils.Fail(c, err.Error())
 		return

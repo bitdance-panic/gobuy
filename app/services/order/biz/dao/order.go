@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+
 	"github.com/bitdance-panic/gobuy/app/consts"
 	"github.com/bitdance-panic/gobuy/app/models"
 	"github.com/pkg/errors"

@@ -93,7 +93,7 @@ func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, erro
 	if err := c.Bind(&loginReq); err != nil {
 		return nil, jwt.ErrMissingLoginValues
 	}
-	loginResp, err := clients.UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
+	loginResp, err := clients.UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
@@ -123,7 +123,7 @@ func loginResponse(ctx context.Context, c *app.RequestContext, code int, token s
 		UserId: int32(userID),
 	}
 
-	loginResp, err := clients.UserClient.GetUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
+	loginResp, err := clients.UserClient.GetUser(context.Background(), &req, callopt.WithRPCTimeout(5*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
