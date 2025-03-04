@@ -19,28 +19,94 @@ struct Order{
     6: list<OrderItem> items;
     7: string created_at;
     8: string pay_time;
+    9: string phone;
+    10: string order_address;
+}
+
+struct UserAddress{
+    1: i32 id;
+    2: i32 user_id;
+    3: string phone;
+    4: string user_address;
+}
+
+struct CreateUserAddressReq{
+    1: i32 user_id;
+    2: string phone;
+    3: string user_address;
+}
+
+struct CreateUserAddressResp{
+    1: i32 user_id;
+    2: bool success;
+}
+
+struct DeleteUserAddressReq{
+    1: i32 user_id;
+}
+
+struct DeleteUserAddressResp{
+    1: i32 user_id;
+    2: bool success;
+}
+
+struct UpdateUserAddressReq{
+    1: i32 user_id;
+    2: string user_address;
+}
+
+struct UpdateUserAddressResp{
+    1: string user_address;
+    2: bool success;
+}
+
+struct GetUserAddressReq{
+    1: i32 user_id;
+}
+
+struct GetUserAddressResp{
+    1: UserAddress user_address;
 }
 
 service OrderService{
     CreateOrderResp createOrder(1: CreateOrderReq req);
     UpdateOrderStatusResp updateOrderStatus(1: UpdateOrderStatusReq req);
+    UpdateOrderAddressResp updateOrderAddress(1:UpdateOrderAddressReq req);
     GetOrderResp getOrder(1: GetOrderReq req);
     ListOrderResp listUserOrder(1: ListOrderReq req);
     ListOrderResp adminListOrder(1: ListOrderReq req);
+    CreateUserAddressResp createUserAddress(1: CreateUserAddressReq req);
+    DeleteUserAddressResp deleteUserAddress(1: DeleteUserAddressReq req);
+    UpdateUserAddressResp updateUserAddress(1: UpdateUserAddressReq req);
+    GetUserAddressResp getUserAddress(1: GetUserAddressReq req);
 }
+
+
 struct CreateOrderReq{
     1: i32 user_id;
     2: list<i32> cartItemIDs;
+    3: string phone;
+    4: string order_address;
 }
 struct CreateOrderResp{
     1: Order order;
 }
+
+struct UpdateOrderAddressReq{
+    1: i32 order_id;
+    2: string order_address;
+}
+struct UpdateOrderAddressResp{
+    1: string order_address;
+    2: bool success;
+}
+
 struct UpdateOrderStatusReq{
     1: i32 order_id;
     2: i32 status;
 }
 struct UpdateOrderStatusResp{
-    1: i32 new_status;
+    1: i32 status;
     2: bool success;
 }
 struct ListOrderReq{

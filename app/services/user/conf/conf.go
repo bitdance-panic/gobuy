@@ -77,7 +77,8 @@ type Kitex struct {
 
 type Registry struct {
 	RegistryAddress []string `yaml:"registry_address"`
-	ServiceId       string   `yaml:"service_id"`
+	Username        string   `yaml:"username"`
+	Password        string   `yaml:"password"`
 }
 
 // GetConf gets configuration instance

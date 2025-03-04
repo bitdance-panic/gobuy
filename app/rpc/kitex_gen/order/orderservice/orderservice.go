@@ -27,6 +27,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"updateOrderAddress": kitex.NewMethodInfo(
+		updateOrderAddressHandler,
+		newOrderServiceUpdateOrderAddressArgs,
+		newOrderServiceUpdateOrderAddressResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 	"getOrder": kitex.NewMethodInfo(
 		getOrderHandler,
 		newOrderServiceGetOrderArgs,
@@ -45,6 +52,34 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		adminListOrderHandler,
 		newOrderServiceAdminListOrderArgs,
 		newOrderServiceAdminListOrderResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"createUserAddress": kitex.NewMethodInfo(
+		createUserAddressHandler,
+		newOrderServiceCreateUserAddressArgs,
+		newOrderServiceCreateUserAddressResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"deleteUserAddress": kitex.NewMethodInfo(
+		deleteUserAddressHandler,
+		newOrderServiceDeleteUserAddressArgs,
+		newOrderServiceDeleteUserAddressResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"updateUserAddress": kitex.NewMethodInfo(
+		updateUserAddressHandler,
+		newOrderServiceUpdateUserAddressArgs,
+		newOrderServiceUpdateUserAddressResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"getUserAddress": kitex.NewMethodInfo(
+		getUserAddressHandler,
+		newOrderServiceGetUserAddressArgs,
+		newOrderServiceGetUserAddressResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
@@ -150,6 +185,24 @@ func newOrderServiceUpdateOrderStatusResult() interface{} {
 	return order.NewOrderServiceUpdateOrderStatusResult()
 }
 
+func updateOrderAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceUpdateOrderAddressArgs)
+	realResult := result.(*order.OrderServiceUpdateOrderAddressResult)
+	success, err := handler.(order.OrderService).UpdateOrderAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceUpdateOrderAddressArgs() interface{} {
+	return order.NewOrderServiceUpdateOrderAddressArgs()
+}
+
+func newOrderServiceUpdateOrderAddressResult() interface{} {
+	return order.NewOrderServiceUpdateOrderAddressResult()
+}
+
 func getOrderHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*order.OrderServiceGetOrderArgs)
 	realResult := result.(*order.OrderServiceGetOrderResult)
@@ -204,6 +257,78 @@ func newOrderServiceAdminListOrderResult() interface{} {
 	return order.NewOrderServiceAdminListOrderResult()
 }
 
+func createUserAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceCreateUserAddressArgs)
+	realResult := result.(*order.OrderServiceCreateUserAddressResult)
+	success, err := handler.(order.OrderService).CreateUserAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceCreateUserAddressArgs() interface{} {
+	return order.NewOrderServiceCreateUserAddressArgs()
+}
+
+func newOrderServiceCreateUserAddressResult() interface{} {
+	return order.NewOrderServiceCreateUserAddressResult()
+}
+
+func deleteUserAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceDeleteUserAddressArgs)
+	realResult := result.(*order.OrderServiceDeleteUserAddressResult)
+	success, err := handler.(order.OrderService).DeleteUserAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceDeleteUserAddressArgs() interface{} {
+	return order.NewOrderServiceDeleteUserAddressArgs()
+}
+
+func newOrderServiceDeleteUserAddressResult() interface{} {
+	return order.NewOrderServiceDeleteUserAddressResult()
+}
+
+func updateUserAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceUpdateUserAddressArgs)
+	realResult := result.(*order.OrderServiceUpdateUserAddressResult)
+	success, err := handler.(order.OrderService).UpdateUserAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceUpdateUserAddressArgs() interface{} {
+	return order.NewOrderServiceUpdateUserAddressArgs()
+}
+
+func newOrderServiceUpdateUserAddressResult() interface{} {
+	return order.NewOrderServiceUpdateUserAddressResult()
+}
+
+func getUserAddressHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*order.OrderServiceGetUserAddressArgs)
+	realResult := result.(*order.OrderServiceGetUserAddressResult)
+	success, err := handler.(order.OrderService).GetUserAddress(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newOrderServiceGetUserAddressArgs() interface{} {
+	return order.NewOrderServiceGetUserAddressArgs()
+}
+
+func newOrderServiceGetUserAddressResult() interface{} {
+	return order.NewOrderServiceGetUserAddressResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -234,6 +359,16 @@ func (p *kClient) UpdateOrderStatus(ctx context.Context, req *order.UpdateOrderS
 	return _result.GetSuccess(), nil
 }
 
+func (p *kClient) UpdateOrderAddress(ctx context.Context, req *order.UpdateOrderAddressReq) (r *order.UpdateOrderAddressResp, err error) {
+	var _args order.OrderServiceUpdateOrderAddressArgs
+	_args.Req = req
+	var _result order.OrderServiceUpdateOrderAddressResult
+	if err = p.c.Call(ctx, "updateOrderAddress", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
 func (p *kClient) GetOrder(ctx context.Context, req *order.GetOrderReq) (r *order.GetOrderResp, err error) {
 	var _args order.OrderServiceGetOrderArgs
 	_args.Req = req
@@ -259,6 +394,46 @@ func (p *kClient) AdminListOrder(ctx context.Context, req *order.ListOrderReq) (
 	_args.Req = req
 	var _result order.OrderServiceAdminListOrderResult
 	if err = p.c.Call(ctx, "adminListOrder", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) CreateUserAddress(ctx context.Context, req *order.CreateUserAddressReq) (r *order.CreateUserAddressResp, err error) {
+	var _args order.OrderServiceCreateUserAddressArgs
+	_args.Req = req
+	var _result order.OrderServiceCreateUserAddressResult
+	if err = p.c.Call(ctx, "createUserAddress", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) DeleteUserAddress(ctx context.Context, req *order.DeleteUserAddressReq) (r *order.DeleteUserAddressResp, err error) {
+	var _args order.OrderServiceDeleteUserAddressArgs
+	_args.Req = req
+	var _result order.OrderServiceDeleteUserAddressResult
+	if err = p.c.Call(ctx, "deleteUserAddress", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UpdateUserAddress(ctx context.Context, req *order.UpdateUserAddressReq) (r *order.UpdateUserAddressResp, err error) {
+	var _args order.OrderServiceUpdateUserAddressArgs
+	_args.Req = req
+	var _result order.OrderServiceUpdateUserAddressResult
+	if err = p.c.Call(ctx, "updateUserAddress", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetUserAddress(ctx context.Context, req *order.GetUserAddressReq) (r *order.GetUserAddressResp, err error) {
+	var _args order.OrderServiceGetUserAddressArgs
+	_args.Req = req
+	var _result order.OrderServiceGetUserAddressResult
+	if err = p.c.Call(ctx, "getUserAddress", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

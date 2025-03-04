@@ -30,6 +30,24 @@ func (*OrderServiceImpl) UpdateOrderStatus(ctx context.Context, req *rpc_order.U
 	return orderBll.UpdateOrderStatus(ctx, req)
 }
 
+func (*OrderServiceImpl) UpdateOrderAddress(ctx context.Context, req *rpc_order.UpdateOrderAddressReq) (*rpc_order.UpdateOrderAddressResp, error) {
+	return orderBll.UpdateOrderAddress(ctx, req)
+}
+
 func (*OrderServiceImpl) AdminListOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	return orderBll.AdminListOrder(ctx, req)
+}
+
+func (*OrderServiceImpl) CreateUserAddress(ctx context.Context, req *rpc_order.CreateUserAddressReq) (*rpc_order.CreateUserAddressResp, error) {
+	return orderBll.CreateUserAddress(ctx, req)
+}
+
+func (*OrderServiceImpl) DeleteUserAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
+	return orderBll.DeleteUserAddress(ctx, req)
+}
+func (*OrderServiceImpl) UpdateUserAddress(ctx context.Context, req *rpc_order.UpdateUserAddressReq) (*rpc_order.UpdateUserAddressResp, error) {
+	return orderBll.UpdateUserAddress(ctx, req)
+}
+func (*OrderServiceImpl) GetUserAddress(ctx context.Context, req *rpc_order.GetUserAddressReq) (*rpc_order.GetUserAddressResp, error) {
+	return orderBll.GetUserAddress(ctx, req)
 }
