@@ -64,11 +64,13 @@ func (bll *OrderBLL) CreateOrder(ctx context.Context, req *rpc_order.CreateOrder
 	}
 	// 先保存下订单
 	order := models.Order{
-		UserID:     int(req.UserId),
-		Number:     orderNumber,
-		TotalPrice: totalPrice,
-		Status:     int(consts.OrderStatusPending),
-		PayTime:    nil,
+		UserID:       int(req.UserId),
+		Number:       orderNumber,
+		TotalPrice:   totalPrice,
+		Status:       int(consts.OrderStatusPending),
+		PayTime:      nil,
+		Phone:        req.Phone,
+		OrderAddress: req.OrderAddress,
 	}
 
 	err = dao.CreateOrder(tidb.DB, &order)
@@ -121,6 +123,25 @@ func (bll *OrderBLL) UpdateOrderStatus(ctx context.Context, req *rpc_order.Updat
 		Success: true,
 	}, nil
 }
+
+func (bll *OrderBLL) UpdateOrderAddress(ctx context.Context, req *rpc_order.UpdateOrderAddressReq) (*rpc_order.UpdateOrderAddressResp, error) {
+	order, err := dao.GetOrderByID(tidb.DB, int(req.OrderId))
+	if err != nil {
+		return nil, err
+	}
+	if order == nil {
+		return nil, errors.New("order not found")
+	}
+	err = dao.UpdateOrderAddress(tidb.DB, order, req.OrderAddress)
+	if err != nil {
+		return nil, err
+	}
+	return &rpc_order.UpdateOrderAddressResp{
+		OrderAddress: req.OrderAddress,
+		Success:      true,
+	}, nil
+}
+
 func (bll *OrderBLL) ListUserOrder(ctx context.Context, req *rpc_order.ListOrderReq) (*rpc_order.ListOrderResp, error) {
 	orders, err := dao.ListUserOrder(tidb.DB, int(req.UserId), int(req.PageNum), int(req.PageSize))
 	if err != nil {
@@ -192,68 +213,66 @@ func convertOrderToProto(order *models.Order) *rpc_order.Order {
 }
 
 // 创建订单地址
-func (bll *OrderBLL) CreateOrderAddress(ctx context.Context, req *rpc_order.CreateOrderAddressReq) (*rpc_order.CreateOrderAddressResp, error) {
-	orderAddress := models.OrderAddress{
-		UserID:       int(req.UserId),
-		Phone:        req.Phone,
-		OrderID:      int(req.OrderId),
-		OrderAddress: req.OrderAddress,
+func (bll *OrderBLL) CreateUserAddress(ctx context.Context, req *rpc_order.CreateUserAddressReq) (*rpc_order.CreateUserAddressResp, error) {
+	userAddress := models.UserAddress{
+		UserID:      int(req.UserId),
+		Phone:       req.Phone,
+		UserAddress: req.UserAddress,
 	}
 
 	// 调用 DAO 层创建订单地址
-	err := dao.CreateOrderAddress(tidb.DB, &orderAddress)
+	err := dao.CreateUserAddress(tidb.DB, &userAddress)
 	if err != nil {
 		return nil, err
 	}
 
-	return &rpc_order.CreateOrderAddressResp{
-		OrderId: int32(orderAddress.OrderID),
+	return &rpc_order.CreateUserAddressResp{
+		UserId:  int32(userAddress.UserID),
 		Success: true,
 	}, nil
 }
 
 // 删除订单地址
-func (bll *OrderBLL) DeleteOrderAddress(ctx context.Context, req *rpc_order.DeleteOrderAddressReq) (*rpc_order.DeleteOrderAddressResp, error) {
+func (bll *OrderBLL) DeleteUserAddress(ctx context.Context, req *rpc_order.DeleteUserAddressReq) (*rpc_order.DeleteUserAddressResp, error) {
 	// 调用 DAO 层删除订单地址
-	err := dao.DeleteOrderAddress(tidb.DB, req.OrderId)
+	err := dao.DeleteUserAddress(tidb.DB, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &rpc_order.DeleteOrderAddressResp{
-		OrderId: req.OrderId,
+	return &rpc_order.DeleteUserAddressResp{
+		UserId:  req.UserId,
 		Success: true,
 	}, nil
 }
 
 // 更新订单地址
-func (bll *OrderBLL) UpdateOrderAddress(ctx context.Context, req *rpc_order.UpdateOrderAddressReq) (*rpc_order.UpdateOrderAddressResp, error) {
+func (bll *OrderBLL) UpdateUserAddress(ctx context.Context, req *rpc_order.UpdateUserAddressReq) (*rpc_order.UpdateUserAddressResp, error) {
 	// 调用 DAO 层更新订单地址
-	err := dao.UpdateOrderAddress(tidb.DB, req.OrderId, req.OrderAddress)
+	err := dao.UpdateUserAddress(tidb.DB, req.UserId, req.UserAddress)
 	if err != nil {
 		return nil, err
 	}
 
-	return &rpc_order.UpdateOrderAddressResp{
-		OrderAddress: req.OrderAddress,
-		Success:      true,
+	return &rpc_order.UpdateUserAddressResp{
+		UserAddress: req.UserAddress,
+		Success:     true,
 	}, nil
 }
 
 // 获取订单地址
-func (bll *OrderBLL) GetOrderAddress(ctx context.Context, req *rpc_order.GetOrderAddressReq) (*rpc_order.GetOrderAddressResp, error) {
+func (bll *OrderBLL) GetUserAddress(ctx context.Context, req *rpc_order.GetUserAddressReq) (*rpc_order.GetUserAddressResp, error) {
 	// 调用 DAO 层获取订单地址
-	orderAddress, err := dao.GetOrderAddress(tidb.DB, req.OrderId)
+	userAddress, err := dao.GetUserAddress(tidb.DB, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &rpc_order.GetOrderAddressResp{
-		OrderAddress: &rpc_order.OrderAddress{
-			UserId:       int32(orderAddress.UserID),
-			Phone:        orderAddress.Phone,
-			OrderId:      int32(orderAddress.OrderID),
-			OrderAddress: orderAddress.OrderAddress,
+	return &rpc_order.GetUserAddressResp{
+		UserAddress: &rpc_order.UserAddress{
+			UserId:      int32(userAddress.UserID),
+			Phone:       userAddress.Phone,
+			UserAddress: userAddress.UserAddress,
 		},
 	}, nil
 }

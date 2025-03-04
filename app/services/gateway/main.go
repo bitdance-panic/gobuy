@@ -88,13 +88,13 @@ func main() {
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
 		// 白名单放行接口
-		middleware.WhiteListMiddleware(),
-		conditionalAuthMiddleware(),
-		addUidMiddleware(),
-		// 黑名单检查
-		middleware.BlacklistMiddleware(),
-		// 用户权限检查
-		middleware.CasbinMiddleware(),
+		//middleware.WhiteListMiddleware(),
+		//conditionalAuthMiddleware(),
+		//addUidMiddleware(),
+		//// 黑名单检查
+		//middleware.BlacklistMiddleware(),
+		//// 用户权限检查
+		//middleware.CasbinMiddleware(),
 	)
 	// 注册路由
 	registerRoutes(h)
@@ -150,10 +150,12 @@ func registerRoutes(h *server.Hertz) {
 		orderGroup.POST("", handlers.HandleCreateOrder)
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
-		orderGroup.POST("/address", handlers.HandleCreateOrderAddress)
-		orderGroup.GET("/address", handlers.HandleGetOrderAddress)
-		orderGroup.PUT("/address", handlers.HandleUpdateOrderAddress)
-		orderGroup.DELETE("/address", handlers.HandleDeleteOrderAddress)
+		orderGroup.POST("/address", handlers.HandleCreateUserAddress)
+		orderGroup.GET("/address", handlers.HandleGetUserAddress)
+		orderGroup.PUT("/address", handlers.HandleUpdateUserAddress)
+		orderGroup.DELETE("/address", handlers.HandleDeleteUserAddress)
+		orderGroup.PUT("/orderAddress", handlers.HandleUpdateOrderAddress)
+		orderGroup.PUT("/status", handlers.HandleUpdateOrderStatus)
 	}
 	paymentGroup := h.Group("/payment")
 	{

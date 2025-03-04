@@ -16,7 +16,9 @@ import (
 func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 	userID := c.GetInt(consts.CONTEXT_UID_KEY)
 	var body struct {
-		ItemIDs []int `json:"itemIDs"`
+		ItemIDs      []int  `json:"itemIDs"`
+		Phone        string `json:"phone"`
+		OrderAddress string `json:"order_address"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())
@@ -27,8 +29,10 @@ func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 		itemIDs[i] = int32(itemID)
 	}
 	req := rpc_order.CreateOrderReq{
-		UserId:      int32(userID),
-		CartItemIDs: itemIDs,
+		UserId:       int32(userID),
+		CartItemIDs:  itemIDs,
+		Phone:        body.Phone,
+		OrderAddress: body.OrderAddress,
 	}
 	resp, err := clients.OrderClient.CreateOrder(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
@@ -36,6 +40,97 @@ func HandleCreateOrder(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	utils.Success(c, utils.H{"order": resp.Order})
+}
+
+func HandleUpdateOrderStatus(ctx context.Context, c *app.RequestContext) {
+	// 1. 绑定请求参数
+	var body struct {
+		OrderID int `json:"order_id" binding:"required"`
+		Status  int `json:"status" binding:"required"`
+	}
+	if err := c.Bind(&body); err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 2. 参数验证
+	if body.OrderID <= 0 {
+		utils.Fail(c, "无效的订单ID")
+		return
+	}
+	if body.Status < 0 || body.Status > 2 { // 0: 待支付, 1: 已支付, 2: 已取消
+		utils.Fail(c, "无效的订单状态")
+		return
+	}
+
+	// 3. 构建RPC请求
+	req := rpc_order.UpdateOrderStatusReq{
+		OrderId: int32(body.OrderID),
+		Status:  int32(body.Status),
+	}
+
+	// 4. 调用服务
+	resp, err := clients.OrderClient.UpdateOrderStatus(
+		context.Background(),
+		&req,
+		callopt.WithRPCTimeout(3*time.Second),
+	)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 5. 返回响应
+	utils.Success(c, utils.H{
+		"success": resp.Success,
+		"status":  resp.Status,
+		"message": "订单状态更新成功",
+	})
+}
+
+func HandleUpdateOrderAddress(ctx context.Context, c *app.RequestContext) {
+	// 1. 绑定请求参数
+	var body struct {
+		OrderID      int    `json:"order_id"`
+		OrderAddress string `json:"order_address" binding:"required"`
+	}
+	if err := c.Bind(&body); err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 2. 参数验证
+	if body.OrderID <= 0 {
+		utils.Fail(c, "无效的订单ID")
+		return
+	}
+	if body.OrderAddress == "" {
+		utils.Fail(c, "地址不能为空")
+		return
+	}
+
+	// 3. 构建RPC请求
+	req := rpc_order.UpdateOrderAddressReq{
+		OrderId:      int32(body.OrderID),
+		OrderAddress: body.OrderAddress,
+	}
+
+	// 4. 调用服务
+	resp, err := clients.OrderClient.UpdateOrderAddress(
+		context.Background(),
+		&req,
+		callopt.WithRPCTimeout(3*time.Second),
+	)
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
+	// 5. 返回响应
+	utils.Success(c, utils.H{
+		"success": resp.Success,
+		"message": "地址更新成功",
+	})
 }
 
 func HandleGetOrder(ctx context.Context, c *app.RequestContext) {
@@ -93,102 +188,101 @@ func HandleAdminListOrder(ctx context.Context, c *app.RequestContext) {
 	utils.Success(c, utils.H{"orders": resp.Orders, "total_count": resp.TotalCount})
 }
 
-func HandleCreateOrderAddress(ctx context.Context, c *app.RequestContext) {
-	userID := c.GetInt(consts.CONTEXT_UID_KEY)
+func HandleCreateUserAddress(ctx context.Context, c *app.RequestContext) {
+	//UserID := c.GetInt(consts.CONTEXT_UID_KEY)
 	var body struct {
-		Phone        string `json:"phone"`
-		OrderID      int32  `json:"orderID"`
-		OrderAddress string `json:"orderAddress"`
+		UserID      int32  `json:"user_id"`
+		Phone       string `json:"phone"`
+		UserAddress string `json:"userAddress"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	req := rpc_order.CreateOrderAddressReq{
-		UserId:       int32(userID),
-		Phone:        body.Phone,
-		OrderId:      body.OrderID,
-		OrderAddress: body.OrderAddress,
+	req := rpc_order.CreateUserAddressReq{
+		UserId:      body.UserID,
+		Phone:       body.Phone,
+		UserAddress: body.UserAddress,
 	}
 
 	// 调用 OrderClient 的 CreateOrderAddress 方法
-	resp, err := clients.OrderClient.CreateOrderAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.CreateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	utils.Success(c, utils.H{"orderAddress": resp.OrderId, "success": resp.Success})
+	utils.Success(c, utils.H{"userAddress": resp.UserId, "success": resp.Success})
 }
 
-func HandleDeleteOrderAddress(ctx context.Context, c *app.RequestContext) {
+func HandleDeleteUserAddress(ctx context.Context, c *app.RequestContext) {
 	var body struct {
-		OrderID int32 `json:"orderID"`
+		UserID int32 `json:"userID"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	req := rpc_order.DeleteOrderAddressReq{
-		OrderId: body.OrderID,
+	req := rpc_order.DeleteUserAddressReq{
+		UserId: body.UserID,
 	}
 
 	// 调用 OrderClient 的 DeleteOrderAddress 方法
-	resp, err := clients.OrderClient.DeleteOrderAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.DeleteUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	utils.Success(c, utils.H{"orderID": resp.OrderId, "success": resp.Success})
+	utils.Success(c, utils.H{"userID": resp.UserId, "success": resp.Success})
 }
 
-func HandleUpdateOrderAddress(ctx context.Context, c *app.RequestContext) {
+func HandleUpdateUserAddress(ctx context.Context, c *app.RequestContext) {
 	var body struct {
-		OrderID      int32  `json:"orderID"`
-		OrderAddress string `json:"orderAddress"`
+		UserID      int32  `json:"userID"`
+		UserAddress string `json:"userAddress"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	req := rpc_order.UpdateOrderAddressReq{
-		OrderId:      body.OrderID,
-		OrderAddress: body.OrderAddress,
+	req := rpc_order.UpdateUserAddressReq{
+		UserId:      body.UserID,
+		UserAddress: body.UserAddress,
 	}
 
 	// 调用 OrderClient 的 UpdateOrderAddress 方法
-	resp, err := clients.OrderClient.UpdateOrderAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.UpdateUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	utils.Success(c, utils.H{"orderAddress": resp.OrderAddress, "success": resp.Success})
+	utils.Success(c, utils.H{"userAddress": resp.UserAddress, "success": resp.Success})
 }
 
-func HandleGetOrderAddress(ctx context.Context, c *app.RequestContext) {
+func HandleGetUserAddress(ctx context.Context, c *app.RequestContext) {
 	var body struct {
-		OrderID int32 `json:"orderID"`
+		UserID int32 `json:"userID"`
 	}
 	if err := c.Bind(&body); err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	req := rpc_order.GetOrderAddressReq{
-		OrderId: body.OrderID,
+	req := rpc_order.GetUserAddressReq{
+		UserId: body.UserID,
 	}
 
 	// 调用 OrderClient 的 GetOrderAddress 方法
-	resp, err := clients.OrderClient.GetOrderAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
+	resp, err := clients.OrderClient.GetUserAddress(context.Background(), &req, callopt.WithRPCTimeout(3*time.Second))
 	if err != nil {
 		utils.Fail(c, err.Error())
 		return
 	}
 
-	utils.Success(c, utils.H{"orderAddress": resp.OrderAddress})
+	utils.Success(c, utils.H{"userAddress": resp.UserAddress})
 }
