@@ -21,6 +21,7 @@ type Config struct {
 	Kitex    Kitex    `yaml:"kitex"`
 	Hertz    Hertz    `yaml:"hertz"`
 	Tidb     Tidb     `yaml:"tidb"`
+	Alipay   Alipay   `yaml:"alipay"`
 	Postgres Postgres `yaml:"postgres"`
 	Redis    Redis    `yaml:"redis"`
 	Registry Registry `yaml:"registry"`
@@ -40,6 +41,12 @@ type Postgres struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Host     string `yaml:"host"`
+}
+
+type Alipay struct {
+	APPID        string `yaml:"app_id"`
+	PrivateKey   string `yaml:"private_key"`
+	ServerDomain string `yaml:"server_domain"`
 }
 
 type Redis struct {
@@ -80,8 +87,7 @@ type Kitex struct {
 
 type Registry struct {
 	RegistryAddress []string `yaml:"registry_address"`
-	Username        string   `yaml:"username"`
-	Password        string   `yaml:"password"`
+	ServiceId       string   `yaml:"service_id"`
 }
 
 type Auth struct {

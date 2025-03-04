@@ -3,7 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
+	"strings"
+	"time"
 
+	"github.com/bitdance-panic/gobuy/app/common/mtl"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/redis"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
@@ -12,35 +17,24 @@ import (
 	_ "github.com/bitdance-panic/gobuy/app/services/gateway/docs"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/handlers"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/middleware"
+	"github.com/bitdance-panic/gobuy/app/utils"
+	"github.com/hertz-contrib/registry/consul"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/cors"
-	"github.com/hertz-contrib/jwt"
+	hertzlogrus "github.com/hertz-contrib/logger/logrus"
+	hertzobslogrus "github.com/hertz-contrib/obs-opentelemetry/logging/logrus"
+	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 	"github.com/hertz-contrib/swagger"
 	swaggerFiles "github.com/swaggo/files"
 
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
+	consulapi "github.com/hashicorp/consul/api"
 )
-
-func addUidMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
-			c.Next(ctx) // 白名单跳过认证
-			return
-		}
-
-		if claims := jwt.ExtractClaims(ctx, c); claims != nil {
-			fmt.Println("设置UID")
-			userID := claims[middleware.IdentityKey]
-			c.Set("uid", int(userID.(float64)))
-		}
-		// fmt.Println("设置UID")
-		// c.Set("uid", 450002)
-		c.Next(ctx)
-	}
-}
 
 // @title userservice
 // @version 1.0
@@ -55,7 +49,65 @@ func addUidMiddleware() app.HandlerFunc {
 // @host localhost:8888
 // @BasePath /
 // @schemes http
+
+var (
+	ServiceName = "gateway"
+	address     string
+	h           *server.Hertz
+)
+
+func registerToConsul() {
+	// build a consul client
+	config := consulapi.DefaultConfig()
+	config.Address = conf.GetConf().Registry.RegistryAddress[0] // "localhost:8500"
+	consulclient, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatalf("failed to build a consul client: %v", err)
+		return
+	}
+	// build a consul register with the consul client
+	r := consul.NewConsulRegister(consulclient)
+
+	// 解析服务的 IP 和端口
+	address = conf.GetConf().Hertz.Address
+	if strings.HasPrefix(address, ":") {
+		localIp := utils.MustGetLocalIPv4()
+		address = localIp + address
+	}
+	addr, err := net.ResolveTCPAddr("tcp", address)
+	if err != nil {
+		panic(err)
+	}
+
+	// // 生成唯一服务 ID（例如使用 IP:Port）
+	// parts := strings.Split(address, ":")
+	// if len(parts) != 2 {
+	// 	log.Fatalf("地址格式错误: %s", address)
+	// }
+	// ip := parts[0]
+	// port, _ := strconv.Atoi(parts[1])
+	// serviceID := fmt.Sprintf("gateway-%s-%d", ip, port)
+
+	tracer, cfg := hertztracing.NewServerTracer()
+
+	// run Hertz with the consul register
+	h = server.Default(
+		server.WithHostPorts(address),
+		server.WithRegistry(r, &registry.Info{
+			ServiceName: "gateway",
+			Addr:        addr,
+			Weight:      10,
+			Tags:        nil,
+		}),
+		tracer,
+	)
+	h.Use(hertztracing.ServerMiddleware(cfg))
+}
+
 func main() {
+	p := mtl.InitTracing(ServiceName)
+	defer p.Shutdown(context.Background())
+
 	// 初始化数据库
 	dal.Init()
 
@@ -65,8 +117,6 @@ func main() {
 	}
 	// dao.AddUserRole(tidb.DB, 540001, 1)
 
-	clients.Init()
-
 	// 同步黑名单到Redis
 	redis.SyncBlacklistToRedis()
 
@@ -74,9 +124,7 @@ func main() {
 	middleware.StartRedisCleanupTask()
 
 	// 创建Hertz实例
-	address := conf.GetConf().Hertz.Address
-	s := fmt.Sprintf("localhost%s", address)
-	h := server.New(server.WithHostPorts(s))
+	registerToConsul()
 
 	// 中间件链
 	h.Use(
@@ -88,18 +136,43 @@ func main() {
 			AllowCredentials: true,          // 允许携带凭证（如 cookies）
 		}),
 		// 白名单放行接口
-		//middleware.WhiteListMiddleware(),
-		//conditionalAuthMiddleware(),
-		//addUidMiddleware(),
-		//// 黑名单检查
-		//middleware.BlacklistMiddleware(),
-		//// 用户权限检查
-		//middleware.CasbinMiddleware(),
+		middleware.WhiteListMiddleware(),
+		middleware.ConditionalAuthMiddleware(),
+		middleware.AddUidMiddleware(),
+		// 黑名单检查
+		middleware.BlacklistMiddleware(),
+		// 用户权限检查
+		middleware.CasbinMiddleware(),
 	)
+
+	logger := hertzobslogrus.NewLogger(hertzobslogrus.WithLogger(hertzlogrus.NewLogger().Logger()))
+	hlog.SetLogger(logger)
+	hlog.SetLevel(hlog.LevelInfo) //(conf.LogLevel())
+	var flushInterval time.Duration
+	flushInterval = time.Second
+	// if os.Getenv("Go_ENV") == "online" {
+	// 	flushInterval = time.Minute
+	// } else {
+	// 	flushInterval = time.Second
+	// }
+	asyncWriter := &zapcore.BufferedWriteSyncer{
+		WS: zapcore.AddSync(&lumberjack.Logger{
+			Filename:   conf.GetConf().Hertz.LogFileName,
+			MaxSize:    conf.GetConf().Hertz.LogMaxSize,
+			MaxBackups: conf.GetConf().Hertz.LogMaxBackups,
+			MaxAge:     conf.GetConf().Hertz.LogMaxAge,
+		}),
+		FlushInterval: flushInterval,
+	}
+	hlog.SetOutput(asyncWriter)
+	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {
+		asyncWriter.Sync()
+	})
+
 	// 注册路由
 	registerRoutes(h)
 	// 注册Swagger
-	registerSwagger(h, s)
+	registerSwagger(h, address)
 	h.Spin()
 }
 
@@ -150,24 +223,14 @@ func registerRoutes(h *server.Hertz) {
 		orderGroup.POST("", handlers.HandleCreateOrder)
 		orderGroup.GET("/:id", handlers.HandleGetOrder)
 		orderGroup.GET("/user", handlers.HandleListUserOrder)
-		orderGroup.POST("/address", handlers.HandleCreateUserAddress)
-		orderGroup.GET("/address", handlers.HandleGetUserAddress)
-		orderGroup.PUT("/address", handlers.HandleUpdateUserAddress)
-		orderGroup.DELETE("/address", handlers.HandleDeleteUserAddress)
-		orderGroup.PUT("/orderAddress", handlers.HandleUpdateOrderAddress)
-		orderGroup.PUT("/status", handlers.HandleUpdateOrderStatus)
 	}
 	paymentGroup := h.Group("/payment")
 	{
-		// TODO 只需要处理支付操作，应该是个回调的接口
-		paymentGroup.POST("/:orderID", TODOHandler)
+		paymentGroup.GET("/:orderID", handlers.HandleGetPayUrl)
 	}
 	agentGroup := h.Group("/agent")
 	{
-		// TODO 根据用户输入获取对应商品
-		agentGroup.POST("/product/search", TODOHandler)
-		// TODO 根据用户输入获取对应订单
-		agentGroup.POST("/order/search", TODOHandler)
+		agentGroup.POST("/ask", handlers.HandleAskAgent)
 	}
 	adminGroup := h.Group("/admin")
 	{
@@ -187,9 +250,9 @@ func registerRoutes(h *server.Hertz) {
 			// 获取所有的用户信息
 			adminUserGroup.GET("/list", handlers.HandleAdminListUser)
 			// TODO 封禁用户
-			adminUserGroup.GET("/block/:userID", handlers.HandleBlockUser)
+			adminUserGroup.POST("/block", handlers.HandleBlockUser)
 			// TODO 解封
-			adminUserGroup.GET("/unblock/:userID", handlers.HandleUnblockUser)
+			adminUserGroup.DELETE("/unblock/:identifier", handlers.HandleUnblockUser)
 			// 移除用户
 			adminUserGroup.DELETE("/:userID", handlers.HandleRemoveUser)
 		}
@@ -198,16 +261,6 @@ func registerRoutes(h *server.Hertz) {
 			// TODO 获取所有的订单(分页)（订单包括支付信息）
 			adminOrderGroup.GET("/list", handlers.HandleAdminListOrder)
 		}
-	}
-}
-
-func conditionalAuthMiddleware() app.HandlerFunc {
-	return func(ctx context.Context, c *app.RequestContext) {
-		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
-			c.Next(ctx) // 跳过认证
-			return
-		}
-		middleware.AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
 	}
 }
 

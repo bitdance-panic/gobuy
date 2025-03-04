@@ -35,7 +35,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/admin/unblock_user": {
+        "/admin/unblock": {
             "delete": {
                 "description": "解除封禁",
                 "consumes": [

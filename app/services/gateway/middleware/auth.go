@@ -4,13 +4,14 @@ import (
 	"context"
 	"time"
 
+	app_consts "github.com/bitdance-panic/gobuy/app/consts"
 	"github.com/bitdance-panic/gobuy/app/models"
 	rpc_user "github.com/bitdance-panic/gobuy/app/rpc/kitex_gen/user"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	//"github.com/bitdance-panic/gobuy/app/services/gateway/conf"
 
-	"github.com/bitdance-panic/gobuy/app/services/cart/biz/clients"
+	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/clients"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dal/tidb"
 	"github.com/bitdance-panic/gobuy/app/services/gateway/biz/dao"
 	gutils "github.com/bitdance-panic/gobuy/app/services/gateway/utils"
@@ -23,7 +24,7 @@ import (
 
 type User = models.User
 
-var IdentityKey = "uid"
+var IdentityKey = app_consts.CONTEXT_UID_KEY
 
 var secret = "panic-bitdance"
 
@@ -92,34 +93,47 @@ func authenticate(ctx context.Context, c *app.RequestContext) (interface{}, erro
 	if err := c.Bind(&loginReq); err != nil {
 		return nil, jwt.ErrMissingLoginValues
 	}
-
 	loginResp, err := clients.UserClient.Login(context.Background(), &loginReq, callopt.WithRPCTimeout(10*time.Second))
 	if err != nil {
 		return nil, jwt.ErrFailedAuthentication
 	}
+	userID := int(loginResp.UserId)
+	c.Set(app_consts.CONTEXT_UID_KEY, userID)
 	return loginResp.UserId, nil
 }
 
 // 登录响应
 func loginResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
+	userID := c.GetInt(app_consts.CONTEXT_UID_KEY)
 	// 生成RefreshToken
-	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	refreshToken, err := gutils.GenerateRefreshToken(userID)
 	if err != nil {
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 保存refreshToken
-	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+	if err := dao.UpdateRefreshToken(tidb.DB, userID, refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
 		return
 	}
 
+	req := rpc_user.GetUserReq{
+		UserId: int32(userID),
+	}
+
+	loginResp, err := clients.UserClient.GetUser(context.Background(), &req, callopt.WithRPCTimeout(10*time.Second))
+	if err != nil {
+		utils.Fail(c, err.Error())
+		return
+	}
+
 	utils.Success(c, map[string]interface{}{
 		"access_token":  token,
-		"expire":        expire.Unix(),
 		"refresh_token": refreshToken,
+		"email":         loginResp.Email,
+		"username":      loginResp.Username,
 	})
 }
 
@@ -133,16 +147,16 @@ func loginResponse(ctx context.Context, c *app.RequestContext, code int, token s
 // refreshResponse 刷新Token响应
 func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
 	// 生成新的RefreshToken
-	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt("uid"))
+	refreshToken, err := gutils.GenerateRefreshToken(c.GetInt(app_consts.CONTEXT_UID_KEY))
 	if err != nil {
 		utils.FailFull(c, consts.StatusInternalServerError, "Failed to generate refreshtoken", nil)
 		return
 	}
 
 	// 更新数据库中的RefreshToken
-	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt("uid"), refreshToken); err != nil {
+	if err := dao.UpdateRefreshToken(tidb.DB, c.GetInt(app_consts.CONTEXT_UID_KEY), refreshToken); err != nil {
 		hlog.Errorf("Failed to save refresh token, error: %v", err)
-		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken", nil)
+		utils.FailFull(c, consts.StatusInternalServerError, "Failed to store refreshtoken, error: "+err.Error(), nil)
 		return
 	}
 
@@ -156,11 +170,21 @@ func refreshResponse(ctx context.Context, c *app.RequestContext, code int, token
 // 身份处理
 func identityHandler(ctx context.Context, c *app.RequestContext) interface{} {
 	claims := jwt.ExtractClaims(ctx, c)
-	return claims["uid"]
+	return claims[app_consts.CONTEXT_UID_KEY]
 }
 
 // 统一错误处理
 func unauthorizedHandler(ctx context.Context, c *app.RequestContext, code int, message string) {
 	utils.FailFull(c, code, message, nil)
 	c.Abort()
+}
+
+func ConditionalAuthMiddleware() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		if skip, exists := c.Get("skip_auth"); exists && skip.(bool) {
+			c.Next(ctx) // 跳过认证
+			return
+		}
+		AuthMiddleware.MiddlewareFunc()(ctx, c) // 执行认证
+	}
 }
